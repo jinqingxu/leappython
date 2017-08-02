@@ -50,6 +50,7 @@ leapdata=[]
 #a global array to store data from android
 androiddata=[]
 pid=0
+Pi=3.1415926
 #find the leap record with best timestamp_match of start
 def best_match_start(stime,offset):
     for i in range(offset,len(leapdata)):
@@ -80,9 +81,9 @@ def split_and_write(begin,end,pid,block,trial,headers):
     f.close()
 
 
-def process():
-    file1='/Users/irene/Desktop/data/Data from LEAPtest_results_PID_127_Frame.csv' #leap data
-    file2='/Users/irene/Desktop/data/PId_127_2D_FittsDetailedTrialData_External.csv' #android data
+def process(pid):
+    file1='/Users/irene/Desktop/data/Data from LEAPtest_results_PID_'+str(pid)+'_Frame.csv' #leap data
+    file2='/Users/irene/Desktop/data/PId_'+str(pid)+'_2D_FittsDetailedTrialData_External.csv' #android data
     pid=(file2.split('_'))[1]
     headers=[]
     #read leap data
@@ -122,6 +123,8 @@ def get_mean(pid):
     position3D=[]
     for i in range(0,5):
         file='/Users/irene/Desktop/data/split3/Pid_'+str(pid)+'_Trial_'+str(i)+'.csv'
+        a = open(file, "r")
+        print len(a.readlines())
         with open(file) as f:
             f_csv = csv.reader(f)
             next(f_csv)
@@ -150,6 +153,55 @@ def calculate_distance_3D_2D(position3D):
             distancesFor3D.append(currentd)
     return distancesFor3D
 
+rulers=[109.3,109.3,109.3,62,125,218.6,90,180,154.03,154.03]
+
+
+
+
+
+#find the 3D cors for the 2D cors point on ipad
+def TwoCorToThreeCor(currentTwoCor):
+    #the start point is the center of the ipad
+    startThreeCor = ThreeCorPoint(-2.33, 44.395, -33.421)
+    startTwoCor = TwoCorPoint(1024, 720)
+
+    ChangeDis = math.sqrt(math.pow(startTwoCor.x - currentTwoCor.x, 2) + math.pow(startTwoCor.y - currentTwoCor.y, 2))
+    ChangeX = abs(currentTwoCor.x - startTwoCor.x)
+    ChangeY = ChangeDis * math.sin(Pi / 4) * math.sin(Pi / 4)
+    ChangZ = ChangeDis * math.sin(Pi / 4) * math.cos(Pi / 4)
+    # let startPoint as base point, find the taget point's direction
+    # right-up,left-up,left-down,right-down
+    # right
+    if currentTwoCor.x>startTwoCor.x:
+        #right-up
+        if currentTwoCor.y<startTwoCor.y:
+            # x++ y++ z--
+            newX=startThreeCor.x+ChangeX
+            newY=startThreeCor.y+ChangeY
+            newZ=startThreeCor.z-ChangZ
+        #right-down
+        else:
+            # x++ y-- z++
+            newX = startThreeCor.x + ChangeX
+            newY = startThreeCor.y - ChangeY
+            newZ = startThreeCor.z + ChangZ
+    #left
+    else:
+        # left-up
+        if currentTwoCor.y < startTwoCor.y:
+            # x-- y++ z--
+            newX = startThreeCor.x - ChangeX
+            newY = startThreeCor.y + ChangeY
+            newZ = startThreeCor.z - ChangZ
+        # left-down
+        else:
+            # x-- y-- z++
+            newX = startThreeCor.x - ChangeX
+            newY = startThreeCor.y - ChangeY
+            newZ = startThreeCor.z + ChangZ
+
+    target=ThreeCorPoint(newX,newY.newZ)
+    return target
 
 
 
@@ -157,11 +209,34 @@ def calculate_distance_3D_2D(position3D):
 
 
 
+def calculate_error(distanceFor3D):
+    file1 = '/Users/irene/Desktop/data/PID_' + str(pid) + '_DIS_error.csv'
+    header=[ "startPointIndex", "endPointIndex", "trueDis", "calDis"]
+    with open(file1, 'w') as f:
+        f_csv = csv.writer(f)
+        f_csv.writerow(header)
+        for i in range(0, len(distancesFor3D)):
+            data = []
+            data.append(distancesFor3D[i].startPointIndex)
+            data.append(distancesFor3D[i].endPointIndex)
+            data.append(rulers[i])
+            data.append(distancesFor3D[i].dis)
+            f_csv.writerow(data)
+            print distancesFor3D[i].startPointIndex,
+            print distancesFor3D[i].endPointIndex,
+            print rulers[i],
+            print distancesFor3D[i].dis,
+            print distancesFor3D[i].startXCor,
+            print distancesFor3D[i].startYCor,
+            print distancesFor3D[i].startZCor
 
 
-#process()
-pid=127
+pid=133
+process(pid)
 position3D=get_mean(pid)
 distancesFor3D=calculate_distance_3D_2D(position3D)
+calculate_error(distancesFor3D)
+
+
 
 

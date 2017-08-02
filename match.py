@@ -21,7 +21,7 @@ def best_match_end(etime,offset):
 
 #write the split data into files
 def split_and_write(begin,end,block,trial,pid,headers):
-    file='/Users/irene/Desktop/data/split/Pid_'+pid+'_Block_'+block+'_Trial_'+trial+'.csv'#one trial matches one file
+    file='/Users/irene/Desktop/data/split_PID_136/Pid_'+pid+'_Block_'+block+'_Trial_'+trial+'.csv'#one trial matches one file
     with open(file, 'w') as f:
         f_csv = csv.writer(f)
         f_csv.writerow(headers)
@@ -36,8 +36,8 @@ def split_and_write(begin,end,block,trial,pid,headers):
 
 
 def process():
-    file1='/Users/irene/Desktop/data/Data from LEAPtest_results_PID_334_Frame.csv' #leap data
-    file2='/Users/irene/Desktop/data/PId_334_2D_FittsDetailedTrialData_External.csv' #android data
+    file1='/Users/irene/Desktop/data/Data from LEAPtest_results_PID_136_Frame.csv' #leap data
+    file2='/Users/irene/Desktop/data/PId_136_2D_FittsDetailedTrialData_External.csv' #android data
     pid=(file2.split('_'))[1]
     headers=[]
     #read leap data
