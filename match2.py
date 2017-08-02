@@ -49,8 +49,10 @@ class Distance:
 leapdata=[]
 #a global array to store data from android
 androiddata=[]
-pid=0
+
+PixelToM=0.0794
 Pi=3.1415926
+
 #find the leap record with best timestamp_match of start
 def best_match_start(stime,offset):
     for i in range(offset,len(leapdata)):
@@ -159,16 +161,18 @@ rulers=[109.3,109.3,109.3,62,125,218.6,90,180,154.03,154.03]
 
 
 
-#find the 3D cors for the 2D cors point on ipad
+# find the 3D cors for the 2D cors point on ipad
+# the 2D cors are in pixels unit
 def TwoCorToThreeCor(currentTwoCor):
     #the start point is the center of the ipad
     startThreeCor = ThreeCorPoint(-2.33, 44.395, -33.421)
     startTwoCor = TwoCorPoint(1024, 720)
 
-    ChangeDis = math.sqrt(math.pow(startTwoCor.x - currentTwoCor.x, 2) + math.pow(startTwoCor.y - currentTwoCor.y, 2))
-    ChangeX = abs(currentTwoCor.x - startTwoCor.x)
-    ChangeY = ChangeDis * math.sin(Pi / 4) * math.sin(Pi / 4)
-    ChangZ = ChangeDis * math.sin(Pi / 4) * math.cos(Pi / 4)
+    ChangeDis = math.sqrt(math.pow(startTwoCor.x - currentTwoCor.x, 2) + math.pow(startTwoCor.y - currentTwoCor.y, 2))*PixelToM
+    ChangeX = abs(currentTwoCor.x - startTwoCor.x)*PixelToM
+    Change2DY=abs(currentTwoCor.y-currentTwoCor.y)*PixelToM
+    ChangeY =  Change2DY* math.sin(Pi / 4)
+    ChangZ =  Change2DY* math.cos(Pi / 4)
     # let startPoint as base point, find the taget point's direction
     # right-up,left-up,left-down,right-down
     # right
@@ -200,7 +204,7 @@ def TwoCorToThreeCor(currentTwoCor):
             newY = startThreeCor.y - ChangeY
             newZ = startThreeCor.z + ChangZ
 
-    target=ThreeCorPoint(newX,newY.newZ)
+    target=ThreeCorPoint(newX,newY,newZ)
     return target
 
 
@@ -228,7 +232,10 @@ def calculate_error(distanceFor3D):
             print distancesFor3D[i].dis,
             print distancesFor3D[i].startXCor,
             print distancesFor3D[i].startYCor,
-            print distancesFor3D[i].startZCor
+            print distancesFor3D[i].startZCor,
+            print distancesFor3D[i].endXCor,
+            print distancesFor3D[i].endYCor,
+            print distancesFor3D[i].endZCor
 
 
 pid=133
@@ -236,6 +243,10 @@ process(pid)
 position3D=get_mean(pid)
 distancesFor3D=calculate_distance_3D_2D(position3D)
 calculate_error(distancesFor3D)
+c=TwoCorPoint(2048,0)
+t=TwoCorToThreeCor(c)
+print "target"
+print t.x,t.y,t.z
 
 
 
