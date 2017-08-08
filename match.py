@@ -21,7 +21,7 @@ def best_match_end(etime,offset):
 
 #write the split data into files
 def split_and_write(begin,end,block,trial,pid,headers):
-    file='/Users/irene/Desktop/data/split_PID_136/Pid_'+pid+'_Block_'+block+'_Trial_'+trial+'.csv'#one trial matches one file
+    file='/Users/irene/Desktop/data/split/Pid_'+str(pid)+'_Block_'+block+'_Trial_'+trial+'.csv'#one trial matches one file
     with open(file, 'w') as f:
         f_csv = csv.writer(f)
         f_csv.writerow(headers)
@@ -35,10 +35,11 @@ def split_and_write(begin,end,block,trial,pid,headers):
     f.close()
 
 
-def process():
-    file1='/Users/irene/Desktop/data/Data from LEAPtest_results_PID_136_Frame.csv' #leap data
-    file2='/Users/irene/Desktop/data/PId_136_2D_FittsDetailedTrialData_External.csv' #android data
-    pid=(file2.split('_'))[1]
+def process(pid):
+    path = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data'
+    file1=path+'/Data from LEAPtest_results_PID_'+str(pid)+'_Frame.csv' #leap data
+    file2=path+'/PId_'+str(pid)+'_TwoDFittsData_External.csv' #android data
+    #pid=(file2.split('_'))[1]
     headers=[]
     #read leap data
     with open(file1) as f:
@@ -68,6 +69,6 @@ def process():
             offset=best_match_end(etime,offset+1)#the next scan should begin at the last_matched_index add 1
             end=offset #the end index of the split data
             split_and_write(begin,end,block,trial,pid,headers2)
-
-process()
+pid=777
+process(pid)
 
