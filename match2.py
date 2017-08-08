@@ -225,7 +225,7 @@ def TwoCorToThreeCor(currentTwoCor):
     return target
 
 # write file and print error of distances
-def write_and_print_error(distanceFor3D):
+def write_and_print_error(pid,distancesFor3D):
     file1 = path+'PID_' + str(pid) + '_DIS_error.csv'
     header=[ "StartIndex", "EndIndex", "RealDis(mm)", "CalDis(mm)","Error(mm)"]
     print 'StartIndex','EndIndex','RealDis(mm)','CalDis(mm)','Error(mm)'
