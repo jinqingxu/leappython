@@ -66,6 +66,7 @@ def best_match_start(stime,offset):
     for i in range(offset,len(leapdata)):
         if leapdata[i][2]>=stime: #the matched_timestamp is after or equal to the stime
             return i #return the matched index of leap data
+    return -1 # not found
 
 # find the leap record with best timestamp_match of first_lift_up
 def best_match_end(etime,offset):
@@ -74,6 +75,7 @@ def best_match_end(etime,offset):
             return i-1  #return the matched index
         elif leapdata[i][2]==etime:
             return i  #the exact matched of leap data
+    return -1 # not found
 
 #write the split data into files
 def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction):
@@ -100,7 +102,6 @@ def process_split(pid,mode):
     if mode=='redcross':# for test experiment
         file2=path+'PID_'+str(pid)+'_FingerCalibData_Internal.csv'
     else:   # for real experiment
-
         file2=path+'PID_'+str(pid)+'_TwoDFittsData_External.csv' #android data
     headers=[] # for headers of the csv file
     #read leap data
@@ -129,8 +130,12 @@ def process_split(pid,mode):
             width=row[5]
             direction=row[6]
             offset=best_match_start(stime,offset)
+            if offset==-1:
+                return
             begin=offset #the begin index of the split data
             offset=best_match_end(etime,offset+1)#the next scan should begin at the last_matched_index add 1
+            if offset==-1:
+                return
             end=offset #the end index of the split data
             split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction)
 
@@ -268,13 +273,14 @@ def print_min_mean_max_from_split_files(pid,num):
         lzs.append(tmp_lz)
     for i in range(0,len(lxs)):
         print 'x'+str(i+1),
-        print get_min_max_mean_from_list(lxs[i]) #one record means an array of x from a trial
+        print get_min_max_mean_deviation_from_list(lxs[i]) #one record means an array of x from a trial
         print 'y'+str(i+1),
-        print get_min_max_mean_from_list(lys[i])
+        print get_min_max_mean_deviation_from_list(lys[i])
         print 'z'+str(i+1),
-        print get_min_max_mean_from_list(lzs[i])
-# get the min(l),max(l),avergae(l)
-def get_min_max_mean_from_list(l):
+        print get_min_max_mean_deviation_from_list(lzs[i])
+
+# get the min(l),max(l),avergae(l),difference of min and max
+def get_min_max_mean_deviation_from_list(l):
     min_l=float(l[0])
     max_l=float(l[0])
     sum_l=0
@@ -290,9 +296,10 @@ def get_min_max_mean_from_list(l):
 def write_dis_difference(pid):
     files = os.listdir(path+'/split')
     file2 = path + 'PID_' + str(pid) + '_TwoDFittsData_External.csv'  # android data
-    new_headers=['Block','Trial','Amplitude(mm)','Width(mm)','Direction','Distance(mm)','Difference(mm)'] # headers for the written file
+    new_headers=['Block','Trial','Amplitude(mm)','Width(mm)','Direction','Distance(mm)','Difference(mm)','Absolute_Difference(mm)'] # headers for the written file
     file3 = path + 'PID_' + str(pid) + '_DIS_Difference_Android_Leap.csv'
-    didata=[]
+    difference_dis_list=[] # record the difference between the calculated distance and amplitude
+    absolute_difference_dis_list=[]  # record the absolute difference between the calculated distance and amplitude
     with open(file3, 'w') as f:
         w_csv = csv.writer(f)
         w_csv.writerow(new_headers)
@@ -340,15 +347,30 @@ def write_dis_difference(pid):
                             difference = dis - float(datas[i][2])  # dis minus amplitude(mm)
                             datas[i].append(dis)
                             datas[i].append(difference)
-                            difdata.append(difference)
+                            datas[i].append(abs(difference))
+                            difference_dis_list.append(difference)
+                            absolute_difference_dis_list.append(abs(difference))
                             w_csv.writerow(datas[i])
                         i=i+1
-        min_d,max_d,average_d=get_min_max_mean_from_list(difdata)
-        stastistic=[]
-        stastistic.append(min_d)
-        stastistic.append(max_d)
-        stastistic.append(average_d)
-        w_csv.writerow(stastistic)
+        min_d,max_d,average_d,deviation_d=get_min_max_mean_deviation_from_list(difference_dis_list)
+        min_abs_d,max_abs_d,average_abs_d,deviation_abs_d=get_min_max_mean_deviation_from_list(absolute_difference_dis_list)
+        for i in range(0,3):
+            statistic = []
+            for j in range(0,5):
+                statistic.append(' ') # space
+            if i==0:
+                statistic.append('min')
+                statistic.append(min_d)
+                statistic.append(min_abs_d)
+            if i==1:
+                statistic.append('max')
+                statistic.append(max_d)
+                statistic.append(max_abs_d)
+            if i==2:
+                statistic.append('average')
+                statistic.append(average_d)
+                statistic.append(average_abs_d)
+            w_csv.writerow(statistic)
 
 
 
@@ -357,11 +379,13 @@ def write_dis_difference(pid):
 spid=777
 mode='circle' # redcross means test experiment,circle means real experiment
 process_split(spid,mode)
-pid=641
-num=5
-position3D=get_mean_from_split_files(pid,num)
-print_min_mean_max_from_split_files(pid,num)
-distancesFor3D=calculate_distance_3D_Of_List(position3D) # ten distances for the 5 points
-write_and_print_error(distancesFor3D)
-write_dis_difference(777)
+write_dis_difference(spid)
+# for test data
+# pid range from 641 to 645
+#pid=641
+#num=5
+#position3D=get_mean_from_split_files(pid,num)
+#print_min_mean_max_from_split_files(pid,num)
+#distancesFor3D=calculate_distance_3D_Of_List(position3D) # ten distances for the 5 points
+#write_and_print_error(distancesFor3D)
 
