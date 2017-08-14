@@ -85,7 +85,7 @@ class LeapAnalyzer:
                 self.movementDirectionChangeZ=self.movementDirectionChangeZ+1
         return currentDirectionZ
 
-    def calculateMovementVariability(self,meanMovementError):
+    def calculateMovementVariability(self,movementOffset):
         sumMovementErrorDifference=0
         differenceMovementErrorSqr=0
         firstFrame=self.frameArray[0]
@@ -101,9 +101,9 @@ class LeapAnalyzer:
             currentX=float(currentFrame[3+self.offset])
             currentY=float(currentFrame[4+self.offset])
             currentZ=float(currentFrame[5+self.offset])
-            differenceMovementErrorSqr=math.pow(self.calculateRealMovementError(startX,startY,startZ,endX,endY,endZ,currentX,currentY,currentZ)-meanMovementError,2)
+            differenceMovementErrorSqr=math.pow(self.calculateRealMovementError(startX,startY,startZ,endX,endY,endZ,currentX,currentY,currentZ)-movementOffset,2)
             sumMovementErrorDifference=sumMovementErrorDifference+differenceMovementErrorSqr
-        movementVariability=math.sqrt(sumMovementErrorDifference/(len(self.frameArray)-3))
+        movementVariability=math.sqrt(sumMovementErrorDifference/(len(self.frameArray)-3.0))
         return movementVariability
 
     # ME
@@ -125,7 +125,7 @@ class LeapAnalyzer:
             currentZ = float(currentFrame[5 + self.offset])
             sumMovementError = sumMovementError + abs(self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                                               endZ, currentX, currentY, currentZ))
-        self.movementError=sumMovementError / (len(self.frameArray)-2)
+        self.movementError=sumMovementError / (len(self.frameArray)-2.0)
         return self.movementError
 
     # the mean movement error
@@ -147,7 +147,7 @@ class LeapAnalyzer:
             currentZ = float(currentFrame[5 + self.offset])
             sumMovementError = sumMovementError + self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                 endZ, currentX, currentY, currentZ)
-        self.meanmovementError = sumMovementError / (len(self.frameArray) - 2)
+        self.meanmovementError = sumMovementError / (len(self.frameArray) - 2.0)
         return self.meanmovementError
 
     # the distance of a point to the plane
@@ -284,7 +284,7 @@ class LeapAnalyzer:
             currentZ = float(currentFrame[5 + self.offset])
             sumMovementError = sumMovementError + self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                                                   endZ, currentX, currentY, currentZ)
-        self.movementOffset = sumMovementError / (len(self.frameArray) - 2)
+        self.movementOffset = sumMovementError / (len(self.frameArray) - 2.0)
         return self.movementOffset
 
 
@@ -297,10 +297,9 @@ def test():
     print 'movementDirectionChangeX',leap.movementDirectionChangeX
     print 'movementDirectionChangeY',leap.movementDirectionChangeY
     print 'movementDirectionChangeZ',leap.movementDirectionChangeZ
-    meanMovementError=leap.calculateMeanMovementError()
-    print 'MV',leap.calculateMovementVariability(meanMovementError)
+    print 'MO', leap.calculateMovementOffset()
+    print 'MV',leap.calculateMovementVariability(leap.movementOffset)
     print 'ME',leap.calculateMovementError()
-    print 'MO' ,leap.calculateMovementOffset()
     leap.calculatePauseTime()
     print 'pauseTime',leap.pauseTime
     if leap.pauseTime>0:
@@ -315,7 +314,6 @@ def test():
     sDuration=leap.spiralDuration
     for s in sDuration:
         print s,
-
 
 
 
