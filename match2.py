@@ -12,6 +12,24 @@ class ThreeCorPoint:
         self.x=x
         self.y=y
         self.z=z
+class Dis_leap_android:
+    block=0
+    trial=0
+    amplitude=0
+    width=0
+    direction=0
+    distance=0
+    difference=0
+    abs_difference=0
+    def __init__(self,block,trial,amplitude,width,direction,distance,difference,abs_difference):
+        self.block=block
+        self.trial=trial
+        self.amplitude=amplitude
+        self.width=width
+        self.direction=direction
+        self.distance=distance
+        self.difference=difference
+        self.abs_difference=abs_difference
 
 # 2D point
 class TwoCorPoint:
@@ -32,6 +50,8 @@ class Distance:
     endYCor=0.0
     endZCor=0.0
     dis=0.0
+
+
     def __init__(self,startPointIndex,endPointIndex,startXCor,startYCor,startZCor,endXCor,endYCor,endZCor,dis):
         self.startPointIndex=startPointIndex
         self.endPointIndex=endPointIndex
@@ -43,6 +63,34 @@ class Distance:
         self.endZCor=endZCor
         self.dis=dis
 
+# the index of data in android file
+offsetStartTime = 15
+offsetFinalLiftUp = 22
+offsetBlock=2
+offsetTrial=3
+offsetAmplitude=5
+offsetWidth=7
+offsetDirection=8
+
+# the index of data in leap file
+offsetLeapX=3
+offsetLeapY=4
+offsetLeapZ=5
+
+# the index of data in split file
+offsetSplitX=9
+offsetSplitY=10
+offsetSplitZ=11
+
+# the index of data in dif file
+offsetDisBlock=0
+offsetDisTrial=1
+offsetDisAmplitude=2
+offsetDisWidth=3
+offsetDisDirection=4
+offsetDisDistance=5
+offsetDisDifference=6
+offsetDisAbsDifference=7
 #workpath
 path = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
 
@@ -110,7 +158,7 @@ def process_split(pid,mode):
         for i in range(0,4):#skip the beginning
             next(f_csv)
         headers=next(f_csv)#get headers of csv
-        headers2=['PID','Block','Trial','Amplitude(pixel)','Width(pixel)','Direction(pixel)']
+        headers2=['PID','Block','Trial','Amplitude(mm)','Width(mm)','Direction']
         headers2.extend(headers) # headers2 is for the result file
         for row in f_csv:
             leapdata.append(row)
@@ -120,20 +168,20 @@ def process_split(pid,mode):
         offset = 0
         f_csv = csv.reader(f)
         for i in range(0,10):
-            next(f_csv) #skip the beginning
+            next(f_csv) # skip the beginning
         for row in f_csv:
-            stime=row[19] #row[19] is the start timestamp
-            etime=row[22] #row[28] is the first_lift_up timestamp
-            block = row[2]
-            trial = row[3]
-            amplitude=row[4]
-            width=row[5]
-            direction=row[6]
+            stime=row[offsetStartTime] # the start timestamp
+            etime=row[offsetFinalLiftUp] #  is the final_lift_up timestamp
+            block = row[offsetBlock]
+            trial = row[offsetTrial]
+            amplitude=row[offsetAmplitude]
+            width=row[offsetWidth]
+            direction=row[offsetDirection]
             offset=best_match_start(stime,offset)
             if offset==-1:
                 return
-            begin=offset #the begin index of the split data
-            offset=best_match_end(etime,offset+1)#the next scan should begin at the last_matched_index add 1
+            begin=offset # the begin index of the split data
+            offset=best_match_end(etime,offset+1) # the next scan should begin at the last_matched_index add 1
             if offset==-1:
                 return
             end=offset #the end index of the split data
@@ -156,9 +204,9 @@ def get_mean_from_split_files(pid,num):
             sum_z=0.0
             k=0
             for row in f_csv:
-                sum_x+=float(row[3])
-                sum_y+=float(row[4])
-                sum_z+=float(row[5])
+                sum_x+=float(row[offsetLeapX])
+                sum_y+=float(row[offsetLeapY])
+                sum_z+=float(row[offsetLeapZ])
                 k=k+1
             current=ThreeCorPoint(sum_x/(k+0.0),sum_y/(k+0.0),sum_z/(k+0.0))
             position3D.append(current)
@@ -265,9 +313,9 @@ def print_min_mean_max_from_split_files(pid,num):
             tmp_ly=[]
             tmp_lz=[]
             for row in f_csv:
-                tmp_lx.append(row[3])
-                tmp_ly.append(row[4])
-                tmp_lz.append(row[5])
+                tmp_lx.append(row[offsetLeapX])
+                tmp_ly.append(row[offsetLeapY])
+                tmp_lz.append(row[offsetLeapZ])
         lxs.append(tmp_lx)
         lys.append(tmp_ly)
         lzs.append(tmp_lz)
@@ -313,17 +361,20 @@ def write_dis_difference(pid):
             datas=[] #  two-dimensional array,one record means data of one trail
             for row in f_csv:
                 difdata=[]
-                difdata.append(row[2])  # block
-                difdata.append(row[3])  # trial
-                difdata.append(row[5])  # amplitude in mm
-                difdata.append(row[7])  # width in mm
-                difdata.append(row[8])  # direction
+                difdata.append(row[offsetBlock])  # block
+                difdata.append(row[offsetTrial])  # trial
+                difdata.append(row[offsetAmplitude])  # amplitude in mm
+                difdata.append(row[offsetWidth])  # width in mm
+                difdata.append(row[offsetDirection])  # direction
                 datas.append(difdata)
             i=0 # index of trial
             # PID_xxx_Block_xxx_Trial_xxx.csv
             for file in files: # open all the file in the '/split' directory
                 if not os.path.isdir(file):  # not a directory
-                    if str(pid) in file:  # if the file begins with PID_xxx
+                    # a bug : if the pid is 888,files begin with pid 8881 will be taken into account
+                    keys=file.split('_')
+                    if str(pid) in keys:  # if the file begins with PID_xxx
+                        print file
                         if i==len(datas):
                             break
                         f = open(path + '/split/' + file, "r")
@@ -332,16 +383,15 @@ def write_dis_difference(pid):
                             f_csv = csv.reader(f)
                             headers = next(f_csv)  # get headers of csv
                             k = 1  # begin with the second line
-                            end = length
                             for row in f_csv:
                                 if k == 1:
-                                    firstx = float(row[9])
-                                    firsty = float(row[10])
-                                    firstz = float(row[11])
-                                if k == end - 1:
-                                    endx = float(row[9])
-                                    endy = float(row[10])
-                                    endz = float(row[11])
+                                    firstx = float(row[offsetSplitX])
+                                    firsty = float(row[offsetSplitY])
+                                    firstz = float(row[offsetSplitZ])
+                                if k == length - 1:
+                                    endx = float(row[offsetSplitX])
+                                    endy = float(row[offsetSplitY])
+                                    endz = float(row[offsetSplitZ])
                                 k = k + 1
                             dis = calculate_3D_Dis_Of_Two_Points(firstx, firsty, firstz, endx, endy, endz)
                             difference = dis - float(datas[i][2])  # dis minus amplitude(mm)
@@ -373,13 +423,96 @@ def write_dis_difference(pid):
             w_csv.writerow(statistic)
 
 
+# find the min,max,average abs_difference of all combinations of amplitude,width and direction
+def statistic_combination(pid):
+    dis_list = []
+    numOfBlocks = 4
+    file=path+'PID_'+str(pid)+'_DIS_Difference_Android_Leap.csv'
+    length=188
+    with open(file) as f:
+        f_csv = csv.reader(f)
+        headers = next(f_csv)  # get headers of csv
+        j=0
+        for row in f_csv:
+            if j==length:
+                break
+            tmp_dis=Dis_leap_android(row[offsetDisBlock],row[offsetDisTrial],row[offsetDisAmplitude],row[offsetDisWidth],row[offsetDisDirection],row[offsetDisDistance],row[offsetDisDifference],row[offsetDisAbsDifference])
+            dis_list.append(tmp_dis)
+            j=j+1
+    dis_list=sorted(dis_list,dis_cmp)
+    #for i in range(len(dis_list)):
+        #print dis_list[i].amplitude,dis_list[i].width,dis_list[i].direction,dis_list[i].abs_difference
+    groupNum=(length)/numOfBlocks
+    # suppose the combination with the same amplitude,width and direction is a group
+    # each group will occur only once in one block
+    with open(file, 'a') as f2:
+        w_csv = csv.writer(f2)
+        empty=[' ',' ', ' ']
+        w_csv.writerow(empty)
+        headers=['amplitude','width','direction','min','max','avg']
+        w_csv.writerow(headers)
+        for i in range(0,groupNum):
+            min_group=float(dis_list[i*numOfBlocks].abs_difference)
+            max_group=float(dis_list[i*numOfBlocks+numOfBlocks-1].abs_difference)
+            sum_group=0
+            # find the average
+            for k in range(0,numOfBlocks):
+                tmp_dis=float(dis_list[i*numOfBlocks+k].abs_difference)
+                sum_group+=tmp_dis
+                if tmp_dis<min_group:
+                    min_group=tmp_dis
+                if tmp_dis>max_group:
+                    max_group=tmp_dis
+            avg_group=sum_group/(numOfBlocks+0.0)
+            outdata=[]
+            outdata.append(dis_list[i*numOfBlocks].amplitude)
+            outdata.append(dis_list[i*numOfBlocks].width)
+            outdata.append(dis_list[i*numOfBlocks].direction)
+            outdata.append(min_group)
+            outdata.append(max_group)
+            outdata.append(avg_group)
+            w_csv.writerow(outdata)
 
 
 
-spid=777
+
+
+
+
+
+
+
+# to find the min,max abs_difference of each combination
+# we can first sort the list with the priority of amplitude,width,direction and abs_difference
+# then the same combination will come together as a group
+# so the first one in the group is the min
+# and the last one in the group is the max
+def dis_cmp(x,y):
+    if x.amplitude<y.amplitude:
+        return -1
+    if x.amplitude>y.amplitude:
+        return 1
+    if x.amplitude==y.amplitude:
+
+        if x.width<y.width:
+            return -1
+        if x.width>y.width:
+            return 1
+        if x.width==y.width:
+            if x.direction<y.direction:
+                return -1
+            if x.direction>y.direction:
+                return 1
+            if x.direction==y.direction:
+                return 0
+
+
+spid=555
 mode='circle' # redcross means test experiment,circle means real experiment
 process_split(spid,mode)
 write_dis_difference(spid)
+
+statistic_combination(spid)
 # for test data
 # pid range from 641 to 645
 #pid=641

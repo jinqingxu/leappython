@@ -2,10 +2,9 @@
 import csv
 import math
 class LeapAnalyzer:
-    path = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/"
-    readFile=path+'Pid_777_Block_0_Trial_1.csv'
+    path = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split/"
+    readFile=path+'PID_888_Block_1_Trial_7.csv'
     frameArray=[]
-    offset=3
     numberFrame=0
     movementDirectionChangeX=0
     movementDirectionChangeY=0
@@ -16,6 +15,13 @@ class LeapAnalyzer:
     spiralDuration=[]
     movementOffset=0
     movementError=0
+    offsetX=9
+    offsetY=10
+    offsetZ=11
+    offsetTimestamp=8
+    offsetSpeedX=21
+    offsetSpeedY=22
+    offsetSpeedZ=23
     def loadLeapData(self):
         file = self.readFile
         with open(file) as f:
@@ -39,12 +45,12 @@ class LeapAnalyzer:
         currentDirectionY = ""
         currentDirectionZ = ""
         while i < len(self.frameArray):
-            prevX = float(prevFrame[3 + self.offset])
-            prevY = float(prevFrame[4 + self.offset])
-            prevZ = float(prevFrame[5 + self.offset])
-            currentX = float(currentFrame[3 + self.offset])
-            currentY = float(currentFrame[4 + self.offset])
-            currentZ = float(currentFrame[5 + self.offset])
+            prevX = float(prevFrame[self.offsetX])
+            prevY = float(prevFrame[self.offsetY])
+            prevZ = float(prevFrame[self.offsetZ])
+            currentX = float(currentFrame[self.offsetX])
+            currentY = float(currentFrame[self.offsetY])
+            currentZ = float(currentFrame[self.offsetZ])
             currentDirectionX = self.calculateMovementDirectionChangeX(prevX, currentX, prevDirectionX, currentDirectionX)
             currentDirectionY = self.calculateMovementDirectionChangeY(prevY, currentY, prevDirectionY, currentDirectionY)
             currentDirectionZ = self.calculateMovementDirectionChangeZ(prevZ, currentZ, prevDirectionZ, currentDirectionZ)
@@ -90,17 +96,17 @@ class LeapAnalyzer:
         differenceMovementErrorSqr=0
         firstFrame=self.frameArray[0]
         lastFrame=self.frameArray[len(self.frameArray)-1]
-        startX=float(firstFrame[3+self.offset])
-        startY=float(firstFrame[4+self.offset])
-        startZ=float(firstFrame[5+self.offset])
-        endX=float(lastFrame[3+self.offset])
-        endY=float(lastFrame[4+self.offset])
-        endZ=float(lastFrame[5+self.offset])
+        startX=float(firstFrame[self.offsetX])
+        startY=float(firstFrame[self.offsetY])
+        startZ=float(firstFrame[self.offsetZ])
+        endX=float(lastFrame[self.offsetX])
+        endY=float(lastFrame[self.offsetY])
+        endZ=float(lastFrame[self.offsetZ])
         for i in range(0,len(self.frameArray)):
             currentFrame=self.frameArray[i]
-            currentX=float(currentFrame[3+self.offset])
-            currentY=float(currentFrame[4+self.offset])
-            currentZ=float(currentFrame[5+self.offset])
+            currentX=float(currentFrame[self.offsetX])
+            currentY=float(currentFrame[self.offsetY])
+            currentZ=float(currentFrame[self.offsetZ])
             differenceMovementErrorSqr=math.pow(self.calculateRealMovementError(startX,startY,startZ,endX,endY,endZ,currentX,currentY,currentZ)-movementOffset,2)
             sumMovementErrorDifference=sumMovementErrorDifference+differenceMovementErrorSqr
         movementVariability=math.sqrt(sumMovementErrorDifference/(len(self.frameArray)-3.0))
@@ -112,17 +118,17 @@ class LeapAnalyzer:
         sumMovementError = 0
         firstFrame = self.frameArray[0]
         lastFrame = self.frameArray[len(self.frameArray) - 1]
-        startX = float(firstFrame[3 + self.offset])
-        startY = float(firstFrame[4 + self.offset])
-        startZ = float(firstFrame[5 + self.offset])
-        endX = float(lastFrame[3 + self.offset])
-        endY = float(lastFrame[4 + self.offset])
-        endZ = float(lastFrame[5 + self.offset])
+        startX = float(firstFrame[self.offsetX])
+        startY = float(firstFrame[self.offsetY])
+        startZ = float(firstFrame[self.offsetZ])
+        endX = float(lastFrame[self.offsetX])
+        endY = float(lastFrame[self.offsetY])
+        endZ = float(lastFrame[self.offsetZ])
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[3 + self.offset])
-            currentY = float(currentFrame[4 + self.offset])
-            currentZ = float(currentFrame[5 + self.offset])
+            currentX = float(currentFrame[self.offsetX])
+            currentY = float(currentFrame[self.offsetY])
+            currentZ = float(currentFrame[self.offsetZ])
             sumMovementError = sumMovementError + abs(self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                                               endZ, currentX, currentY, currentZ))
         self.movementError=sumMovementError / (len(self.frameArray)-2.0)
@@ -134,17 +140,17 @@ class LeapAnalyzer:
         sumMovementError = 0
         firstFrame = self.frameArray[0]
         lastFrame = self.frameArray[len(self.frameArray) - 1]
-        startX = float(firstFrame[3 + self.offset])
-        startY = float(firstFrame[4 + self.offset])
-        startZ = float(firstFrame[5 + self.offset])
-        endX = float(lastFrame[3 + self.offset])
-        endY = float(lastFrame[4 + self.offset])
-        endZ = float(lastFrame[5 + self.offset])
+        startX = float(firstFrame[self.offsetX])
+        startY = float(firstFrame[self.offsetY])
+        startZ = float(firstFrame[self.offsetZ])
+        endX = float(lastFrame[self.offsetX])
+        endY = float(lastFrame[self.offsetY])
+        endZ = float(lastFrame[self.offsetZ])
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[3 + self.offset])
-            currentY = float(currentFrame[4 + self.offset])
-            currentZ = float(currentFrame[5 + self.offset])
+            currentX = float(currentFrame[self.offsetX])
+            currentY = float(currentFrame[self.offsetY])
+            currentZ = float(currentFrame[self.offsetZ])
             sumMovementError = sumMovementError + self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                 endZ, currentX, currentY, currentZ)
         self.meanmovementError = sumMovementError / (len(self.frameArray) - 2.0)
@@ -169,14 +175,29 @@ class LeapAnalyzer:
 
     # judge whether the current point is up or below the laptop plane
     def judgeUpOrBelowPlane(self,curx,cury,curz):
-        # since the angle of the laptop is 45 degree,the normal vector of the plane is (0,1,1)
-        a=0
-        b=1
-        c=-1
+        # since the angle of the laptop is 45 degree,the normal vector of the laptop plane is (0,1,1)
+        # we can calculate it with three points on the plane
         startFrame=self.frameArray[0]
-        startX=float(startFrame[6])
-        startY=float(startFrame[7])
-        startZ=float(startFrame[8])
+        startX=float(startFrame[self.offsetX])
+        startY=float(startFrame[self.offsetY])
+        startZ=float(startFrame[self.offsetZ])
+        endFrame=self.frameArray[self.numberFrame-1]
+        endX=float(endFrame[self.offsetX])
+        endY=float(endFrame[self.offsetY])
+        endZ=float(endFrame[self.offsetZ])
+        # let l represents the line started from start point and ended with the target point
+        # we can calculate the direction vector of l
+        a=endX-startX
+        b=endY-startY
+        c=endZ-startZ
+        # let n represents the plane vertical to the laptop and intersect with the laptop on l
+        # calculate the normal vector of n
+        # it should be vertical to l
+        # it should also be vertical to the normal vector of the laptop plane
+        # we calculate (an,bn,cn) the normal vector of n
+        an=b-c
+        bn=-a
+        cn=a
         # the start point is on the plane
         # the plane function is a*(x-startX)+b*(y-startY)+c*(z-startZ)=0
         # to judge whether the point is up or below the plane
@@ -186,7 +207,7 @@ class LeapAnalyzer:
         # that means the original plane has to translate d/c to become the current plane
         # if d/c > 0 , the current point is up the plane
         # else , it is below the plane
-        translateValue=(a*(curx-startX)+b*(cury-startY)+c*(curz-startZ))/c
+        translateValue=(an*(curx-startX)+bn*(cury-startY)+cn*(curz-startZ))/cn
         if translateValue > 0:
             return True
         else:
@@ -194,7 +215,7 @@ class LeapAnalyzer:
 
 
     def judgePause(self,speedX,speedY,speedZ):
-        pauseMargin=3 # due to the measure mistake of leap motion,the pauseMargin should not be 0
+        pauseMargin=0.002 # due to the measure mistake of leap motion,the pauseMargin should not be 0
         if abs(speedX)<=pauseMargin and abs(speedY)<=pauseMargin and abs(speedZ)<=pauseMargin:
             return True
         else:
@@ -204,10 +225,12 @@ class LeapAnalyzer:
     def calculatePauseTime(self):
         for i in range(0,self.numberFrame):
             curFrame=self.frameArray[i]
-            curspeedX=float(curFrame[18])
-            curspeedY=float(curFrame[19])
-            curspeedZ=float(curFrame[20])
-            startTime=float(curFrame[5]) # the start time of the pause
+            curspeedX=float(curFrame[self.offsetSpeedX])
+            curspeedY=float(curFrame[self.offsetSpeedY])
+            curspeedZ=float(curFrame[self.offsetSpeedZ])
+            if curspeedY==1.2:
+                t=0
+            startTime=float(curFrame[self.offsetTimestamp]) # the start time of the pause
             if self.judgePause(curspeedX,curspeedY,curspeedZ)==True:
                 self.pauseTime=self.pauseTime+1
                 if i==self.numberFrame-1: # if the current frame is the end one
@@ -215,17 +238,17 @@ class LeapAnalyzer:
                 else:
                     for j in range(i + 1, self.numberFrame):
                         nextFrame = self.frameArray[j]
-                        nextspeedX = float(nextFrame[18])
-                        nextspeedY = float(nextFrame[19])
-                        nextspeedZ = float(nextFrame[20])
+                        nextspeedX = float(nextFrame[self.offsetSpeedX])
+                        nextspeedY = float(nextFrame[self.offsetSpeedY])
+                        nextspeedZ = float(nextFrame[self.offsetSpeedZ])
                         if self.judgePause(nextspeedX, nextspeedY, nextspeedZ) == False:
-                            endTime = float(nextFrame[8])
+                            endTime = float(nextFrame[self.offsetTimestamp])
                             duration = endTime - startTime
                             self.pauseDuration.append(duration)
                             break
 
     def judgeNearTarget(self,curX,curY,curZ,targetX,targetY,targetZ):
-        margin=2 # judge the distance of near
+        margin=5 # judge the distance of near
         distance=math.sqrt(math.pow(curX-targetX,2)+math.pow(curY-targetY,2)+math.pow(curZ-targetZ,2))
         if distance<margin:
             return True
@@ -236,31 +259,31 @@ class LeapAnalyzer:
     # row[row.length-1] is the end point,it represents the target point
     def calculateSpiralDuration(self):
         targetFrame=self.frameArray[self.numberFrame-1] # end frame represent the target
-        targetX=float(targetFrame[6])
-        targetY=float(targetFrame[7])
-        targetZ=float(targetFrame[8])
+        targetX=float(targetFrame[self.offsetX])
+        targetY=float(targetFrame[self.offsetY])
+        targetZ=float(targetFrame[self.offsetZ])
         for i in range(1,self.numberFrame-1): # skip the start and end frame
             curFrame=self.frameArray[i]
-            curX=float(curFrame[6])
-            curY=float(curFrame[7])
-            curZ=float(curFrame[8])
+            curX=float(curFrame[self.offsetX])
+            curY=float(curFrame[self.offsetY])
+            curZ=float(curFrame[self.offsetZ])
             if self.judgeNearTarget(curX,curY,curZ,targetX,targetY,targetZ)==True:
                 self.spiralTime=self.spiralTime+1
-                startTime=float(curFrame[5]) # the start time of the spiral
+                startTime=float(curFrame[self.offsetTimestamp]) # the start time of the spiral
                 if i==self.numberFrame-2: # if the current one if the one before the end one
                     nextFrame = self.frameArray[self.numberFrame-1]
-                    endTime = float(nextFrame[5])
+                    endTime = float(nextFrame[self.offsetTimestamp])
                     duration = endTime - startTime
                     self.spiralDuration.append(duration)
                 else:
                     for j in range(i + 1, self.numberFrame - 1):
                         nextFrame = self.frameArray[j]
-                        nextX = float(nextFrame[6])
-                        nextY = float(nextFrame[7])
-                        nextZ = float(nextFrame[8])
+                        nextX = float(nextFrame[self.offsetX])
+                        nextY = float(nextFrame[self.offsetY])
+                        nextZ = float(nextFrame[self.offsetZ])
                         if self.judgeNearTarget(nextX, nextY, nextZ, targetX, targetY,
                                                 targetZ) == False or j == self.numberFrame - 2:  # stop spiral or arriving at the last frame
-                            endTime = float(nextFrame[5])
+                            endTime = float(nextFrame[self.offsetTimestamp])
                             duration = endTime - startTime
                             self.spiralDuration.append(duration)
                             break
@@ -271,22 +294,34 @@ class LeapAnalyzer:
         sumMovementError = 0
         firstFrame = self.frameArray[0]
         lastFrame = self.frameArray[len(self.frameArray) - 1]
-        startX = float(firstFrame[3 + self.offset])
-        startY = float(firstFrame[4 + self.offset])
-        startZ = float(firstFrame[5 + self.offset])
-        endX = float(lastFrame[3 + self.offset])
-        endY = float(lastFrame[4 + self.offset])
-        endZ = float(lastFrame[5 + self.offset])
+        startX = float(firstFrame[self.offsetX])
+        startY = float(firstFrame[self.offsetY])
+        startZ = float(firstFrame[self.offsetZ])
+        endX = float(lastFrame[self.offsetX])
+        endY = float(lastFrame[self.offsetY])
+        endZ = float(lastFrame[self.offsetZ])
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[3 + self.offset])
-            currentY = float(currentFrame[4 + self.offset])
-            currentZ = float(currentFrame[5 + self.offset])
+            currentX = float(currentFrame[self.offsetX])
+            currentY = float(currentFrame[self.offsetY])
+            currentZ = float(currentFrame[self.offsetZ])
             sumMovementError = sumMovementError + self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                                                   endZ, currentX, currentY, currentZ)
         self.movementOffset = sumMovementError / (len(self.frameArray) - 2.0)
         return self.movementOffset
 
+# get the min(l),max(l),avergae(l),difference of min and max
+def get_min_max_mean_deviation_from_list(l):
+    min_l = float(l[0])
+    max_l = float(l[0])
+    sum_l = 0
+    for i in range(0, len(l)):
+        if float(l[i]) > max_l:
+            max_l = float(l[i])
+        if float(l[i]) < min_l:
+            min_l = float(l[i])
+        sum_l += float(l[i])
+    return min_l, max_l, sum_l / (len(l) + 0.0), max_l - min_l
 
 # test the lepa analyzer functions
 def test():
@@ -305,15 +340,16 @@ def test():
     if leap.pauseTime>0:
         pDuration = leap.pauseDuration
         print 'pauseDuration:'
-        for p in pDuration:
-            print p,
+        minp,maxp,averagep,deviationp=get_min_max_mean_deviation_from_list(pDuration)
+        print 'min:',minp,' max:',maxp,' average:',averagep,' deviation:',deviationp
     leap.calculateSpiralDuration()
     print 'spiralTime',
     print leap.spiralTime
-    print 'spiralDuration',
-    sDuration=leap.spiralDuration
-    for s in sDuration:
-        print s,
+    if leap.spiralTime>0:
+        print 'spiralDuration',
+        sDuration=leap.spiralDuration
+        mins,maxs,averages,deviations=get_min_max_mean_deviation_from_list(sDuration)
+        print 'min:',mins,' max:',maxs,' average:',averages,' deviations:',deviations
 
 
 
