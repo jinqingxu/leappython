@@ -165,7 +165,7 @@ def write_dis_difference(pid):
                                     endy = float(row[offsetSplitY])
                                     endz = float(row[offsetSplitZ])
                                 k = k + 1
-                            print "firstx",firstx,"endx",endx
+                            # "firstx",firstx,"endx",endx
                             dis = calculate_3D_Dis_Of_Two_Points(firstx, firsty, firstz, endx, endy, endz)
                             difference = dis - float(datas[i][2])  # dis minus amplitude(mm)
                             absDiffX=abs(firstx-endx)
@@ -239,8 +239,8 @@ def statistic_combination(pid,numberOfCombination):
             dis_list.append(tmp_dis)
             j=j+1
     dis_list=sorted(dis_list,dis_cmp)
-    for i in range(len(dis_list)):
-        print dis_list[i].amplitude,dis_list[i].width,dis_list[i].direction,dis_list[i].abs_difference
+    #for i in range(len(dis_list)):
+        #print dis_list[i].amplitude,dis_list[i].width,dis_list[i].direction,dis_list[i].abs_difference
     # suppose the combination with the same amplitude,width and direction is a group
     # each group will occur only once in one block
     with open(file, 'a') as f2:
@@ -270,8 +270,8 @@ def statistic_combination(pid,numberOfCombination):
                 if tmp_dis > max_group:
                     max_group = tmp_dis
             if curAmplitude!=prevAmplitude or curWidth!=prevWidth or curDirection!=prevDirection or i==len(dis_list)-1: # the beginning of next combination
-                print "sum",sum_group
-                print "lenOfConbination",lenOfCombination
+                #print "sum",sum_group
+                #print "lenOfConbination",lenOfCombination
                 avg_group = sum_group / (lenOfCombination + 0.0)
                 outdata = []
                 outdata.append(dis_list[i-1].amplitude)

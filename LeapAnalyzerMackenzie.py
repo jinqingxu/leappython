@@ -1,22 +1,22 @@
 # seven measures
 import csv
 import math
+import os
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from CalculateOfCircle import calculate_3D_Dis_Of_Two_Points
-class LeapAnalyzer:
-    path = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split/"
-    readFile=path+'PID_884_Block_1_Trial_3.csv'
+
+path = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split/"
+class LeapAnalyzerMackenzie:
+    readFile=""
     frameArray=[]
     numberFrame=0
     movementDirectionChangeX=0
     movementDirectionChangeY=0
     movementDirectionChangeZ=0
-    pauseTime=0
-    pauseDuration=[]
-    spiralTime=0
-    spiralDuration=[]
     movementOffset=0
     movementError=0
+    def __init__(self,readFile):
+        self.readFile=readFile
 
     # index of the data from split files
     offsetX=9
@@ -227,6 +227,11 @@ class LeapAnalyzer:
         else:
             return False
 
+    # for one trial,get the average pause duration
+    def get_mean_pause_duration(self):
+        minp, maxp, averagep, deviationp = get_min_max_mean_deviation_from_list(self.pauseDuration)
+        return averagep
+
     #calculate the pause time and each pause duration
     def calculatePauseTime(self):
         i=0
@@ -255,76 +260,6 @@ class LeapAnalyzer:
             i=i+1
 
 
-    # let the finger point be p ,the laptop plane be A, the line passing though p and vertical to A be l
-    # let the intersaction of l and A be c
-    # spiral should meet two conditions
-    # firstly, c should be inside the circle with the redius of 5/4 target redius
-    # secondly,the distance between p and A should be very small
-    def judgeNearTarget(self,curX,curY,curZ,targetX,targetY,targetZ,width):
-        margin=15 # the max distance of p and A
-        # since the angle of the laptop is 45 degree,the normal vector of the laptop plane is (0,1,1)
-        # so the function of line l is (x-curX)/0=(y-curY)/1=(z-curZ)/1 ,that is y-curY=z-curZ=k
-        # let y=curY+k,z=curZ+k
-        # the function of the laptop is 0*(x-targetX)+1*(y-targetY)+1*(z-targetZ)=0
-        # put y and z into the laptop function
-        # k=(targetY+targetZ-curY-curZ)/2
-        # so y=curY+k=(targetY+targetZ+curY-curZ)/2
-        # z=curZ+k=(targetY+targetZ+curZ-curY)/2
-        # x=curX
-        intersactionX=curX
-        intersactionY=(targetY+targetZ+curY-curZ)/2
-        intersactionZ=(targetY+targetZ+curZ-curY)/2
-        # find the distance between p and A
-        dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,intersactionX,intersactionY,intersactionZ)
-        if dis > margin:
-            return False
-        else: # dis should be smaller or equal to margin
-            dis2=calculate_3D_Dis_Of_Two_Points(targetX,targetY,targetZ,intersactionX,intersactionY,intersactionZ)
-            margin2=(1+1/4)*width # the max distance of A and target center
-            if dis2 > margin2:
-                return False
-            else:
-                return True
-
-
-
-
-    # spiral means the finger is very close to the laptop
-    # and is within the 5/4 redius circle
-    def calculateSpiralDuration(self):
-        targetFrame=self.frameArray[self.numberFrame-1] # end frame represent the target
-        targetX=float(targetFrame[self.offsetX])
-        targetY=float(targetFrame[self.offsetY])
-        targetZ=float(targetFrame[self.offsetZ])
-        width=float(targetFrame[self.offsetWidth])
-        i=1 # skip the start frame
-        while i < self.numberFrame-1: # skip the end frame
-            curFrame=self.frameArray[i]
-            curX=float(curFrame[self.offsetX])
-            curY=float(curFrame[self.offsetY])
-            curZ=float(curFrame[self.offsetZ])
-            if self.judgeNearTarget(curX,curY,curZ,targetX,targetY,targetZ,width)==True:
-                self.spiralTime=self.spiralTime+1
-                startTime=float(curFrame[self.offsetTimestamp]) # the start time of the spiral
-                if i==self.numberFrame-2: # if the current one is the one before the end one,the loop beneath will not be executed
-                    nextFrame = self.frameArray[self.numberFrame-1]
-                    endTime = float(nextFrame[self.offsetTimestamp])
-                    duration = endTime - startTime
-                    self.spiralDuration.append(duration)
-                else:
-                    for j in range(i + 1, self.numberFrame - 1):
-                        nextFrame = self.frameArray[j]
-                        nextX = float(nextFrame[self.offsetX])
-                        nextY = float(nextFrame[self.offsetY])
-                        nextZ = float(nextFrame[self.offsetZ])
-                        if self.judgeNearTarget(nextX, nextY, nextZ, targetX, targetY,
-                                                targetZ,width) == False or j == self.numberFrame - 2:  # stop spiral or arriving at the last frame
-                            endTime = float(nextFrame[self.offsetTimestamp])
-                            duration = endTime - startTime
-                            self.spiralDuration.append(duration)
-                            i=j # find the next spiral
-                            break
-            i=i+1
 
     # MO is the mean movement error
     # the sum of real values with sign divided by numberOfFrame
@@ -349,10 +284,38 @@ class LeapAnalyzer:
         return self.movementOffset
 
 
+# for all trials in one experiment,get the percentage of trials contaning pauses
+def calculate_percentage_containing_pause(pid):
+    files = os.listdir(path)
+    numOfFileWithPause=0 # how many files contain pause
+    numOfFiles=0 # how many files of pid in total
+    # PID_xxx_Block_xxx_Trial_xxx.csv
+    for file in files:  # open all the file in the '/split' directory
+        if not os.path.isdir(file):  # not a directory
+            # a bug : if the pid is 888,files begin with pid 8881 will be taken into account
+            keys = file.split('_')
+            if str(pid) in keys:  # if the file begins with PID_xxx
+                numOfFiles=numOfFiles+1
+                if file=='PID_885_Block_1_Trial_1.csv':
+                    t=0
+                leap=LeapAnalyzer(path+file)
+                leap.loadLeapData()
+                leap.calculateNumberOfFrame()
+                leap.calculatePauseTime()
+                if leap.pauseTime>0:
+                    numOfFileWithPause=numOfFileWithPause+1
+    percentages=numOfFileWithPause/(numOfFiles+0.0) # avoid divide integer error
+    return percentages
 
-# test the lepa analyzer functions
+
+
+
+
+
+# test the measures from MacKenzies
 def test():
-    leap=LeapAnalyzer()
+    readFile=path+"PID_885_Block_2_Trial_3.csv"
+    leap=LeapAnalyzerMackenzie(readFile)
     leap.loadLeapData()
     print 'numberOfFrame', leap.calculateNumberOfFrame()
     leap.calculateMovementDirectionChange()
@@ -362,26 +325,12 @@ def test():
     print 'MO', leap.calculateMovementOffset()
     print 'MV',leap.calculateMovementVariability(leap.movementOffset)
     print 'ME',leap.calculateMovementError()
-    leap.calculatePauseTime()
-    print 'pauseTime',leap.pauseTime
-    if leap.pauseTime>0:
-        pDuration = leap.pauseDuration
-        print 'pauseDuration:'
-        minp,maxp,averagep,deviationp=get_min_max_mean_deviation_from_list(pDuration)
-        print 'min:',minp,' max:',maxp,' average:',averagep,' deviation:',deviationp
-    leap.calculateSpiralDuration()
-    print 'spiralTime',
-    print leap.spiralTime
-    if leap.spiralTime>0:
-        print 'spiralDuration',
-        sDuration=leap.spiralDuration
-        mins,maxs,averages,deviations=get_min_max_mean_deviation_from_list(sDuration)
-        print 'min:',mins,' max:',maxs,' average:',averages,' deviations:',deviations
 
 
 
 
 test()
+
 
 
 
