@@ -1,10 +1,10 @@
-# seven measures
+# seven measures from Mackenzie's paper
 import csv
 import math
 import os
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from CalculateOfCircle import calculate_3D_Dis_Of_Two_Points
-
+from SpaceUtils import getDistanceOfPointAndLine
 path = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split/"
 class LeapAnalyzerMackenzie:
     readFile=""
@@ -165,23 +165,17 @@ class LeapAnalyzerMackenzie:
     # the distance of a point to the plane
     # the real value with sign
     def calculateRealMovementError(self,x1,y1,z1,x2,y2,z2,x,y,z):
-        distanceLine=self.calculateLineDistance(x1,y1,z1,x2,y2,z2)
-        pow1=math.pow((x1-x)*(y2-y1)-(y1-y)*(x2-x1),2)
-        pow2=math.pow((y1-y)*(z2-z1)-(z1-z)*(y2-y1),2)
-        pow3=math.pow((z1-z)*(x2-x1)-(x1-x)*(z2-z1),2)
-        distancePoint=math.sqrt(pow1+pow2+pow3)/distanceLine # the area of the parallelogram divided by the length of the edge is the distance of a point to a line in 3D cors
+        distancePoint=getDistanceOfPointAndLine(x1,y1,z1,x2,y2,z2,x,y,z)
         if self.judgeUpOrBelowPlane(x,y,z)==False:
             distancePoint=distancePoint*(-1)
         #print "dis",distancePoint
         return distancePoint
 
-    def calculateLineDistance(self,x1,y1,z1,x2,y2,z2):
-        return math.sqrt((math.pow((x1-x2),2) + math.pow((y1-y2),2) + math.pow((z1-z2),2)))
 
 
-    # judge whether the current point is up or below the laptop plane
+    # judge whether the current point is up or below the ipad plane
     def judgeUpOrBelowPlane(self,curx,cury,curz):
-        # since the angle of the laptop is 45 degree,the normal vector of the laptop plane is (0,1,1)
+        # since the angle of the ipad is 45 degree,the normal vector of the ipad plane is (0,1,1)
         # we can calculate it with three points on the plane
         startFrame=self.frameArray[0]
         startX=float(startFrame[self.offsetX])
@@ -196,10 +190,10 @@ class LeapAnalyzerMackenzie:
         a=endX-startX
         b=endY-startY
         c=endZ-startZ
-        # let n represents the plane vertical to the laptop and intersect with the laptop on l
+        # let n represents the plane vertical to the ipad and intersect with the ipad on l
         # calculate the normal vector of n
         # it should be vertical to l
-        # it should also be vertical to the normal vector of the laptop plane
+        # it should also be vertical to the normal vector of the ipad plane
         # we calculate (an,bn,cn) the normal vector of n
         an=b-c
         bn=-a
@@ -209,11 +203,9 @@ class LeapAnalyzerMackenzie:
         # to judge whether the point is up or below the plane
         # put the cur point into the function
         # if a*(curX-startX)+b*(curY-startY)+c*(curZ-startZ)=d
-        # that equals a*(curX-startX)+b*(curY-startY)+c*(curZ-startZ-d/c)=0
-        # that means the original plane has to translate d/c to become the current plane
-        # if d/c > 0 , the current point is up the plane
+        # if d > 0 , the current point is up the plane
         # else , it is below the plane
-        translateValue=(an*(curx-startX)+bn*(cury-startY)+cn*(curz-startZ))/cn
+        translateValue=an*(curx-startX)+bn*(cury-startY)+cn*(curz-startZ)
         if translateValue > 0:
             return True
         else:
@@ -298,7 +290,7 @@ def calculate_percentage_containing_pause(pid):
                 numOfFiles=numOfFiles+1
                 if file=='PID_885_Block_1_Trial_1.csv':
                     t=0
-                leap=LeapAnalyzer(path+file)
+                leap=LeapAnalyzerMackenzie(path+file)
                 leap.loadLeapData()
                 leap.calculateNumberOfFrame()
                 leap.calculatePauseTime()

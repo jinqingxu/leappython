@@ -3,6 +3,7 @@
 import csv
 import math
 import os
+
 #workpath
 path = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
 
@@ -102,6 +103,6 @@ def process_split(pid,mode):
             end=offset #the end index of the split data
             split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction)
 
-pid=885
+pid=890
 mode='circle' # redcross means test experiment,circle means real experiment
 process_split(pid,mode)

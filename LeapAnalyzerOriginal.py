@@ -1,10 +1,10 @@
-# seven measures
+# the original measurements not from the paper
 import csv
 import math
 import os
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from CalculateOfCircle import calculate_3D_Dis_Of_Two_Points
-
+from SpaceUtils import getIntersactionPointOfLineAndPlane
 path = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split/"
 class LeapAnalyzerOriginal:
     readFile=""
@@ -37,25 +37,14 @@ class LeapAnalyzerOriginal:
         self.numberFrame=len(self.frameArray)
         return self.numberFrame
 
-    # let the finger point be p ,the laptop plane be A, the line passing though p and vertical to A be l
+    # let the finger point be p ,the ipad plane be A, the line passing though p and vertical to A be l
     # let the intersaction of l and A be c
     # spiral should meet two conditions
     # firstly, c should be inside the circle with the redius of 5/4 target redius
     # secondly,the distance between p and A should be very small
     def judgeNearTarget(self,curX,curY,curZ,targetX,targetY,targetZ,width):
         margin=15 # the max distance of p and A
-        # since the angle of the laptop is 45 degree,the normal vector of the laptop plane is (0,1,1)
-        # so the function of line l is (x-curX)/0=(y-curY)/1=(z-curZ)/1 ,that is y-curY=z-curZ=k
-        # let y=curY+k,z=curZ+k
-        # the function of the laptop is 0*(x-targetX)+1*(y-targetY)+1*(z-targetZ)=0
-        # put y and z into the laptop function
-        # k=(targetY+targetZ-curY-curZ)/2
-        # so y=curY+k=(targetY+targetZ+curY-curZ)/2
-        # z=curZ+k=(targetY+targetZ+curZ-curY)/2
-        # x=curX
-        intersactionX=curX
-        intersactionY=(targetY+targetZ+curY-curZ)/2
-        intersactionZ=(targetY+targetZ+curZ-curY)/2
+        intersactionX,intersactionY,intersactionZ=getIntersactionPointOfLineAndPlane(curX,curY,curZ,targetX,targetY,targetZ)
         # find the distance between p and A
         dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,intersactionX,intersactionY,intersactionZ)
         if dis > margin:
@@ -71,7 +60,7 @@ class LeapAnalyzerOriginal:
 
 
 
-    # spiral means the finger is very close to the laptop
+    # spiral means the finger is very close to the ipad
     # and is within the 5/4 redius circle
     def calculateSpiralDuration(self):
         targetFrame=self.frameArray[self.numberFrame-1] # end frame represent the target

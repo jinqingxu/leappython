@@ -3,6 +3,8 @@
 import csv
 import math
 import os
+from SpaceUtils import calculate_3D_Dis_Of_Two_Points
+
 # 3D point
 class ThreeCorPoint:
     x=0
@@ -87,13 +89,12 @@ offsetDisAbsDifference=7
 #workpath
 path = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
 
-# 1 pixel = 0.0794 mm
-PixelToM=0.0794
+# 1 pixel = 0.0794 mm(calculated by Irene)
+# 1 pixel = 0.088194mm(from the website)
+PixelToM=0.088194
 Pi=3.1415926
 
-# calculate the distance of two 3D points
-def calculate_3D_Dis_Of_Two_Points(x1,y1,z1,x2,y2,z2):
-    return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2)+math.pow(z1-z2,2))
+
 
 # get the min(l),max(l),avergae(l),difference of min and max
 def get_min_max_mean_deviation_from_list(l):
@@ -108,24 +109,44 @@ def get_min_max_mean_deviation_from_list(l):
         sum_l+=float(l[i])
     return min_l, max_l, sum_l / (len(l) + 0.0),max_l-min_l
 
+def file_cmp(x,y):
+    key1=x.split('_')
+    key2=y.split('_')
+    block1=int(key1[3])
+    block2=int(key2[3])
+    trial1=int(key1[5][0:-4])
+    trial2=int(key2[5][0:-4])
+    if block1<block2:
+        return -1
+    if block1>block2:
+        return 1
+    if block1==block2:
+        if trial1<trial2:
+            return -1
+        if trial1==trial2:
+            return 0
+        if trial1>trial2:
+            return 1
+
 # write PID_XXX_Dis_Difference_Android_Leap
 def write_dis_difference(pid):
     files = os.listdir(path+'/split')
+    files=files[1:len(files)]
+    files=sorted(files,file_cmp)
     file2 = path + 'PID_' + str(pid) + '_TwoDFittsData_External.csv'  # android data
-    new_headers=['Block','Trial','Amplitude(mm)','Width(mm)','Direction','Distance(mm)','Difference(mm)','AbsDifference(mm)','AbsDiffX(mm)','AbsDiff_Diff_X(mm)','AbsDiff_Amplitude_X'] # headers for the written file
+    new_headers=['Block','Trial','Amplitude(mm)','Width(mm)','Direction','Start TipX(mm)','End TipX(mm)','Distance(mm)','Difference(mm)','AbsDifference(mm)','AbsDiffX(mm)','AbsDiff_Dis_X(mm)'] # headers for the written file
     file3 = path + 'PID_' + str(pid) + '_DIS_Difference_Android_Leap.csv'
     difference_dis_list=[] # record the difference between the calculated distance and amplitude
     absolute_difference_dis_list=[]  # record the absolute difference between the calculated distance and amplitude
-    absolute_difference_X_list=[]
-    absolute_difference_Diff_X_list=[]
-    absolute_difference_Amplitude_X_list=[]
+    absolute_difference_X_list=[] # record the absolute difference of startX and endX
+    absolute_difference_Dis_X_list=[]
     with open(file3, 'w') as f:
         w_csv = csv.writer(f)
         w_csv.writerow(new_headers)
         #get android data
         with open(file2) as f:
             f_csv = csv.reader(f)
-            for i in range(0, 10):  # skip the beginning
+            for i in range(0, 9):  # skip the beginning
                 next(f_csv)
             headers = next(f_csv)  # get headers of csv
             # android data:Block,Trial,Amplitude,Width,Direction
@@ -140,7 +161,9 @@ def write_dis_difference(pid):
                 datas.append(difdata)
             i=0 # index of trial
             # PID_xxx_Block_xxx_Trial_xxx.csv
+
             for file in files: # open all the file in the '/split' directory
+                print file
                 if not os.path.isdir(file):  # not a directory
                     # a bug : if the pid is 888,files begin with pid 8881 will be taken into account
                     keys=file.split('_')
@@ -169,27 +192,26 @@ def write_dis_difference(pid):
                             dis = calculate_3D_Dis_Of_Two_Points(firstx, firsty, firstz, endx, endy, endz)
                             difference = dis - float(datas[i][2])  # dis minus amplitude(mm)
                             absDiffX=abs(firstx-endx)
-                            absDiff_Diff_X=abs(absDiffX-difference)
+                            absDiff_Dis_X=abs(absDiffX-dis)
                             absDiff_Amplitude_X=abs(absDiffX-float(datas[i][2]))
+                            datas[i].append(firstx)
+                            datas[i].append(endx)
                             datas[i].append(dis)
                             datas[i].append(difference)
                             datas[i].append(abs(difference))
                             datas[i].append(absDiffX)
-                            datas[i].append(absDiff_Diff_X)
-                            datas[i].append(absDiff_Amplitude_X)
+                            datas[i].append(absDiff_Dis_X)
                             # used for further calculation of min,max,average
                             difference_dis_list.append(difference)
                             absolute_difference_dis_list.append(abs(difference))
                             absolute_difference_X_list.append(absDiffX)
-                            absolute_difference_Diff_X_list.append(absDiff_Diff_X)
-                            absolute_difference_Amplitude_X_list.append(absDiff_Amplitude_X)
+                            absolute_difference_Dis_X_list.append(absDiff_Dis_X)
                             w_csv.writerow(datas[i])
                         i=i+1
         min_d,max_d,average_d,deviation_d=get_min_max_mean_deviation_from_list(difference_dis_list)
         min_abs_d,max_abs_d,average_abs_d,deviation_abs_d=get_min_max_mean_deviation_from_list(absolute_difference_dis_list)
         min_abs_x,max_abs_x,average_abs_x,deviation_abs_x=get_min_max_mean_deviation_from_list(absolute_difference_X_list)
-        min_abs_rx,max_abs_rx,average_abs_rx,deciation_abs_rx=get_min_max_mean_deviation_from_list(absolute_difference_Diff_X_list)
-        min_abs_ax,max_abs_ax,average_abs_ax,deviation_abs_ax=get_min_max_mean_deviation_from_list(absolute_difference_Amplitude_X_list)
+        min_abs_rx,max_abs_rx,average_abs_rx,deciation_abs_rx=get_min_max_mean_deviation_from_list(absolute_difference_Dis_X_list)
         for i in range(0,3):
             statistic = []
             for j in range(0,5):
@@ -200,23 +222,18 @@ def write_dis_difference(pid):
                 statistic.append(min_abs_d)
                 statistic.append(min_abs_x)
                 statistic.append(min_abs_rx)
-                statistic.append(min_abs_ax)
             if i==1:
                 statistic.append('max')
                 statistic.append(max_d)
                 statistic.append(max_abs_d)
                 statistic.append(max_abs_x)
                 statistic.append(max_abs_rx)
-                statistic.append(max_abs_ax)
-
             if i==2:
                 statistic.append('average')
                 statistic.append(average_d)
                 statistic.append(average_abs_d)
                 statistic.append(average_abs_x)
                 statistic.append(average_abs_rx)
-                statistic.append(average_abs_ax)
-
             w_csv.writerow(statistic)
 
 
@@ -247,7 +264,7 @@ def statistic_combination(pid,numberOfCombination):
         w_csv = csv.writer(f2)
         empty=[' ',' ', ' '] # an empty line
         w_csv.writerow(empty)
-        headers=['amplitude','width','direction','min','max','avg']
+        headers=['amplitude(mm)','width(mm)','direction','minAbsDiff(mm)','maxAbsDiff(mm)','avgAbsDiff(mm)']
         w_csv.writerow(headers)
         # initial
         prevAmplitude=dis_list[0].amplitude
@@ -316,7 +333,9 @@ def dis_cmp(x,y):
                 return 0
 
 
-pid=555
+# the range of x is from -6 to 6
+# the accurate value for y is 66,for z is -87.85
+pid=890
 numberOfCombination=2
 write_dis_difference(pid)
 statistic_combination(pid,numberOfCombination)
