@@ -1,18 +1,31 @@
 # the measures from huang's paper
 import numpy as np
-import matplotlib.pyplot as plt
 import csv
 import math
 import os
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 # import helper functions from other script
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from SpaceUtils import calculate_3D_Dis_Of_Two_Points
 from SpaceUtils import getIntersactionPointOfLineAndPlane
 from SpaceUtils import getRelativeXandY
 from SpaceUtils import getIntersactionAngleOfTwoLines
-path = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split/"
-path2="/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/"
+from GlobalVariables import path
+from GlobalVariables import path2
+from GlobalVariables import offsetSplitX
+from GlobalVariables import  offsetSplitY
+from GlobalVariables import offsetSplitZ
+from GlobalVariables import  offsetSplitSpeedX
+from GlobalVariables import offsetSplitSpeedY
+from GlobalVariables import offsetSplitSpeedZ
+from GlobalVariables import  offsetSplitTimestamp
+from GlobalVariables import  offsetSplitWidth
+from GlobalVariables import  offsetSplitSpeed
+from GlobalVariables import offsetAndroidBlock
+from GlobalVariables import offsetAndroidTrial
+from GlobalVariables import PixelToM
+from FileUtils import getSortedSplitFile
 class SubMovement:
     startTime=0 # the start time of frame
     endTime=0 # the end time of frame
@@ -77,19 +90,11 @@ class LeapAnalyzerHuang:
         self.readFile=readFile
         self.pid=pid
 
-    # index of the data from split files
-    offsetX=9
-    offsetY=10
-    offsetZ=11
-    offsetTimestamp=8
-    offsetSpeedX=21
-    offsetSpeedY=22
-    offsetSpeedZ=23
-    offsetSpeed=24
-    offsetWidth=4
+
 
     def loadLeapData(self):
         file = self.readFile
+        self.frameArray=[]
         with open(file) as f:
             f_csv = csv.reader(f)
             next(f_csv) # skip the header
@@ -97,12 +102,15 @@ class LeapAnalyzerHuang:
                 self.frameArray.append(row)
         self.numberFrame = len(self.frameArray)
         firstFrame=self.frameArray[0]
-        self.width=float(firstFrame[self.offsetWidth])
+        self.width=float(firstFrame[offsetSplitWidth])
         targetFrame=self.frameArray[self.numberFrame-1]
-        self.targetX=float(targetFrame[self.offsetX])
-        self.targetY=float(targetFrame[self.offsetY])
-        self.targetZ=float(targetFrame[self.offsetZ])
-        self.targetTime=float(targetFrame[self.offsetTimestamp])
+        # the get target function should be changed
+        # it should be calculated more precisely
+        # todo
+        self.targetX=float(targetFrame[offsetSplitX])
+        self.targetY=float(targetFrame[offsetSplitY])
+        self.targetZ=float(targetFrame[offsetSplitZ])
+        self.targetTime=float(targetFrame[offsetSplitTimestamp])
 
 
     def calculateNumberOfFrame(self):
@@ -141,7 +149,6 @@ class LeapAnalyzerHuang:
 
     # the current speed is near zero
     def judgePause(self,speed):
-        #if abs(speedX)<=self.pauseMargin and abs(speedY)<=self.pauseMargin and abs(speedZ)<=self.pauseMargin:
         if speed< self.pauseMarginSpeed:
             return True
         else:
@@ -160,26 +167,22 @@ class LeapAnalyzerHuang:
         i=0
         while i <self.numberFrame:
             curFrame=self.frameArray[i]
-            #curspeedX=float(curFrame[self.offsetSpeedX])
-            #curspeedY=float(curFrame[self.offsetSpeedY])
-            #curspeedZ=float(curFrame[self.offsetSpeedZ])
-            curSpeed=float(curFrame[self.offsetSpeed])
-            startTime=float(curFrame[self.offsetTimestamp]) # the start time of the pause
-            #if self.judgePause(curspeedX,curspeedY,curspeedZ)==True:
+            curSpeed=float(curFrame[offsetSplitSpeed])
+            startTime=float(curFrame[offsetSplitTimestamp]) # the start time of the pause
             if self.judgePause(curSpeed) == True:
                 self.pauseTime=self.pauseTime+1
-                curX=float(curFrame[self.offsetX])
-                curY=float(curFrame[self.offsetY])
-                curZ=float(curFrame[self.offsetZ])
+                curX=float(curFrame[offsetSplitX])
+                curY=float(curFrame[offsetSplitY])
+                curZ=float(curFrame[offsetSplitZ])
                 self.calculatePauseLocation(curX,curY,curZ)
                 if i==self.numberFrame-1: # if the current frame is the end one
                     self.pauseDuration.append(0) # pause time is zero
                 else:
                     for j in range(i + 1, self.numberFrame):
                         nextFrame = self.frameArray[j]
-                        nextSpeed=float(nextFrame[self.offsetSpeed])
+                        nextSpeed=float(nextFrame[offsetSplitSpeed])
                         if self.judgePause(nextSpeed) == False:
-                            endTime = float(nextFrame[self.offsetTimestamp])
+                            endTime = float(nextFrame[offsetSplitTimestamp])
                             duration = endTime - startTime
                             self.pauseDuration.append(duration)
                             i=j
@@ -215,11 +218,11 @@ class LeapAnalyzerHuang:
     # return the acceleration speed of the current offset
     def calculateAccelerationSpeed(self,offset):
         prevFrame = self.frameArray[offset - 1]
-        prevTimeStamp = float(prevFrame[self.offsetTimestamp])
-        prevSpeed = float(prevFrame[self.offsetSpeed])
+        prevTimeStamp = float(prevFrame[offsetSplitTimestamp])
+        prevSpeed = float(prevFrame[offsetSplitSpeed])
         curFrame=self.frameArray[offset]
-        curSpeed=float(curFrame[self.offsetSpeed])
-        curTimeStamp = float(curFrame[self.offsetTimestamp])
+        curSpeed=float(curFrame[offsetSplitSpeed])
+        curTimeStamp = float(curFrame[offsetSplitTimestamp])
         curDuration = curTimeStamp - prevTimeStamp
         curAcc = (curSpeed-prevSpeed)/(curDuration+0.0)
         return curAcc
@@ -234,13 +237,13 @@ class LeapAnalyzerHuang:
             if sumDuration >= 100: # speed >0 up to 100 ms
                 return i-1
             curFrame=self.frameArray[i]
-            curTimeStamp=float(curFrame[self.offsetTimestamp])
+            curTimeStamp=float(curFrame[offsetSplitTimestamp])
             duration=0
             if i!=0: # if i==0 prevFrame equals to curFrame
                 prevFrame=self.frameArray[i-1]
-                prevTimeStamp=float(prevFrame[self.offsetTimestamp])
+                prevTimeStamp=float(prevFrame[offsetSplitTimestamp])
                 duration=curTimeStamp-prevTimeStamp
-            curSpeed=float(curFrame[self.offsetSpeed])
+            curSpeed=float(curFrame[offsetSplitSpeed])
             if curSpeed>self.pauseMarginSpeed:
                 sumDuration+=duration
         return -1
@@ -252,18 +255,18 @@ class LeapAnalyzerHuang:
         while offset<self.numberFrame:
             offset=self.getSubmovementStart(offset) # the start index of the submovement
             startIndex=offset
-            startTime=float(self.frameArray[startIndex][self.offsetTimestamp])
-            startX=float(self.frameArray[startIndex][self.offsetX])
-            startY=float(self.frameArray[startIndex][self.offsetY])
-            startZ=float(self.frameArray[startIndex][self.offsetZ])
+            startTime=float(self.frameArray[startIndex][offsetSplitTimestamp])
+            startX=float(self.frameArray[startIndex][offsetSplitX])
+            startY=float(self.frameArray[startIndex][offsetSplitY])
+            startZ=float(self.frameArray[startIndex][offsetSplitZ])
             if startIndex==-1: # there is no submovements int the future
                 break
             offset=self.getSubmovementEnd(offset+1) # after the start
             endIndex=offset
-            endX=float(self.frameArray[endIndex][self.offsetX])
-            endY=float(self.frameArray[endIndex][self.offsetY])
-            endZ=float(self.frameArray[endIndex][self.offsetZ])
-            endTime=float(self.frameArray[endIndex][self.offsetTimestamp])
+            endX=float(self.frameArray[endIndex][offsetSplitX])
+            endY=float(self.frameArray[endIndex][offsetSplitY])
+            endZ=float(self.frameArray[endIndex][offsetSplitZ])
+            endTime=float(self.frameArray[endIndex][offsetSplitTimestamp])
             #relaendX,relaendY,relaendZ=self.getRelativeCors(endX,endY,endZ)
             #coincidentErrorValue,coincidentErrorType=self.calculateCoincidentError(endX)
             self.submovement_list.append(SubMovement(startTime,endTime,startX,startY,startZ,endX,endY,endZ,self.peekSpeed,endTime-startTime))
@@ -284,7 +287,7 @@ class LeapAnalyzerHuang:
             prevAcc = self.calculateAccelerationSpeed(offset - 1)
         for j in range(offset,self.numberFrame):
             curFrame = self.frameArray[j]
-            curSpeed = float(curFrame[self.offsetSpeed])
+            curSpeed = float(curFrame[offsetSplitSpeed])
             if curSpeed>self.peekSpeed:
                 self.peekSpeed=curSpeed
             curAcc = self.calculateAccelerationSpeed(j)
@@ -387,7 +390,7 @@ class LeapAnalyzerHuang:
     # the target is represented with green color
     # where the lift up points are represented with red color
     def drawTargetFirstLiftUpPlot2D(self):
-        file=path2+"PId_"+str(self.pid)+"_TwoDFittsData_External.csv"
+        file=path+"PId_"+str(self.pid)+"_TwoDFittsData_External.csv"
         targetX_list=[]
         targetY_list=[]
         liftUpX_list=[]
@@ -402,25 +405,130 @@ class LeapAnalyzerHuang:
                 next(f_csv)
             headers = next(f_csv)  # get headers of csv
             for row in f_csv:
-                targetX_list.append(float(row[offsetTargetX]))
-                targetY_list.append(float(row[offsetTargetY]))
-                liftUpX_list.append(float(row[offsetLiftUpX]))
-                liftUpY_list.append(float(row[offsetLiftUpY]))
+                targetX_list.append(float(row[offsetTargetX])*PixelToM) # change from Pixel to mm
+                targetY_list.append(float(row[offsetTargetY])*PixelToM)
+                liftUpX_list.append(float(row[offsetLiftUpX])*PixelToM)
+                liftUpY_list.append(float(row[offsetLiftUpY])*PixelToM)
             # draw the picture
             plt.title('distribution of First attempt')
-            plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o', label='target', s=100,
+            plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o', label='Target', s=100,
                             edgecolors='black')
-            plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o', label='First_Lift_Up', s=30,
+            plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o', label='FLU', s=30,
                             edgecolors='black')
-            plt.xlabel('First Lift Up X(pixel)')
-            plt.ylabel('First Left Up Y(pixel)')
+            plt.xlabel('First Lift Up X(mm)')
+            plt.ylabel('First Left Up Y(mm)')
             plt.legend()
             plt.grid(True)
             plt.show()
 
+    # find the First Lift Up Cors in leap motion
+    # find the closest timestamp
+    def getFirstLiftUpCors(self,FirstLiftUpTimestamp):
+        for i in range(len(self.frameArray)):
+            curTime=float(self.frameArray[i][offsetSplitTimestamp])
+            if curTime==FirstLiftUpTimestamp:
+                return i
+            if curTime>FirstLiftUpTimestamp:
+                prev=float(self.frameArray[i-1][offsetSplitTimestamp])
+                if abs(prev-FirstLiftUpTimestamp)<abs(curTime-FirstLiftUpTimestamp): # find the closest one
+                    return i-1
+                else:
+                    return i
+        return len(self.frameArray)-1 # if not found,the first LiftUp Time is before the end timestamp in the split file
+
+    # the distribution of lift up in the first attempt
+    def drawTargetFirstLiftUpPlot3D(self):
+        fileandroid=path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
+        firstLiftUpTime_list=[]
+        offsetFirstLiftUp=20
+        # store 3D cors for target
+        targetX_list=[]
+        targetY_list=[]
+        targetZ_list=[]
+        # store 3D cors for first lift up
+        firstLiftUpX_list=[]
+        firstLiftUpY_list=[]
+        firstLiftUpZ_list=[]
+        with open(fileandroid) as f:
+            f_csv = csv.reader(f)
+            for i in range(0, 10):  # skip the beginning
+                next(f_csv)
+            for row in f_csv:
+                firstLiftUpTime_list.append(float(row[20])) # first lift up timestamp
+        files=getSortedSplitFile(path2,self.pid)
+        for i in range(len(firstLiftUpTime_list)):
+            self.readFile = path2 + files[i]
+            self.loadLeapData()
+            targetX_list.append(float(self.targetX))
+            targetY_list.append(float(self.targetY))
+            targetZ_list.append(float(self.targetZ))
+            print firstLiftUpTime_list[i]
+            loc = self.getFirstLiftUpCors(firstLiftUpTime_list[i])
+            firstLiftUpX_list.append(float(self.frameArray[loc][offsetSplitX]))
+            firstLiftUpY_list.append(float(self.frameArray[loc][offsetSplitY]))
+            firstLiftUpZ_list.append(float(self.frameArray[loc][offsetSplitZ]))
+            print 'targetX','targetY','targetZ','firstLiftUpX','firstLiftUpY','firstLiftUpZ'
+            print self.targetX,self.targetY,self.targetZ,self.frameArray[loc][offsetSplitX],self.frameArray[loc][offsetSplitY],self.frameArray[loc][offsetSplitZ]
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(targetX_list,targetY_list,targetZ_list, c='r', label='target', alpha=1, marker='o', s=90,edgecolors='black')
+        ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='c',label='First Lift Up', alpha=1, marker='o', s=30,edgecolors='black')
+        ax.set_xlabel('x(mm)')
+        ax.set_ylabel('y(mm)')
+        ax.set_zlabel('z(mm)')
+        plt.title('Distribution of First Lift Up in 3D')
+        plt.legend()
+        plt.show()
+
+    def drawRelativeTargetFirstLiftUpPlot3D(self,block,trial):
+        fileandroid = path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
+        offsetFirstLiftUp = 20
+        # store 3D cors for target
+        targetX_list = []
+        targetY_list = []
+        targetZ_list = []
+        # the target is the center
+        targetX_list.append(0)
+        targetY_list.append(0)
+        targetZ_list.append(0)
+        # store 3D cors for first lift up
+        firstLiftUpX_list = []
+        firstLiftUpY_list = []
+        firstLiftUpZ_list = []
+        with open(fileandroid) as f:
+            f_csv = csv.reader(f)
+            for i in range(0, 10):  # skip the beginning
+                next(f_csv)
+            for row in f_csv:
+                if str(row[offsetAndroidBlock])==str(block) and str(row[offsetAndroidTrial])==str(trial):
+                    firstLiftUpTime=float(row[offsetFirstLiftUp])  # first lift up timestamp
+                    break
+        file=path2+"PID_"+str(self.pid)+"_Block_"+str(block)+"_Trial_"+str(trial)+".csv"
+        self.readFile=file
+        self.loadLeapData()
+        loc=self.getFirstLiftUpCors(firstLiftUpTime) # get the index of the first lift up frame
+        firstLiftUpX_list.append(float(self.frameArray[loc][offsetSplitX])-self.targetX) # frameArray[loc] is the first Lift Up frame.Get the first List Up X cors.Then get the relative X
+        firstLiftUpY_list.append(float(self.frameArray[loc][offsetSplitY])-self.targetY)
+        firstLiftUpZ_list.append(float(self.frameArray[loc][offsetSplitZ])-self.targetZ)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='r', label='First Lift Up', alpha=1,
+                   marker='o', s=30, edgecolors='black')
+        ax.scatter(targetX_list, targetY_list, targetZ_list, c='c', label='target', alpha=1, marker='o', s=100,
+                   edgecolors='black')
+        margin = 40  # the margin of the plot
+        ax.set_xlabel('x(mm)')
+        ax.set_ylabel('y(mm)')
+        ax.set_zlabel('z(mm)')
+        ax.set_xlim( -1*(margin), margin)
+        ax.set_ylim(-1*(margin),margin)
+        ax.set_zlim(-1*(margin),  margin)
+        plt.title('Distribution of First attempt relative to the target in single trial in 3D')
+        plt.legend()
+        plt.show()
 
     def drawRelativeTargetFirstLiftUpPlot2D(self,block,trial):
-        file = path2 + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
+        file = path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
         targetX_list = []
         targetY_list = []
         liftUpX_list = []
@@ -431,43 +539,95 @@ class LeapAnalyzerHuang:
         offsetLiftUpY = 17
         with open(file) as f:
             f_csv = csv.reader(f)
-            for i in range(0, 9):  # skip the beginning
+            for i in range(0, 10):  # skip the beginning
                 next(f_csv)
-            headers = next(f_csv)  # get headers of csv
             for row in f_csv:
-                if int(row[2])==block and int(row[3])==trial:
-                    targetX=float(row[offsetTargetX])
-                    targetY=float(row[offsetTargetY])
+                if int(row[2])==block and int(row[3])==trial: # find the record with the block and trial
+                    targetX=float(row[offsetTargetX])*PixelToM # change from pixel to mm
+                    targetY=float(row[offsetTargetY])*PixelToM
                     targetX_list.append(0)
                     targetY_list.append(0)
-                    liftUpX=float(row[offsetLiftUpX])
-                    liftUpY=float(row[offsetLiftUpY])
+                    liftUpX=float(row[offsetLiftUpX])*PixelToM
+                    liftUpY=float(row[offsetLiftUpY])*PixelToM
                     relaLiftUpX=liftUpX-targetX
                     relaLiftUpY=liftUpY-targetY
                     liftUpX_list.append(relaLiftUpX)
                     liftUpY_list.append(relaLiftUpY)
                     break
             # draw the picture
-            plt.title('distribution of First attempt relative to the target in single trial')
+            plt.title('Distribution of First attempt relative to the target in single trial in 2D')
             plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o', label='target', s=100,
                                 edgecolors='black')
             plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o', label='First_Lift_Up', s=30,
                                 edgecolors='black')
             margin=40 # the margin of the plot
-            plt.xlim((-1 * (targetX_list[0]+margin), targetX_list[0]+margin))
-            plt.ylim((-1 * (targetY_list[0]+margin), targetY_list[0]+margin))
-            plt.xlabel('First Lift Up X(pixel)')
-            plt.ylabel('First Left Up Y(pixel)')
+            plt.xlim(-1 * (margin), margin) # set the target point to be the center
+            plt.ylim(-1 * (margin), margin)
+            plt.xlabel('First Lift Up X(mm)')
+            plt.ylabel('First Left Up Y(mm)')
             plt.legend()
             plt.grid(True)
             plt.show()
 
 
+    def drawPath(self):
+        files=getSortedSplitFile(path2,self.pid)
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        k=0
+        colors=['b','y','g'] # color for the path of fingers
+        for file in files:
+            # store 3D cors for target
+            startX_list = []
+            startY_list = []
+            startZ_list = []
+            targetX_list = []
+            targetY_list = []
+            targetZ_list = []
+            # store 3D cors for first lift up
+            frameX_list = []
+            frameY_list = []
+            frameZ_list = []
+            if k==3:
+                break
+            self.readFile = path2 + file
+            self.loadLeapData()
+            targetX_list.append(self.targetX)
+            targetY_list.append(self.targetY)
+            targetZ_list.append(self.targetZ)
+            startX_list.append(float(self.frameArray[0][offsetSplitX]))
+            startY_list.append(float(self.frameArray[0][offsetSplitY]))
+            startZ_list.append(float(self.frameArray[0][offsetSplitZ]))
+
+            for frame in self.frameArray:
+                frameX_list.append(float(frame[offsetSplitX]))
+                frameY_list.append(float(frame[offsetSplitY]))
+                frameZ_list.append(float(frame[offsetSplitZ]))
+
+            ax.scatter(startX_list, startY_list, startZ_list, c='r', label='First Lift Up', alpha=1,
+                       marker='o', s=30, edgecolors='black')
+            ax.scatter(frameX_list, frameY_list, frameZ_list, c=colors[k], label='First Lift Up', alpha=1,
+                       marker='o', s=30, edgecolors='black')
+            ax.scatter(targetX_list, targetY_list, targetZ_list, c='c', label='target', alpha=1, marker='o', s=100,
+                       edgecolors='black')
+            k=k+1
+
+        ax.set_xlabel('x(mm)')
+        ax.set_ylabel('y(mm)')
+        ax.set_zlabel('z(mm)')
+        plt.title('path of fingers in an experiment')
+        plt.legend()
+        plt.show()
+
+
+'''       
+# this function is not used any more       
 # for all trials in one experiment,get the percentage of trials contaning pauses
 def calculatePercentageContainingPause(pid):
-    files = os.listdir(path)
+    files = os.listdir(path2)
     numOfFileWithPause=0 # how many files contain pause
     numOfFiles=0 # how many files of pid in total
+    print 'file','pauseTime'
     # PID_xxx_Block_xxx_Trial_xxx.csv
     for file in files:  # open all the file in the '/split' directory
         if not os.path.isdir(file):  # not a directory
@@ -475,27 +635,26 @@ def calculatePercentageContainingPause(pid):
             keys = file.split('_')
             if str(pid) in keys:  # if the file begins with PID_xxx
                 numOfFiles=numOfFiles+1
-                leap=LeapAnalyzerHuang(path+file)
+                leap=LeapAnalyzerHuang(path2+file,pid)
                 leap.loadLeapData()
                 leap.calculateNumberOfFrame()
                 leap.calculatePauseTime()
-                print file,leap.pauseTime,leap.calculatePauseTime()
+                print file,leap.pauseTime
                 if leap.pauseTime>0:
                     numOfFileWithPause=numOfFileWithPause+1
     percentages=numOfFileWithPause/(numOfFiles+0.0) # avoid divide integer error
     return percentages
+'''
 
-pid=885
-#print "percentage of pause"
-#print calculatePercentageContainingPause(pid)
 
 def test_submovement():
-    readfile=path+'PID_890_Block_1_Trial_4.csv'
-    pid=901
+    readfile=path2+'PID_893_Block_1_Trial_4.csv'
+    pid=893
     leap=LeapAnalyzerHuang(readfile,pid)
-    '''
     leap.loadLeapData()
     leap.getSubmovements()
+    print 'submovements'
+    print 'startTime','endTime','peekSpeed','duration'
     for  s in leap.submovement_list:
         print s.startTime,s.endTime,s.peekSpeed,s.duration
     print 'totalNumOfSubMovement', leap.getTotalNumOfSubMovement()
@@ -504,10 +663,16 @@ def test_submovement():
     print 'numOfSubmovementsBeforeFinal',numBeforeFinal
     print 'numOfSubmovementSlipOff',numSlipOff
     '''
-    #leap.drawTargetFirstLiftUpPlot2D()
-    leap.drawRelativeTargetFirstLiftUpPlot2D(1,6)
+    leap.drawTargetFirstLiftUpPlot2D()
+    leap.drawRelativeTargetFirstLiftUpPlot2D(1,7)
+    leap.drawTargetFirstLiftUpPlot3D()
+    leap.drawRelativeTargetFirstLiftUpPlot3D(1,2)
+    '''
+    leap.drawPath()
 
-
+pid=893
+#print "percentage of pause"
+#print calculatePercentageContainingPause(pid)
 test_submovement()
 
 

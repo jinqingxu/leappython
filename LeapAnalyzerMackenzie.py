@@ -3,9 +3,17 @@ import csv
 import math
 import os
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
-from CalculateOfCircle import calculate_3D_Dis_Of_Two_Points
 from SpaceUtils import getDistanceOfPointAndLine
-path = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split/"
+from GlobalVariables import offsetSplitX
+from GlobalVariables import  offsetSplitY
+from GlobalVariables import offsetSplitZ
+from GlobalVariables import  offsetSplitSpeedX
+from GlobalVariables import offsetSplitSpeedY
+from GlobalVariables import offsetSplitSpeedZ
+from GlobalVariables import  offsetSplitTimestamp
+from GlobalVariables import  offsetSplitWidth
+from GlobalVariables import  path2
+
 class LeapAnalyzerMackenzie:
     readFile=""
     frameArray=[]
@@ -18,15 +26,6 @@ class LeapAnalyzerMackenzie:
     def __init__(self,readFile):
         self.readFile=readFile
 
-    # index of the data from split files
-    offsetX=9
-    offsetY=10
-    offsetZ=11
-    offsetTimestamp=8
-    offsetSpeedX=21
-    offsetSpeedY=22
-    offsetSpeedZ=23
-    offsetWidth=4
 
     def loadLeapData(self):
         file = self.readFile
@@ -51,12 +50,12 @@ class LeapAnalyzerMackenzie:
         currentDirectionY = ""
         currentDirectionZ = ""
         while i < len(self.frameArray):
-            prevX = float(prevFrame[self.offsetX])
-            prevY = float(prevFrame[self.offsetY])
-            prevZ = float(prevFrame[self.offsetZ])
-            currentX = float(currentFrame[self.offsetX])
-            currentY = float(currentFrame[self.offsetY])
-            currentZ = float(currentFrame[self.offsetZ])
+            prevX = float(prevFrame[offsetSplitX])
+            prevY = float(prevFrame[offsetSplitY])
+            prevZ = float(prevFrame[offsetSplitZ])
+            currentX = float(currentFrame[offsetSplitX])
+            currentY = float(currentFrame[offsetSplitY])
+            currentZ = float(currentFrame[offsetSplitZ])
             currentDirectionX = self.calculateMovementDirectionChangeX(prevX, currentX, prevDirectionX, currentDirectionX)
             currentDirectionY = self.calculateMovementDirectionChangeY(prevY, currentY, prevDirectionY, currentDirectionY)
             currentDirectionZ = self.calculateMovementDirectionChangeZ(prevZ, currentZ, prevDirectionZ, currentDirectionZ)
@@ -102,17 +101,17 @@ class LeapAnalyzerMackenzie:
         differenceMovementErrorSqr=0
         firstFrame=self.frameArray[0]
         lastFrame=self.frameArray[len(self.frameArray)-1]
-        startX=float(firstFrame[self.offsetX])
-        startY=float(firstFrame[self.offsetY])
-        startZ=float(firstFrame[self.offsetZ])
-        endX=float(lastFrame[self.offsetX])
-        endY=float(lastFrame[self.offsetY])
-        endZ=float(lastFrame[self.offsetZ])
+        startX=float(firstFrame[offsetSplitX])
+        startY=float(firstFrame[offsetSplitY])
+        startZ=float(firstFrame[offsetSplitZ])
+        endX=float(lastFrame[offsetSplitX])
+        endY=float(lastFrame[offsetSplitY])
+        endZ=float(lastFrame[offsetSplitZ])
         for i in range(0,len(self.frameArray)):
             currentFrame=self.frameArray[i]
-            currentX=float(currentFrame[self.offsetX])
-            currentY=float(currentFrame[self.offsetY])
-            currentZ=float(currentFrame[self.offsetZ])
+            currentX=float(currentFrame[offsetSplitX])
+            currentY=float(currentFrame[offsetSplitY])
+            currentZ=float(currentFrame[offsetSplitZ])
             differenceMovementErrorSqr=math.pow(self.calculateRealMovementError(startX,startY,startZ,endX,endY,endZ,currentX,currentY,currentZ)-movementOffset,2)
             sumMovementErrorDifference=sumMovementErrorDifference+differenceMovementErrorSqr
         movementVariability=math.sqrt(sumMovementErrorDifference/(len(self.frameArray)-3.0))
@@ -124,17 +123,17 @@ class LeapAnalyzerMackenzie:
         sumMovementError = 0
         firstFrame = self.frameArray[0]
         lastFrame = self.frameArray[len(self.frameArray) - 1]
-        startX = float(firstFrame[self.offsetX])
-        startY = float(firstFrame[self.offsetY])
-        startZ = float(firstFrame[self.offsetZ])
-        endX = float(lastFrame[self.offsetX])
-        endY = float(lastFrame[self.offsetY])
-        endZ = float(lastFrame[self.offsetZ])
+        startX = float(firstFrame[offsetSplitX])
+        startY = float(firstFrame[offsetSplitY])
+        startZ = float(firstFrame[offsetSplitZ])
+        endX = float(lastFrame[offsetSplitX])
+        endY = float(lastFrame[offsetSplitY])
+        endZ = float(lastFrame[offsetSplitZ])
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[self.offsetX])
-            currentY = float(currentFrame[self.offsetY])
-            currentZ = float(currentFrame[self.offsetZ])
+            currentX = float(currentFrame[offsetSplitX])
+            currentY = float(currentFrame[offsetSplitY])
+            currentZ = float(currentFrame[offsetSplitZ])
             sumMovementError = sumMovementError + abs(self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                                               endZ, currentX, currentY, currentZ))
         self.movementError=sumMovementError / (len(self.frameArray)-2.0)
@@ -146,17 +145,17 @@ class LeapAnalyzerMackenzie:
         sumMovementError = 0
         firstFrame = self.frameArray[0]
         lastFrame = self.frameArray[len(self.frameArray) - 1]
-        startX = float(firstFrame[self.offsetX])
-        startY = float(firstFrame[self.offsetY])
-        startZ = float(firstFrame[self.offsetZ])
-        endX = float(lastFrame[self.offsetX])
-        endY = float(lastFrame[self.offsetY])
-        endZ = float(lastFrame[self.offsetZ])
+        startX = float(firstFrame[offsetSplitX])
+        startY = float(firstFrame[offsetSplitY])
+        startZ = float(firstFrame[offsetSplitZ])
+        endX = float(lastFrame[offsetSplitX])
+        endY = float(lastFrame[offsetSplitY])
+        endZ = float(lastFrame[offsetSplitZ])
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[self.offsetX])
-            currentY = float(currentFrame[self.offsetY])
-            currentZ = float(currentFrame[self.offsetZ])
+            currentX = float(currentFrame[offsetSplitX])
+            currentY = float(currentFrame[offsetSplitY])
+            currentZ = float(currentFrame[offsetSplitZ])
             sumMovementError = sumMovementError + self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                 endZ, currentX, currentY, currentZ)
         self.meanmovementError = sumMovementError / (len(self.frameArray) - 2.0)
@@ -165,6 +164,7 @@ class LeapAnalyzerMackenzie:
     # the distance of a point to the plane
     # the real value with sign
     def calculateRealMovementError(self,x1,y1,z1,x2,y2,z2,x,y,z):
+        # calculate the distance between a point and a line
         distancePoint=getDistanceOfPointAndLine(x1,y1,z1,x2,y2,z2,x,y,z)
         if self.judgeUpOrBelowPlane(x,y,z)==False:
             distancePoint=distancePoint*(-1)
@@ -178,13 +178,13 @@ class LeapAnalyzerMackenzie:
         # since the angle of the ipad is 45 degree,the normal vector of the ipad plane is (0,1,1)
         # we can calculate it with three points on the plane
         startFrame=self.frameArray[0]
-        startX=float(startFrame[self.offsetX])
-        startY=float(startFrame[self.offsetY])
-        startZ=float(startFrame[self.offsetZ])
+        startX=float(startFrame[offsetSplitX])
+        startY=float(startFrame[offsetSplitY])
+        startZ=float(startFrame[offsetSplitZ])
         endFrame=self.frameArray[self.numberFrame-1]
-        endX=float(endFrame[self.offsetX])
-        endY=float(endFrame[self.offsetY])
-        endZ=float(endFrame[self.offsetZ])
+        endX=float(endFrame[offsetSplitX])
+        endY=float(endFrame[offsetSplitY])
+        endZ=float(endFrame[offsetSplitZ])
         # let l represents the line started from start point and ended with the target point
         # we can calculate the direction vector of l
         a=endX-startX
@@ -221,6 +221,7 @@ class LeapAnalyzerMackenzie:
 
     # for one trial,get the average pause duration
     def get_mean_pause_duration(self):
+        # get the min max mean and deviation value
         minp, maxp, averagep, deviationp = get_min_max_mean_deviation_from_list(self.pauseDuration)
         return averagep
 
@@ -229,10 +230,10 @@ class LeapAnalyzerMackenzie:
         i=0
         while i <self.numberFrame:
             curFrame=self.frameArray[i]
-            curspeedX=float(curFrame[self.offsetSpeedX])
-            curspeedY=float(curFrame[self.offsetSpeedY])
-            curspeedZ=float(curFrame[self.offsetSpeedZ])
-            startTime=float(curFrame[self.offsetTimestamp]) # the start time of the pause
+            curspeedX=float(curFrame[offsetSplitSpeedX])
+            curspeedY=float(curFrame[offsetSplitSpeedY])
+            curspeedZ=float(curFrame[offsetSplitSpeedZ])
+            startTime=float(curFrame[offsetSplitTimestamp]) # the start time of the pause
             if self.judgePause(curspeedX,curspeedY,curspeedZ)==True:
                 self.pauseTime=self.pauseTime+1
                 if i==self.numberFrame-1: # if the current frame is the end one
@@ -240,11 +241,11 @@ class LeapAnalyzerMackenzie:
                 else:
                     for j in range(i + 1, self.numberFrame):
                         nextFrame = self.frameArray[j]
-                        nextspeedX = float(nextFrame[self.offsetSpeedX])
-                        nextspeedY = float(nextFrame[self.offsetSpeedY])
-                        nextspeedZ = float(nextFrame[self.offsetSpeedZ])
+                        nextspeedX = float(nextFrame[offsetSplitSpeedX])
+                        nextspeedY = float(nextFrame[offsetSplitSpeedY])
+                        nextspeedZ = float(nextFrame[offsetSplitSpeedZ])
                         if self.judgePause(nextspeedX, nextspeedY, nextspeedZ) == False:
-                            endTime = float(nextFrame[self.offsetTimestamp])
+                            endTime = float(nextFrame[offsetSplitTimestamp])
                             duration = endTime - startTime
                             self.pauseDuration.append(duration)
                             i=j
@@ -259,17 +260,17 @@ class LeapAnalyzerMackenzie:
         sumMovementError = 0
         firstFrame = self.frameArray[0]
         lastFrame = self.frameArray[len(self.frameArray) - 1]
-        startX = float(firstFrame[self.offsetX])
-        startY = float(firstFrame[self.offsetY])
-        startZ = float(firstFrame[self.offsetZ])
-        endX = float(lastFrame[self.offsetX])
-        endY = float(lastFrame[self.offsetY])
-        endZ = float(lastFrame[self.offsetZ])
+        startX = float(firstFrame[offsetSplitX])
+        startY = float(firstFrame[offsetSplitY])
+        startZ = float(firstFrame[offsetSplitZ])
+        endX = float(lastFrame[offsetSplitX])
+        endY = float(lastFrame[offsetSplitY])
+        endZ = float(lastFrame[offsetSplitZ])
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[self.offsetX])
-            currentY = float(currentFrame[self.offsetY])
-            currentZ = float(currentFrame[self.offsetZ])
+            currentX = float(currentFrame[offsetSplitX])
+            currentY = float(currentFrame[offsetSplitY])
+            currentZ = float(currentFrame[offsetSplitZ])
             sumMovementError = sumMovementError + self.calculateRealMovementError(startX, startY, startZ, endX, endY,
                                                                                   endZ, currentX, currentY, currentZ)
         self.movementOffset = sumMovementError / (len(self.frameArray) - 2.0)
@@ -278,7 +279,7 @@ class LeapAnalyzerMackenzie:
 
 # for all trials in one experiment,get the percentage of trials contaning pauses
 def calculate_percentage_containing_pause(pid):
-    files = os.listdir(path)
+    files = os.listdir(path2)
     numOfFileWithPause=0 # how many files contain pause
     numOfFiles=0 # how many files of pid in total
     # PID_xxx_Block_xxx_Trial_xxx.csv
@@ -290,7 +291,7 @@ def calculate_percentage_containing_pause(pid):
                 numOfFiles=numOfFiles+1
                 if file=='PID_885_Block_1_Trial_1.csv':
                     t=0
-                leap=LeapAnalyzerMackenzie(path+file)
+                leap=LeapAnalyzerMackenzie(path2+file)
                 leap.loadLeapData()
                 leap.calculateNumberOfFrame()
                 leap.calculatePauseTime()
@@ -306,7 +307,7 @@ def calculate_percentage_containing_pause(pid):
 
 # test the measures from MacKenzies
 def test():
-    readFile=path+"PID_885_Block_2_Trial_3.csv"
+    readFile=path2+"PID_885_Block_2_Trial_3.csv"
     leap=LeapAnalyzerMackenzie(readFile)
     leap.loadLeapData()
     print 'numberOfFrame', leap.calculateNumberOfFrame()

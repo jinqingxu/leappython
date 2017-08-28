@@ -2,11 +2,10 @@ import csv
 import math
 import os
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
-# the index of data in leap file
-offsetLeapX=3
-offsetLeapY=4
-offsetLeapZ=5
-
+from GlobalVariables import offsetLeapX
+from GlobalVariables import offsetLeapY
+from GlobalVariables import offsetLeapZ
+from GlobalVariables import path
 # 3D point
 class ThreeCorPoint:
     x=0
@@ -72,8 +71,7 @@ def print_min_mean_max_from_split_files(pid,num):
         print 'z'+str(i+1),
         print get_min_max_mean_deviation_from_list(lzs[i])
 
-# workpath
-path = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
+
 
 #calculate the distance of each point in the list with others
 #for example,if there are points 1,2,3,4,5

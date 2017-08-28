@@ -3,8 +3,8 @@
 import csv
 import math
 import os
-PixelToM=0.088194
-Pi=3.1415926
+from GlobalVariables import Pi
+from GlobalVariables import PixelToM
 
 # 3D point
 class ThreeCorPoint:
@@ -48,7 +48,7 @@ def getRelativeXandY(curX,curY,curZ,startX,startY,startZ,targetX,targetY,targetZ
     # the direction vector of Y axis is vertical to (startX-targetX,startY-targetY,startZ-targetZ)
     # the direction vector of Y axis is (startY-targetY-startZ+targetZ,targetX-startZ,startX-targetX)
     diffX=lengthl*cosa
-    '''
+    sina=math.sqrt(1-pow(cosa,2))
     diffY=lengthl*sina
     if curY>targetY: # above the line
         if curX>targetX: # be right to the center point
@@ -73,7 +73,7 @@ def getRelativeXandY(curX,curY,curZ,startX,startY,startZ,targetX,targetY,targetZ
             newX=targetX-diffX
             newY=targetY-diffY
     return newX,newY
-    '''
+
 
 
 # this function is not used yet

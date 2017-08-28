@@ -3,28 +3,24 @@
 import csv
 import math
 import os
+# android data
+from GlobalVariables import offsetAndroidStartTime
+from GlobalVariables import offsetAndroidFinalLiftUp
+from GlobalVariables import offsetAndroidBlock
+from GlobalVariables import offsetAndroidTrial
+from GlobalVariables import  offsetAndroidAmplitude
+from GlobalVariables import  offsetAndroidWidth
+from GlobalVariables import offsetAndroidDirection
 
-#workpath
-path = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
+
+from GlobalVariables import path
 
 #a global array to store data from leap motion
 leapdata=[]
 
 #a global array to store data from android
 androiddata=[]
-# the index of data in android file
-offsetStartTime = 15
-offsetFinalLiftUp = 22
-offsetBlock=2
-offsetTrial=3
-offsetAmplitude=5
-offsetWidth=7
-offsetDirection=8
 
-# the index of data in leap file
-offsetLeapX=3
-offsetLeapY=4
-offsetLeapZ=5
 #find the leap record with best timestamp_match of start
 def best_match_start(stime,offset):
     for i in range(offset,len(leapdata)):
@@ -86,23 +82,27 @@ def process_split(pid,mode):
         for i in range(0,10):
             next(f_csv) # skip the beginning
         for row in f_csv:
-            stime=row[offsetStartTime] # the start timestamp
-            etime=row[offsetFinalLiftUp] #  is the final_lift_up timestamp
-            block = row[offsetBlock]
-            trial = row[offsetTrial]
-            amplitude=row[offsetAmplitude]
-            width=row[offsetWidth]
-            direction=row[offsetDirection]
+            stime=row[offsetAndroidStartTime] # the start timestamp
+            etime=row[offsetAndroidFinalLiftUp] #  is the final_lift_up timestamp
+            block = row[offsetAndroidBlock]
+            trial = row[offsetAndroidTrial]
+            amplitude=row[offsetAndroidAmplitude]
+            width=row[offsetAndroidWidth]
+            direction=row[offsetAndroidDirection]
+            # to find the best matched start offset
             offset=best_match_start(stime,offset)
             if offset==-1:
                 return
             begin=offset # the begin index of the split data
-            offset=best_match_end(etime,offset+1) # the next scan should begin at the last_matched_index add 1
+            # to find the best matched end offset
+            # the next scan should begin at the last_matched_index add 1
+            offset=best_match_end(etime,offset+1)
             if offset==-1:
                 return
             end=offset #the end index of the split data
+            # use the start and end offset to split the data
             split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction)
 
-pid=890
+pid=893
 mode='circle' # redcross means test experiment,circle means real experiment
 process_split(pid,mode)
