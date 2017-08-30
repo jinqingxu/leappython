@@ -2,18 +2,18 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="8cb37c28-91f2-4414-b81c-b10740f8ea30" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/FileUtils.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/GlobalVariables.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/historyCode/plot3.py" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/ErrorUtils.py" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/CalculateErrors.py" afterPath="$PROJECT_DIR$/WriteMeasureFile.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CalculateOfCircle.py" afterPath="$PROJECT_DIR$/CalculateOfCircle.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/CalculateOfRedCross.py" afterPath="$PROJECT_DIR$/CalculateOfRedCross.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/FileUtils.py" afterPath="$PROJECT_DIR$/FileUtils.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/GlobalVariables.py" afterPath="$PROJECT_DIR$/GlobalVariables.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/LeapAnalyzerHuang.py" afterPath="$PROJECT_DIR$/LeapAnalyzerHuang.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/LeapAnalyzerMackenzie.py" afterPath="$PROJECT_DIR$/LeapAnalyzerMackenzie.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/LeapAnalyzerOriginal.py" afterPath="$PROJECT_DIR$/LeapAnalyzerOriginal.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/SpaceUtils.py" afterPath="$PROJECT_DIR$/SpaceUtils.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Split.py" afterPath="$PROJECT_DIR$/Split.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/historyCode/plot.py" afterPath="$PROJECT_DIR$/historyCode/plot.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -23,17 +23,18 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/python$CalculateOfCircle.coverage" NAME="CalculateOfCircle Coverage Results" MODIFIED="1503706734359" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$CalculateOfCircle.coverage" NAME="CalculateOfCircle Coverage Results" MODIFIED="1504132294227" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$plot3.coverage" NAME="plot3 Coverage Results" MODIFIED="1503541626273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/historyCode" />
     <SUITE FILE_PATH="coverage/python$LeapAnalyzerOriginal.coverage" NAME="LeapAnalyzerOriginal Coverage Results" MODIFIED="1503796797517" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$match2.coverage" NAME="match2 Coverage Results" MODIFIED="1502920971653" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$plot.coverage" NAME="plot Coverage Results" MODIFIED="1503512326540" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/historyCode" />
     <SUITE FILE_PATH="coverage/python$LeapAnalyzerNewMeasures.coverage" NAME="LeapAnalyzerNewMeasures Coverage Results" MODIFIED="1502997995761" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$Unittests_in_LeapAnalyzerOriginal2_py.coverage" NAME="Unittests in LeapAnalyzerOriginal2.py Coverage Results" MODIFIED="1503796728209" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$Unittests_in_LeapAnalyzerHuang_py.coverage" NAME="Unittests in LeapAnalyzerHuang.py Coverage Results" MODIFIED="1503945882495" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$LeapAnalyzer.coverage" NAME="LeapAnalyzer Coverage Results" MODIFIED="1503005068378" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/python$CalculateOfRedCross.coverage" NAME="CalculateOfRedCross Coverage Results" MODIFIED="1503513895834" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/python$LeapAnalyzerHuang.coverage" NAME="LeapAnalyzerHuang Coverage Results" MODIFIED="1503706827397" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/python$Split.coverage" NAME="Split Coverage Results" MODIFIED="1503796684322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$CalculateOfRedCross.coverage" NAME="CalculateOfRedCross Coverage Results" MODIFIED="1504028899323" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$LeapAnalyzerHuang.coverage" NAME="LeapAnalyzerHuang Coverage Results" MODIFIED="1504042473954" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$Split.coverage" NAME="Split Coverage Results" MODIFIED="1504129171153" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$file.coverage" NAME="file Coverage Results" MODIFIED="1503434059270" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/historyCode" />
     <SUITE FILE_PATH="coverage/python$Unittests_in_LeapAnalyzerOriginal_py.coverage" NAME="Unittests in LeapAnalyzerOriginal.py Coverage Results" MODIFIED="1503796702829" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$match.coverage" NAME="match Coverage Results" MODIFIED="1501878681357" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -41,6 +42,7 @@
     <SUITE FILE_PATH="coverage/python$Unittests_in_LeapAnalyzerNewMeasures_py.coverage" NAME="Unittests in LeapAnalyzerNewMeasures.py Coverage Results" MODIFIED="1502998035612" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$plot2.coverage" NAME="plot2 Coverage Results" MODIFIED="1503438942568" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/historyCode" />
     <SUITE FILE_PATH="coverage/python$split.coverage" NAME="split Coverage Results" MODIFIED="1502918375521" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/python$WriteMeasureFile.coverage" NAME="WriteMeasureFile Coverage Results" MODIFIED="1504131740395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/python$LeapAnalyzerNew.coverage" NAME="LeapAnalyzerNew Coverage Results" MODIFIED="1503003167812" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
@@ -49,10 +51,32 @@
       <file leaf-file-name="CalculateOfCircle.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/CalculateOfCircle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1047">
-              <caret line="165" column="53" lean-forward="false" selection-start-line="165" selection-start-column="53" selection-end-line="165" selection-end-column="53" />
+            <state relative-caret-position="174">
+              <caret line="295" column="7" lean-forward="false" selection-start-line="295" selection-start-column="7" selection-end-line="295" selection-end-column="7" />
               <folding>
                 <element signature="e#97#107#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ErrorUtils.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/ErrorUtils.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1140">
+              <caret line="76" column="0" lean-forward="false" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="WriteMeasureFile.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/WriteMeasureFile.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="558">
+              <caret line="108" column="29" lean-forward="false" selection-start-line="108" selection-start-column="29" selection-end-line="108" selection-end-column="29" />
+              <folding>
+                <element signature="e#27#77#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -61,8 +85,8 @@
       <file leaf-file-name="GlobalVariables.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/GlobalVariables.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="374">
-              <caret line="44" column="40" lean-forward="false" selection-start-line="44" selection-start-column="40" selection-end-line="44" selection-end-column="40" />
+            <state relative-caret-position="135">
+              <caret line="9" column="27" lean-forward="false" selection-start-line="9" selection-start-column="27" selection-end-line="9" selection-end-column="27" />
               <folding />
             </state>
           </provider>
@@ -71,8 +95,8 @@
       <file leaf-file-name="LeapAnalyzerMackenzie.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LeapAnalyzerMackenzie.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1670">
-              <caret line="114" column="142" lean-forward="false" selection-start-line="114" selection-start-column="142" selection-end-line="114" selection-end-column="142" />
+            <state relative-caret-position="405">
+              <caret line="41" column="24" lean-forward="false" selection-start-line="41" selection-start-column="24" selection-end-line="41" selection-end-column="24" />
               <folding>
                 <element signature="e#40#50#0" expanded="true" />
               </folding>
@@ -83,34 +107,10 @@
       <file leaf-file-name="LeapAnalyzerHuang.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LeapAnalyzerHuang.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-880">
-              <caret line="600" column="0" lean-forward="true" selection-start-line="600" selection-start-column="0" selection-end-line="600" selection-end-column="0" />
+            <state relative-caret-position="660">
+              <caret line="71" column="9" lean-forward="false" selection-start-line="71" selection-start-column="9" selection-end-line="71" selection-end-column="9" />
               <folding>
-                <element signature="e#34#52#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="plot3.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/historyCode/plot3.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="21" column="10" lean-forward="false" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
-              <folding>
-                <element signature="e#0#31#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="CalculateOfRedCross.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CalculateOfRedCross.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1585">
-              <caret line="18" column="32" lean-forward="false" selection-start-line="18" selection-start-column="32" selection-end-line="18" selection-end-column="32" />
-              <folding>
-                <element signature="e#0#10#0" expanded="true" />
+                <element signature="e#35#53#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -119,11 +119,9 @@
       <file leaf-file-name="SpaceUtils.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/SpaceUtils.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="840">
-              <caret line="56" column="30" lean-forward="true" selection-start-line="56" selection-start-column="30" selection-end-line="56" selection-end-column="30" />
-              <folding>
-                <element signature="e#15#25#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="1740">
+              <caret line="128" column="50" lean-forward="false" selection-start-line="128" selection-start-column="50" selection-end-line="128" selection-end-column="50" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -131,8 +129,8 @@
       <file leaf-file-name="LeapAnalyzerOriginal.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/LeapAnalyzerOriginal.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="183">
-              <caret line="101" column="35" lean-forward="false" selection-start-line="101" selection-start-column="35" selection-end-line="101" selection-end-column="35" />
+            <state relative-caret-position="330">
+              <caret line="32" column="20" lean-forward="false" selection-start-line="32" selection-start-column="20" selection-end-line="32" selection-end-column="20" />
               <folding>
                 <element signature="e#47#57#0" expanded="true" />
               </folding>
@@ -140,13 +138,13 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="plot2.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/historyCode/plot2.py">
+      <file leaf-file-name="CalculateOfRedCross.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/CalculateOfRedCross.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="120">
-              <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
+            <state relative-caret-position="780">
+              <caret line="52" column="39" lean-forward="false" selection-start-line="52" selection-start-column="38" selection-end-line="52" selection-end-column="39" />
               <folding>
-                <element signature="e#0#31#0" expanded="true" />
+                <element signature="e#0#10#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -155,11 +153,9 @@
       <file leaf-file-name="Split.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/Split.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1530">
-              <caret line="102" column="60" lean-forward="false" selection-start-line="102" selection-start-column="60" selection-end-line="102" selection-end-column="60" />
-              <folding>
-                <element signature="e#97#107#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="1380">
+              <caret line="105" column="7" lean-forward="false" selection-start-line="105" selection-start-column="7" selection-end-line="105" selection-end-column="7" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -175,20 +171,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>judge</find>
-      <find>startX</find>
-      <find>pause</find>
-      <find>veri</find>
-      <find>calculateLine</find>
-      <find>judgeQ</find>
-      <find>Pi</find>
-      <find>w_csv</find>
-      <find>absolute_difference_Diff_X_list</find>
-      <find>PixelToM</find>
-      <find>i</find>
-      <find>cmp</find>
-      <find>Two</find>
-      <find>file</find>
       <find>path2</find>
       <find>offsetX</find>
       <find>offsetSplit</find>
@@ -202,9 +184,23 @@
       <find>path</find>
       <find>get</find>
       <find>init</find>
-      <find>print</find>
       <find>get_min</find>
       <find>files</find>
+      <find>start</find>
+      <find>load</find>
+      <find>split</find>
+      <find>key</find>
+      <find>peek</find>
+      <find>pause</find>
+      <find>901</find>
+      <find>end</find>
+      <find>5</find>
+      <find>len</find>
+      <find>ver</find>
+      <find>verifi</find>
+      <find>targetTime</find>
+      <find>target</find>
+      <find>print</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -226,16 +222,20 @@
         <option value="$PROJECT_DIR$/LeapAnalyzer.py" />
         <option value="$PROJECT_DIR$/historyCode/plot2.py" />
         <option value="$PROJECT_DIR$/historyCode/plot.py" />
-        <option value="$PROJECT_DIR$/CalculateOfRedCross.py" />
         <option value="$PROJECT_DIR$/historyCode/plot3.py" />
+        <option value="$PROJECT_DIR$/LeapAnalyzerOriginal2.py" />
         <option value="$PROJECT_DIR$/FileUtils.py" />
-        <option value="$PROJECT_DIR$/GlobalVariables.py" />
+        <option value="$PROJECT_DIR$/CalculateErrors.py" />
+        <option value="$PROJECT_DIR$/CalculateOfRedCross.py" />
+        <option value="$PROJECT_DIR$/CalculateOfTarget.py" />
+        <option value="$PROJECT_DIR$/ErrorUtils.py" />
         <option value="$PROJECT_DIR$/Split.py" />
         <option value="$PROJECT_DIR$/SpaceUtils.py" />
-        <option value="$PROJECT_DIR$/LeapAnalyzerOriginal2.py" />
+        <option value="$PROJECT_DIR$/GlobalVariables.py" />
         <option value="$PROJECT_DIR$/LeapAnalyzerOriginal.py" />
-        <option value="$PROJECT_DIR$/LeapAnalyzerMackenzie.py" />
         <option value="$PROJECT_DIR$/LeapAnalyzerHuang.py" />
+        <option value="$PROJECT_DIR$/LeapAnalyzerMackenzie.py" />
+        <option value="$PROJECT_DIR$/WriteMeasureFile.py" />
         <option value="$PROJECT_DIR$/CalculateOfCircle.py" />
       </list>
     </option>
@@ -247,7 +247,8 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="y" value="23" />
+    <option name="x" value="143" />
+    <option name="y" value="150" />
     <option name="width" value="1260" />
     <option name="height" value="709" />
   </component>
@@ -305,26 +306,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.LeapAnalyzerOriginal">
-    <configuration default="false" name="LeapAnalyzerHuang" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="python" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/LeapAnalyzerHuang.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python.CalculateOfCircle">
     <configuration default="false" name="Split" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -344,39 +326,7 @@
       <option name="EMULATE_TERMINAL" value="false" />
       <method />
     </configuration>
-    <configuration default="false" name="Unittests in LeapAnalyzerOriginal.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="python" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/LeapAnalyzerOriginal.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method />
-    </configuration>
-    <configuration default="false" name="Unittests in LeapAnalyzerOriginal2.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="python" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/LeapAnalyzerOriginal2.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
-      <method />
-    </configuration>
-    <configuration default="false" name="LeapAnalyzerOriginal" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration default="false" name="CalculateOfCircle" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -389,7 +339,64 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="python" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/LeapAnalyzerOriginal.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/CalculateOfCircle.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="LeapAnalyzerHuang" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="python" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/LeapAnalyzerHuang.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="CalculateOfRedCross" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="python" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/CalculateOfRedCross.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="WriteMeasureFile" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="python" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/WriteMeasureFile.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -544,19 +551,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.LeapAnalyzerHuang" />
-      <item index="1" class="java.lang.String" itemvalue="Python.Split" />
-      <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in LeapAnalyzerOriginal.py" />
-      <item index="3" class="java.lang.String" itemvalue="Python tests.Unittests in LeapAnalyzerOriginal2.py" />
-      <item index="4" class="java.lang.String" itemvalue="Python.LeapAnalyzerOriginal" />
+      <item index="0" class="java.lang.String" itemvalue="Python.Split" />
+      <item index="1" class="java.lang.String" itemvalue="Python.CalculateOfCircle" />
+      <item index="2" class="java.lang.String" itemvalue="Python.LeapAnalyzerHuang" />
+      <item index="3" class="java.lang.String" itemvalue="Python.CalculateOfRedCross" />
+      <item index="4" class="java.lang.String" itemvalue="Python.WriteMeasureFile" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.LeapAnalyzerOriginal" />
-        <item index="1" class="java.lang.String" itemvalue="Python tests.Unittests in LeapAnalyzerOriginal2.py" />
-        <item index="2" class="java.lang.String" itemvalue="Python tests.Unittests in LeapAnalyzerOriginal.py" />
-        <item index="3" class="java.lang.String" itemvalue="Python.Split" />
-        <item index="4" class="java.lang.String" itemvalue="Python.LeapAnalyzerHuang" />
+        <item index="0" class="java.lang.String" itemvalue="Python.CalculateOfCircle" />
+        <item index="1" class="java.lang.String" itemvalue="Python.WriteMeasureFile" />
+        <item index="2" class="java.lang.String" itemvalue="Python.Split" />
+        <item index="3" class="java.lang.String" itemvalue="Python.LeapAnalyzerHuang" />
+        <item index="4" class="java.lang.String" itemvalue="Python.CalculateOfRedCross" />
       </list>
     </recent_temporary>
   </component>
@@ -574,20 +581,20 @@
     <servers />
   </component>
   <component name="TestHistory">
-    <history-entry file="Unittests_in_LeapAnalyzerNewMeasures_py - 2017.08.17 at 15h 24m 39s.xml">
-      <configuration name="Unittests in LeapAnalyzerNewMeasures.py" configurationId="tests" />
+    <history-entry file="Unittests_in_LeapAnalyzerHuang_py - 2017.08.28 at 14h 42m 40s.xml">
+      <configuration name="Unittests in LeapAnalyzerHuang.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_LeapAnalyzerNewMeasures_py - 2017.08.17 at 15h 24m 50s.xml">
-      <configuration name="Unittests in LeapAnalyzerNewMeasures.py" configurationId="tests" />
+    <history-entry file="Unittests_in_LeapAnalyzerHuang_py - 2017.08.28 at 14h 42m 50s.xml">
+      <configuration name="Unittests in LeapAnalyzerHuang.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_LeapAnalyzerNewMeasures_py - 2017.08.17 at 15h 25m 11s.xml">
-      <configuration name="Unittests in LeapAnalyzerNewMeasures.py" configurationId="tests" />
+    <history-entry file="Unittests_in_LeapAnalyzerHuang_py - 2017.08.28 at 14h 44m 19s.xml">
+      <configuration name="Unittests in LeapAnalyzerHuang.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_LeapAnalyzerNewMeasures_py - 2017.08.17 at 15h 25m 39s.xml">
-      <configuration name="Unittests in LeapAnalyzerNewMeasures.py" configurationId="tests" />
+    <history-entry file="Unittests_in_LeapAnalyzerHuang_py - 2017.08.28 at 14h 44m 34s.xml">
+      <configuration name="Unittests in LeapAnalyzerHuang.py" configurationId="tests" />
     </history-entry>
-    <history-entry file="Unittests_in_LeapAnalyzerNewMeasures_py - 2017.08.17 at 15h 26m 54s.xml">
-      <configuration name="Unittests in LeapAnalyzerNewMeasures.py" configurationId="tests" />
+    <history-entry file="Unittests_in_LeapAnalyzerHuang_py - 2017.08.28 at 14h 44m 43s.xml">
+      <configuration name="Unittests in LeapAnalyzerHuang.py" configurationId="tests" />
     </history-entry>
     <history-entry file="Unittests_in_LeapAnalyzerNewMeasures_py - 2017.08.17 at 15h 27m 15s.xml">
       <configuration name="Unittests in LeapAnalyzerNewMeasures.py" configurationId="tests" />
@@ -606,19 +613,19 @@
     </history-entry>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1260" height="709" extended-state="0" />
+    <frame x="143" y="150" width="1260" height="709" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.1952381" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.325" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.325" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.0" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2453125" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3421875" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.2828125" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
@@ -644,6 +651,21 @@
           <line>14</line>
           <option name="timeStamp" value="328" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/CalculateOfRedCross.py</url>
+          <line>140</line>
+          <option name="timeStamp" value="360" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ErrorUtils.py</url>
+          <line>43</line>
+          <option name="timeStamp" value="424" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ErrorUtils.py</url>
+          <line>33</line>
+          <option name="timeStamp" value="425" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -652,42 +674,16 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="353" />
+      <option name="time" value="426" />
     </breakpoint-manager>
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/LeapAnalyzerHuang.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4320">
-          <caret line="296" column="68" lean-forward="true" selection-start-line="296" selection-start-column="68" selection-end-line="296" selection-end-column="68" />
-          <folding>
-            <element signature="e#34#52#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/historyCode/file.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/historyCode/match.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/SpaceUtils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1215">
           <caret line="83" column="40" lean-forward="false" selection-start-line="83" selection-start-column="38" selection-end-line="83" selection-end-column="40" />
-          <folding>
-            <element signature="e#15#25#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -712,9 +708,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1545">
           <caret line="105" column="7" lean-forward="false" selection-start-line="105" selection-start-column="7" selection-end-line="105" selection-end-column="7" />
-          <folding>
-            <element signature="e#97#107#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -747,7 +741,7 @@
         <state relative-caret-position="0">
           <caret line="0" column="29" lean-forward="false" selection-start-line="0" selection-start-column="29" selection-end-line="0" selection-end-column="29" />
           <folding>
-            <element signature="e#34#52#0" expanded="true" />
+            <element signature="e#35#53#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -777,9 +771,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
           <caret line="22" column="0" lean-forward="false" selection-start-line="22" selection-start-column="0" selection-end-line="22" selection-end-column="0" />
-          <folding>
-            <element signature="e#15#25#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -797,9 +789,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1560">
           <caret line="104" column="7" lean-forward="false" selection-start-line="104" selection-start-column="7" selection-end-line="104" selection-end-column="7" />
-          <folding>
-            <element signature="e#97#107#0" expanded="true" />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -872,19 +862,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/FileUtils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="405">
-          <caret line="27" column="61" lean-forward="false" selection-start-line="27" selection-start-column="61" selection-end-line="27" selection-end-column="61" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/historyCode/plot.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
           <caret line="21" column="10" lean-forward="false" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -892,9 +873,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
           <caret line="9" column="0" lean-forward="false" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#31#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -903,91 +881,107 @@
         <state relative-caret-position="315">
           <caret line="21" column="10" lean-forward="false" selection-start-line="21" selection-start-column="10" selection-end-line="21" selection-end-column="10" />
           <folding>
-            <element signature="e#0#31#0" expanded="true" />
+            <element signature="e#0#31#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Split.py">
+    <entry file="file://$PROJECT_DIR$/LeapAnalyzerOriginal2.py" />
+    <entry file="file://$PROJECT_DIR$/CalculateOfTarget.py" />
+    <entry file="file://$PROJECT_DIR$/FileUtils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1530">
-          <caret line="102" column="60" lean-forward="false" selection-start-line="102" selection-start-column="60" selection-end-line="102" selection-end-column="60" />
-          <folding>
-            <element signature="e#97#107#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/SpaceUtils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="840">
-          <caret line="56" column="30" lean-forward="true" selection-start-line="56" selection-start-column="30" selection-end-line="56" selection-end-column="30" />
-          <folding>
-            <element signature="e#15#25#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/LeapAnalyzerOriginal2.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1905">
-          <caret line="127" column="0" lean-forward="true" selection-start-line="127" selection-start-column="0" selection-end-line="127" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/LeapAnalyzerOriginal.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="183">
-          <caret line="101" column="35" lean-forward="false" selection-start-line="101" selection-start-column="35" selection-end-line="101" selection-end-column="35" />
-          <folding>
-            <element signature="e#47#57#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/LeapAnalyzerMackenzie.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1670">
-          <caret line="114" column="142" lean-forward="false" selection-start-line="114" selection-start-column="142" selection-end-line="114" selection-end-column="142" />
-          <folding>
-            <element signature="e#40#50#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/LeapAnalyzerHuang.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-880">
-          <caret line="600" column="0" lean-forward="true" selection-start-line="600" selection-start-column="0" selection-end-line="600" selection-end-column="0" />
-          <folding>
-            <element signature="e#34#52#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/GlobalVariables.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="374">
-          <caret line="44" column="40" lean-forward="false" selection-start-line="44" selection-start-column="40" selection-end-line="44" selection-end-column="40" />
+        <state relative-caret-position="135">
+          <caret line="9" column="4" lean-forward="false" selection-start-line="9" selection-start-column="4" selection-end-line="9" selection-end-column="29" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/CalculateOfRedCross.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1585">
-          <caret line="18" column="32" lean-forward="false" selection-start-line="18" selection-start-column="32" selection-end-line="18" selection-end-column="32" />
+        <state relative-caret-position="780">
+          <caret line="52" column="39" lean-forward="false" selection-start-line="52" selection-start-column="38" selection-end-line="52" selection-end-column="39" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/SpaceUtils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1740">
+          <caret line="128" column="50" lean-forward="false" selection-start-line="128" selection-start-column="50" selection-end-line="128" selection-end-column="50" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/Split.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1380">
+          <caret line="105" column="7" lean-forward="false" selection-start-line="105" selection-start-column="7" selection-end-line="105" selection-end-column="7" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/GlobalVariables.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="135">
+          <caret line="9" column="27" lean-forward="false" selection-start-line="9" selection-start-column="27" selection-end-line="9" selection-end-column="27" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ErrorUtils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1140">
+          <caret line="76" column="0" lean-forward="false" selection-start-line="76" selection-start-column="0" selection-end-line="76" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LeapAnalyzerMackenzie.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="41" column="24" lean-forward="false" selection-start-line="41" selection-start-column="24" selection-end-line="41" selection-end-column="24" />
+          <folding>
+            <element signature="e#40#50#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LeapAnalyzerOriginal.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="32" column="20" lean-forward="false" selection-start-line="32" selection-start-column="20" selection-end-line="32" selection-end-column="20" />
+          <folding>
+            <element signature="e#47#57#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/LeapAnalyzerHuang.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="660">
+          <caret line="71" column="9" lean-forward="false" selection-start-line="71" selection-start-column="9" selection-end-line="71" selection-end-column="9" />
+          <folding>
+            <element signature="e#35#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/WriteMeasureFile.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="558">
+          <caret line="108" column="29" lean-forward="false" selection-start-line="108" selection-start-column="29" selection-end-line="108" selection-end-column="29" />
+          <folding>
+            <element signature="e#27#77#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/CalculateOfCircle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1047">
-          <caret line="165" column="53" lean-forward="false" selection-start-line="165" selection-start-column="53" selection-end-line="165" selection-end-column="53" />
+        <state relative-caret-position="174">
+          <caret line="295" column="7" lean-forward="false" selection-start-line="295" selection-start-column="7" selection-end-line="295" selection-end-column="7" />
           <folding>
             <element signature="e#97#107#0" expanded="true" />
           </folding>

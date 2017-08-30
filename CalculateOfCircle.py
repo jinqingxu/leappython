@@ -83,6 +83,8 @@ class Distance:
 
 # get the min(l),max(l),avergae(l),difference of min and max
 def get_min_max_mean_deviation_from_list(l):
+    if len(l)==0:
+        return 0,0,0,0
     min_l=float(l[0])
     max_l=float(l[0])
     sum_l=0
@@ -195,7 +197,7 @@ def write_dis_difference(pid):
 
 
 # find the min,max,average abs_difference of all combinations of amplitude,width and direction
-def statistic_combination(pid,numberOfCombination):
+def statistic_combination(pid):
     dis_list = []
     file=path+'PID_'+str(pid)+'_DIS_Difference_Android_Leap.csv'
     length=0
@@ -291,10 +293,9 @@ def dis_cmp(x,y):
 
 # the range of x is from -6 to 6
 # the accurate value for y is 66,for z is -87.85
-pid=893
-numberOfCombination=8
+pid=848
 write_dis_difference(pid)
-statistic_combination(pid,numberOfCombination)
+statistic_combination(pid)
 
 
 

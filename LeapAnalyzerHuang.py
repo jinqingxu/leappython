@@ -1,31 +1,34 @@
 # the measures from huang's paper
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 import numpy as np
 import csv
 import math
 import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+
 # import helper functions from other script
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from SpaceUtils import calculate_3D_Dis_Of_Two_Points
-from SpaceUtils import getIntersactionPointOfLineAndPlane
-from SpaceUtils import getRelativeXandY
-from SpaceUtils import getIntersactionAngleOfTwoLines
 from GlobalVariables import path
 from GlobalVariables import path2
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
 from GlobalVariables import offsetSplitZ
-from GlobalVariables import  offsetSplitSpeedX
-from GlobalVariables import offsetSplitSpeedY
-from GlobalVariables import offsetSplitSpeedZ
 from GlobalVariables import  offsetSplitTimestamp
 from GlobalVariables import  offsetSplitWidth
 from GlobalVariables import  offsetSplitSpeed
 from GlobalVariables import offsetAndroidBlock
 from GlobalVariables import offsetAndroidTrial
 from GlobalVariables import PixelToM
+from GlobalVariables import startThreeCor
+from GlobalVariables import ThreeCorPoint
 from FileUtils import getSortedSplitFile
+from SpaceUtils import getTargetLocationFor3D
+
 class SubMovement:
     startTime=0 # the start time of frame
     endTime=0 # the end time of frame
@@ -67,10 +70,14 @@ class SubMovement:
 
 class LeapAnalyzerHuang:
     pid=0
+    block=0
+    trial=0
     readFile=""
     frameArray=[]
     numberFrame=0
-    peekSpeed=0
+    peekSpeed=0 # tmp variable for submovement peek speed
+    trialPeekSpeed=0 # peek speed in the whole trial
+    meanPauseDuration=0
     pauseTime=0
     pauseDuration=[]
     pauseLocation=[]
@@ -86,9 +93,23 @@ class LeapAnalyzerHuang:
     RelativeEndCors=[] # store the 3D points of end of submovements
     verificationTime=0.0 # the verification time,the duration from the end of the last submovement to the end of the trial
 
-    def __init__(self,readFile,pid):
+    def __init__(self,readFile,pid,block,trial):
         self.readFile=readFile
         self.pid=pid
+        self.block=block
+        self.trial=trial
+        self.submovement_list=[]
+        self.readFile=readFile
+        self.frameArray = []
+        self.numberFrame = 0
+        self.peekSpeed = 0  # tmp variable for submovement peek speed
+        self.trialPeekSpeed = 0  # peek speed in the whole trial
+        self.meanPauseDuration = 0
+        self.pauseTime = 0
+        self.pauseDuration = []
+        self.pauseLocation = []
+        self.verificationTime=0.0
+        self.RelativeEndCors=[]
 
 
 
@@ -104,12 +125,10 @@ class LeapAnalyzerHuang:
         firstFrame=self.frameArray[0]
         self.width=float(firstFrame[offsetSplitWidth])
         targetFrame=self.frameArray[self.numberFrame-1]
-        # the get target function should be changed
-        # it should be calculated more precisely
-        # todo
-        self.targetX=float(targetFrame[offsetSplitX])
-        self.targetY=float(targetFrame[offsetSplitY])
-        self.targetZ=float(targetFrame[offsetSplitZ])
+        targetThreeCor=getTargetLocationFor3D(self.pid,self.block,self.trial) # with accurate start coordinate in 3D,calculate the target 3D
+        self.targetX=targetThreeCor.x
+        self.targetY=targetThreeCor.y
+        self.targetZ=targetThreeCor.z
         self.targetTime=float(targetFrame[offsetSplitTimestamp])
 
 
@@ -157,7 +176,10 @@ class LeapAnalyzerHuang:
     # for one trial,get the average pause duration
     # the unit of duration is ms
     def getMeanPauseDuration(self):
+        if len(self.pauseDuration)==0:
+            return 0
         minp, maxp, averagep, deviationp = get_min_max_mean_deviation_from_list(self.pauseDuration)
+        self.meanPauseDuration=averagep
         return averagep
 
     #calculate the pause time and each pause duration
@@ -188,6 +210,7 @@ class LeapAnalyzerHuang:
                             i=j
                             break
             i=i+1
+        self.getMeanPauseDuration()
 
 
     # get number of submovements before final entry
@@ -269,9 +292,12 @@ class LeapAnalyzerHuang:
             endTime=float(self.frameArray[endIndex][offsetSplitTimestamp])
             #relaendX,relaendY,relaendZ=self.getRelativeCors(endX,endY,endZ)
             #coincidentErrorValue,coincidentErrorType=self.calculateCoincidentError(endX)
+            if self.peekSpeed>self.trialPeekSpeed:
+                self.trialPeekSpeed=self.peekSpeed
             self.submovement_list.append(SubMovement(startTime,endTime,startX,startY,startZ,endX,endY,endZ,self.peekSpeed,endTime-startTime))
             self.peekSpeed=0 # prepared for the next submovement
             offset=offset+1 # the start of next submovement begins after the end
+
 
     # curoffset means the current index
     # judge if the submovement ends
@@ -401,9 +427,8 @@ class LeapAnalyzerHuang:
         offsetLiftUpY=17
         with open(file) as f:
             f_csv = csv.reader(f)
-            for i in range(0, 9):  # skip the beginning
+            for i in range(0, 10):  # skip the beginning
                 next(f_csv)
-            headers = next(f_csv)  # get headers of csv
             for row in f_csv:
                 targetX_list.append(float(row[offsetTargetX])*PixelToM) # change from Pixel to mm
                 targetY_list.append(float(row[offsetTargetY])*PixelToM)
@@ -434,7 +459,7 @@ class LeapAnalyzerHuang:
                     return i-1
                 else:
                     return i
-        return len(self.frameArray)-1 # if not found,the first LiftUp Time is before the end timestamp in the split file
+        return len(self.frameArray)-2 # if not found,the one before final LiftUp is the end of the submovement
 
     # the distribution of lift up in the first attempt
     def drawTargetFirstLiftUpPlot3D(self):
@@ -575,7 +600,8 @@ class LeapAnalyzerHuang:
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         k=0
-        colors=['b','y','g'] # color for the path of fingers
+        #colors=['b','y','g','r',''] # color for the path of fingers
+        colors = cm.rainbow(np.linspace(0, 1, 16))
         for file in files:
             # store 3D cors for target
             startX_list = []
@@ -588,24 +614,26 @@ class LeapAnalyzerHuang:
             frameX_list = []
             frameY_list = []
             frameZ_list = []
-            if k==3:
+            if k==1:
                 break
             self.readFile = path2 + file
+            keys=file.split('_')
+            self.block=keys[3]
+            self.trial = int(keys[5][0:-4])
             self.loadLeapData()
             targetX_list.append(self.targetX)
             targetY_list.append(self.targetY)
             targetZ_list.append(self.targetZ)
-            startX_list.append(float(self.frameArray[0][offsetSplitX]))
-            startY_list.append(float(self.frameArray[0][offsetSplitY]))
-            startZ_list.append(float(self.frameArray[0][offsetSplitZ]))
-
+            startX_list.append(float(startThreeCor.x))
+            startY_list.append(float(startThreeCor.y))
+            startZ_list.append(float(startThreeCor.z))
             for frame in self.frameArray:
                 frameX_list.append(float(frame[offsetSplitX]))
                 frameY_list.append(float(frame[offsetSplitY]))
                 frameZ_list.append(float(frame[offsetSplitZ]))
 
-            ax.scatter(startX_list, startY_list, startZ_list, c='r', label='First Lift Up', alpha=1,
-                       marker='o', s=30, edgecolors='black')
+            ax.scatter(startX_list, startY_list, startZ_list, c='b', label='Start', alpha=1,
+                       marker='+', s=100, edgecolors='black')
             ax.scatter(frameX_list, frameY_list, frameZ_list, c=colors[k], label='First Lift Up', alpha=1,
                        marker='o', s=30, edgecolors='black')
             ax.scatter(targetX_list, targetY_list, targetZ_list, c='c', label='target', alpha=1, marker='o', s=100,
@@ -646,11 +674,13 @@ def calculatePercentageContainingPause(pid):
     return percentages
 '''
 
-
+'''
 def test_submovement():
-    readfile=path2+'PID_893_Block_1_Trial_4.csv'
-    pid=893
-    leap=LeapAnalyzerHuang(readfile,pid)
+    pid = 893
+    block=1
+    trial=4
+    readfile=path2+'PID_'+str(pid)+'_Block_'+str(block)+'_Trial_'+str(trial)+'.csv'
+    leap=LeapAnalyzerHuang(readfile,pid,block,trial)
     leap.loadLeapData()
     leap.getSubmovements()
     print 'submovements'
@@ -662,17 +692,17 @@ def test_submovement():
     numBeforeFinal,numSlipOff=leap.getNumOfSubmovementInTwoSets()
     print 'numOfSubmovementsBeforeFinal',numBeforeFinal
     print 'numOfSubmovementSlipOff',numSlipOff
-    '''
+    
     leap.drawTargetFirstLiftUpPlot2D()
     leap.drawRelativeTargetFirstLiftUpPlot2D(1,7)
     leap.drawTargetFirstLiftUpPlot3D()
     leap.drawRelativeTargetFirstLiftUpPlot3D(1,2)
-    '''
+    
     leap.drawPath()
+'''
 
-pid=893
 #print "percentage of pause"
 #print calculatePercentageContainingPause(pid)
-test_submovement()
+#test_submovement()
 
 

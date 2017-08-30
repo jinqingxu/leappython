@@ -89,9 +89,9 @@ def calculate_distance_3D_Of_List(position3D):
 
 #get the mean x,y,z for each split data
 #that represents the 3D cors of each trial
-def get_mean_from_split_files(pid,num):
+def get_mean_from_split_files(pid,num): # num means how many data we need to process,in the cross-hair experiment
     position3D=[]
-    for i in range(0,5): # there are five measure points
+    for i in range(0,num):
         file=path+'Data from LEAPtest_results_PID_'+str(pid+i)+'_Frame.csv'
         a = open(file, "r")
         #print len(a.readlines())
@@ -136,8 +136,8 @@ def write_and_print_error(distancesFor3D):
 
 # for test data
 # pid range from 641 to 645
-pid=641
-num=5
+pid=646
+num=1
 position3D=get_mean_from_split_files(pid,num)
 print_min_mean_max_from_split_files(pid,num)
 distancesFor3D=calculate_distance_3D_Of_List(position3D) # ten distances for the 5 points

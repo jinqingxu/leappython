@@ -2,27 +2,17 @@
 
 import csv
 import math
-import os
 from GlobalVariables import Pi
 from GlobalVariables import PixelToM
-
-# 3D point
-class ThreeCorPoint:
-    x=0
-    y=0
-    z=0
-    def __init__(self,x,y,z):
-        self.x=x
-        self.y=y
-        self.z=z
-
-# 2D point
-class TwoCorPoint:
-    x = 0
-    y = 0
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+from GlobalVariables import TwoCorPoint
+from GlobalVariables import ThreeCorPoint
+from GlobalVariables import  startTwoCor
+from GlobalVariables import  startThreeCor
+from GlobalVariables import path
+from GlobalVariables import offsetAndroidBlock
+from GlobalVariables import offsetAndroidTrial
+from GlobalVariables import offsetAndroidTargetX
+from GlobalVariables import offsetAndroidTargetY
 
 
 # find the Relative X and Y cors for point on the ipad
@@ -74,17 +64,35 @@ def getRelativeXandY(curX,curY,curZ,startX,startY,startZ,targetX,targetY,targetZ
             newY=targetY-diffY
     return newX,newY
 
+# input pid,block,trial
+# find the 3D position for a target
+def getTargetLocationFor3D(pid,block,trial):
+    file = path + "PId_" + str(pid) + "_TwoDFittsData_External.csv"
+    with open(file) as f:
+        f_csv = csv.reader(f)
+        for i in range(0, 10):  # skip the beginning
+            next(f_csv)
+        for row in f_csv:
+            if str(row[offsetAndroidBlock])==str(block) and str(row[offsetAndroidTrial])==str(trial):
+                targetX=float(row[offsetAndroidTargetX])
+                targetY=float(row[offsetAndroidTargetY])
+                targetTwoCor=TwoCorPoint(targetX,targetY) # the target point in 2D world
+                targetThreeCor=TwoCorToThreeCor(targetTwoCor)
+                return targetThreeCor
+    return -1 # not found
 
 
-# this function is not used yet
+
+# calculate the exact 3D position of targets
+# we keep the finger on the start button
+# then we get the average value of the start position
 # find the 3D cors for the 2D cors point on ipad
 # the 2D cors are in pixels unit
-def TwoCorToThreeCor(currentTwoCor,startThreeCor,startTwoCor):
-    #the start point is the center of the ipad
-    # * PixelToM change the unit from pixel to mm
-    ChangeDis = math.sqrt(math.pow(startTwoCor.x - currentTwoCor.x, 2) + math.pow(startTwoCor.y - currentTwoCor.y, 2))*PixelToM
+def TwoCorToThreeCor(currentTwoCor):
+    # the start point is the center of the ipad
+    # PixelToM change the unit from pixel to mm
     ChangeX = abs(currentTwoCor.x - startTwoCor.x)*PixelToM # X's location change in 2D is the same as that in 3D
-    Change2DY=abs(currentTwoCor.y-currentTwoCor.y)*PixelToM # Change2Y means the  location change of Y axis in the 2D plane
+    Change2DY=abs(currentTwoCor.y-startTwoCor.y)*PixelToM # Change2Y means the  location change of Y axis in the 2D plane
     ChangeY =  Change2DY* math.sin(Pi / 4) # the angle of the plane is 45 degree
     ChangZ =  Change2DY* math.cos(Pi / 4)
     # let the center point as base point, find the taget point's direction
@@ -118,7 +126,7 @@ def TwoCorToThreeCor(currentTwoCor,startThreeCor,startTwoCor):
             newY = startThreeCor.y - ChangeY
             newZ = startThreeCor.z + ChangZ
 
-    target=ThreeCorPoint(newX,newY,newZ)
+    target=ThreeCorPoint(round(newX),round(newY,0),round(newZ,0))
     return target
 
 
