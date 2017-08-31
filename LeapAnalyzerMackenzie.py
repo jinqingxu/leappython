@@ -1,16 +1,10 @@
 # seven measures from Mackenzie's paper
 import csv
 import math
-import os
-from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from SpaceUtils import getDistanceOfPointAndLine
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
 from GlobalVariables import offsetSplitZ
-from GlobalVariables import  offsetSplitSpeedX
-from GlobalVariables import offsetSplitSpeedY
-from GlobalVariables import offsetSplitSpeedZ
-from GlobalVariables import  offsetSplitTimestamp
 from GlobalVariables import  path2
 from GlobalVariables import  startThreeCor
 from SpaceUtils import getTargetLocationFor3D
@@ -34,6 +28,7 @@ class LeapAnalyzerMackenzie:
     startX=0
     startY=0
     startZ=0
+    taskAxisCrossing=0
 
     def __init__(self,readFile,pid,block,trial):
         self.readFile=readFile
@@ -65,9 +60,9 @@ class LeapAnalyzerMackenzie:
         self.startX=startThreeCor.x
         self.startY=startThreeCor.y
         self.startZ=startThreeCor.z
+        self.numberFrame=len(self.frameArray)
 
     def calculateNumberOfFrame(self):
-        self.numberFrame=len(self.frameArray)
         return self.numberFrame
 
     def calculateMovementDirectionChange(self):
@@ -177,6 +172,30 @@ class LeapAnalyzerMackenzie:
             distancePoint=distancePoint*(-1)
         #print "dis",distancePoint
         return distancePoint
+
+    # task axis crossing happens when the path of the finger passes through the the task plane
+    # the task plane means a plane vertical to the tablet plane
+    # the task plane and the tablet plane intersects at the task axis
+    # this function calculate the mean time of task axis crossing happened per trial
+    def calculateTaskAxisCrossing(self):
+
+        startFrame=self.frameArray[0]
+
+        # judge the initial direction
+        if self.judgeUpOrBelowPlane(float(startFrame[offsetSplitX]),float(startFrame[offsetSplitY]),float(startFrame[offsetSplitZ]))==True:
+            preAbove=True
+        else:
+            preAbove=False
+
+        for  i in range(1,len(self.frameArray)):
+            curFrame=self.frameArray[i]
+            curAbove=self.judgeUpOrBelowPlane(float(curFrame[offsetSplitX]),float(curFrame[offsetSplitY]),float(curFrame[offsetSplitZ]))
+            if curAbove!=preAbove:
+                self.taskAxisCrossing=self.taskAxisCrossing+1 # task axis crossing happens
+                preAbove=curAbove
+
+
+
 
 
 
