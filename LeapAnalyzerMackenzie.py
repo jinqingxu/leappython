@@ -82,11 +82,12 @@ class LeapAnalyzerMackenzie:
             currentX = float(currentFrame[offsetSplitX])
             currentY = float(currentFrame[offsetSplitY])
             currentZ = float(currentFrame[offsetSplitZ])
-            currentDirectionX = self.calculateMovementDirectionChangeX(prevX, currentX, prevDirectionX, currentDirectionX)
+            currentDirectionX = self.calculateMovementDirectionChangeX(prevX, currentX, prevDirectionX, currentDirectionX) # update the self.movementDirectionChangX and return the current direction
             currentDirectionY = self.calculateMovementDirectionChangeY(prevY, currentY, prevDirectionY, currentDirectionY)
             currentDirectionZ = self.calculateMovementDirectionChangeZ(prevZ, currentZ, prevDirectionZ, currentDirectionZ)
             prevFrame = currentFrame
             currentFrame = self.frameArray[i]
+            # replace the previous direction with the current one
             prevDirectionX = currentDirectionX
             prevDirectionY = currentDirectionY
             prevDirectionZ = currentDirectionZ

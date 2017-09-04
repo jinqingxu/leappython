@@ -108,11 +108,12 @@ def writeHwangMeasurements(pid,files,datas,headers):
         keys = files[i].split('_')
         block = keys[3]
         trial = int(keys[5][0:-4])
-
         leap = LeapAnalyzerHuang(path2+files[i], pid, block, trial)
         leap.loadLeapData()
         leap.getSubmovements() # get the submovement_list,all measures from Hwang are based on this data
         leap.calculatePauseTime() # get how many pauses happens per trial and the mean pause duration
+        leap.pid=pid
+        leap.drawPath()
         # put data from measures of Hwang into an array
         hwangData=[leap.pauseTime,leap.meanPauseDuration,leap.getVerificatonTime(),leap.getTotalNumOfSubMovement(),leap.trialPeekSpeed]
         # initial a Leap Analyzer for measures of our work

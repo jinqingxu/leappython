@@ -496,6 +496,9 @@ class LeapAnalyzerHuang:
             print self.targetX,self.targetY,self.targetZ,self.frameArray[loc][offsetSplitX],self.frameArray[loc][offsetSplitY],self.frameArray[loc][offsetSplitZ]
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
+        # draw the tablet plane
+        X, Y, Z = self.drawTabletPlane()
+        ax.scatter(X, Y, Z, c='c', alpha=0.1, marker='o', s=1)
         ax.scatter(targetX_list,targetY_list,targetZ_list, c='r', label='target', alpha=1, marker='o', s=90,edgecolors='black')
         ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='c',label='First Lift Up', alpha=1, marker='o', s=30,edgecolors='black')
         ax.set_xlabel('x(mm)')
@@ -594,6 +597,33 @@ class LeapAnalyzerHuang:
             plt.grid(True)
             plt.show()
 
+    # a helper function for drawing the tablet plane in a 3D plot
+    # cumulate points to form a plane
+    # return the point list of the plane
+    def drawTabletPlane(self):
+        X=[]
+        Y=[]
+        Z=[]
+        # use points to draw the tablet planee
+        startX = -90
+        startY = 0
+        startZ = -48
+        lengthX = 200
+        # 45 * sqrt(2)
+        lengthY = 60
+        changeX = 0
+        changeY = 0
+        step = 0.8  # the density of the points in the plane
+        while changeX < lengthX:
+            changeY = 0
+            while changeY < lengthY:
+                X.append(startX + changeX)
+                Y.append(startY + changeY)
+                Z.append(
+                    startZ - changeY)  # the angle is 45 degree, so the absolute change of Y and Z should be the same
+                changeY += step
+            changeX += step
+        return X,Y,Z
 
     def drawPath(self):
         files=getSortedSplitFile(path2,self.pid)
@@ -639,7 +669,9 @@ class LeapAnalyzerHuang:
             ax.scatter(targetX_list, targetY_list, targetZ_list, c='c', label='target', alpha=1, marker='o', s=100,
                        edgecolors='black')
             k=k+1
-
+        # draw the tablet plane
+        X,Y,Z=self.drawTabletPlane()
+        ax.scatter(X, Y, Z, c='c', alpha=0.1, marker='o', s=1)
         ax.set_xlabel('x(mm)')
         ax.set_ylabel('y(mm)')
         ax.set_zlabel('z(mm)')
@@ -674,7 +706,7 @@ def calculatePercentageContainingPause(pid):
     return percentages
 '''
 
-'''
+
 def test_submovement():
     pid = 893
     block=1
@@ -699,7 +731,7 @@ def test_submovement():
     leap.drawRelativeTargetFirstLiftUpPlot3D(1,2)
     
     leap.drawPath()
-'''
+
 
 #print "percentage of pause"
 #print calculatePercentageContainingPause(pid)

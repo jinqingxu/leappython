@@ -25,8 +25,6 @@ from GlobalVariables import offsetDisAbsDifference
 from GlobalVariables import offsetDisDifference
 from GlobalVariables import path
 from GlobalVariables import  path2
-from GlobalVariables import PixelToM
-from GlobalVariables import Pi
 from FileUtils import getSortedSplitFile
 
 # 3D point
