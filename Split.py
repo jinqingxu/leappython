@@ -11,7 +11,7 @@ from GlobalVariables import offsetAndroidTrial
 from GlobalVariables import  offsetAndroidAmplitude
 from GlobalVariables import  offsetAndroidWidth
 from GlobalVariables import offsetAndroidDirection
-
+import shutil
 
 from GlobalVariables import path
 
@@ -57,6 +57,8 @@ def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction)
 
 # split the data from leap motion with the timstamp from android file
 def process_split(pid,mode):
+    shutil.rmtree('/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split')
+    os.mkdir('/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split')
     file1=path+'Data from LEAPtest_results_PID_'+str(pid)+'_Frame.csv' #leap data
     file2=''
     if mode=='redcross':# for test experiment
@@ -103,6 +105,6 @@ def process_split(pid,mode):
             # use the start and end offset to split the data
             split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction)
 
-pid=849
+pid=891
 mode='circle' # redcross means test experiment,circle means real experiment
 process_split(pid,mode)

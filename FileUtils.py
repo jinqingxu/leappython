@@ -25,7 +25,6 @@ def file_cmp(x,y):
 # return them in a sorted list
 def getSortedSplitFile(path,pid):
     files = os.listdir(path)
-    files = files[1:len(files)] # remove the '_DS.store' file
     files = sorted(files, file_cmp)
     result=[]
     for file in files:

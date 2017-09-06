@@ -708,7 +708,7 @@ def calculatePercentageContainingPause(pid):
 
 
 def test_submovement():
-    pid = 893
+    pid = 891
     block=1
     trial=4
     readfile=path2+'PID_'+str(pid)+'_Block_'+str(block)+'_Trial_'+str(trial)+'.csv'
