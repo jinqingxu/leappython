@@ -105,6 +105,6 @@ def process_split(pid,mode):
             # use the start and end offset to split the data
             split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction)
 
-pid=891
+pid=851
 mode='circle' # redcross means test experiment,circle means real experiment
 process_split(pid,mode)

@@ -15,8 +15,7 @@ offsetAndroidFirstLiftUpX=16
 offsetAndroidFirstLiftUpY=17
 offsetAndroidFirstTouchDownX=14
 offsetAndroidFirstTouchDownY=15
-offsetAndroidTargetX=12
-offsetAndroidTargetY=13
+
 
 # the index of data in leap file
 offsetLeapX=3
@@ -37,6 +36,7 @@ offsetSplitSpeedY = 22
 offsetSplitSpeedZ = 23
 offsetSplitWidth = 4
 offsetSplitSpeed=24
+offsetSplitDirection=5
 
 
 # the index of data in dif file

@@ -131,7 +131,7 @@ def TwoCorToThreeCor(currentTwoCor):
 
 
 
-
+'''
 # this function is not used yet
 # in 2D cors
 # judge whether a point is above or beneath to a line
@@ -169,6 +169,7 @@ def judgeQuadrant(curX,curY,centerX,centerY,axisX1,axisY1,axisX2,axisY2):
             return 4
         else:  # beneath y
             return 3
+'''
 
 # get the intersaction angle of two lines
 # (x1,y1) (x2,y2) are the points on l1
@@ -187,21 +188,58 @@ def getIntersactionAngleOfTwoLines(X1,Y1,X2,Y2,X3,Y3,X4,Y4):
 def calculate_3D_Dis_Of_Two_Points(x1,y1,z1,x2,y2,z2):
     return math.sqrt(math.pow(x1-x2,2)+math.pow(y1-y2,2)+math.pow(z1-z2,2))
 
-# get th intersaction point of a line and a plane
-# let the line passing through curX,curY,curZ be l
-# this function calculate the intersaction point of l and the ipad
-# targetX targetY,targetZ is a point on the plane of ipad
-# since the angle of the ipad is 45 degree,the normal vector of the ipad plane is (0,1,1)
+'''
+# this function is not used any time
+# originally used in LeapAnalyzerOriginal
+# let the line vertical to the plane and  passing through curX,curY,curZ  be l
+# this function calculate the intersaction point of l and the tablet plane
+# targetX targetY,targetZ is a point on the tablet plane
+# since the angle of the tablet plane is 45 degree,the normal vector of the tablet plane is (0,1,1)
 # so the function of line l is (x-curX)/0=(y-curY)/1=(z-curZ)/1 ,that is y-curY=z-curZ=k
 # let y=curY+k,z=curZ+k
-# the function of the ipad is 0*(x-targetX)+1*(y-targetY)+1*(z-targetZ)=0
-# put y and z into the ipad function
+# the function of the tablet plane is 0*(x-targetX)+1*(y-targetY)+1*(z-targetZ)=0
+# put y and z into the plane function
 # k=(targetY+targetZ-curY-curZ)/2
 # so y=curY+k=(targetY+targetZ+curY-curZ)/2
 # z=curZ+k=(targetY+targetZ+curZ-curY)/2
 # x=curX
-def getIntersactionPointOfLineAndPlane(curX,curY,curZ,targetX,targetY,targetZ):
+def getIntersactionPointOfFingerAndTabletPlane(curX,curY,curZ,targetX,targetY,targetZ):
     return curX,(targetY + targetZ + curY - curZ) / 2,(targetY + targetZ + curZ - curY) / 2
+'''
+
+# let the line vertical to the plane and  passing through curX,curY,curZ  be l
+# this function calculate the intersaction point of l and the plane
+# (planeX,planeY,planeZ) is a point on the  plane
+# (nx,ny,nz) is the normal vector of the plane
+# the plane function is nx*(x-planeX)+ny*(y-planeY)+nz*(z-planeZ)=0 (1)
+# since l is vertical to the plane
+# (nx,ny,nz) is the direction vector of l
+# so the function of l is (x-curX)/nx=(y-curY)/ny=(z-curZ)/nz=k
+# thus x=k*nx+curX y=k*ny+curY z=k*nz+curZ
+# put x,y,z into function (1)
+# k=(-nx*curX+nx*planeX-ny*curY+ny*planeY-nz*curZ+nz*planeZ)/((nx)^2+(ny)^2+(nz)^2)
+def getIntersactionPointOfPointAndPlane(curX,curY,curZ,planeX,planeY,planeZ,nx,ny,nz):
+    k=(-nx*curX+nx*planeX-ny*curY+ny*planeY-nz*curZ+nz*planeZ)/((nx)^2+(ny)^2+(nz)^2)
+    intersactionX=k*nx+curX
+    intersactionY=k*ny+curY
+    intersactionZ=k*nz+curZ
+    return intersactionX,intersactionY,intersactionZ
+
+
+# maybe used in the movement error calculation
+# this function is used to calculate the distance between a point and a plane
+# (curX,curY,curZ) is the current point
+# (planeX,planeY,planeZ) is a point on the  plane
+# (nx,ny,nz) is the normal vector of the plane
+def getDistanceBetweenPointAndPlane(curX,curY,curZ,planeX,planeY,planeZ,nx,ny,nz):
+    # let the line vertical to the plane and  passing through curX,curY,curZ  be l
+    # this function calculate the intersaction point of l and the plane
+    intersactionX, intersactionY, intersactionZ=getIntersactionPointOfPointAndPlane(curX,curY,curZ,planeX,planeY,planeZ,nx,ny,nz)
+    # the distance between a point and the plane is actually the distance between the point and the intersaction point
+    dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,intersactionX,intersactionY,intersactionZ)
+    return dis
+
+
 
 # get the distance from a point to a line
 def getDistanceOfPointAndLine(x1,y1,z1,x2,y2,z2,x,y,z):

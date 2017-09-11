@@ -291,7 +291,7 @@ def dis_cmp(x,y):
 
 # the range of x is from -6 to 6
 # the accurate value for y is 66,for z is -87.85
-pid=891
+pid=851
 write_dis_difference(pid)
 statistic_combination(pid)
 

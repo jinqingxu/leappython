@@ -66,9 +66,10 @@ class LeapAnalyzerMackenzie:
         return self.numberFrame
 
     def calculateMovementDirectionChange(self):
-        prevFrame = self.frameArray[0]
-        currentFrame = self.frameArray[1]
-        i = 2
+        prevFrame = self.frameArray[0] # let the first frame be the initial prevFrame
+        currentFrame = self.frameArray[1] # let the second frame be the initial currentFrame
+        i = 2 # started from the third frame
+        # the initial value
         prevDirectionX = "Right"
         prevDirectionY = "Up"
         prevDirectionZ = "Forward"
@@ -82,11 +83,11 @@ class LeapAnalyzerMackenzie:
             currentX = float(currentFrame[offsetSplitX])
             currentY = float(currentFrame[offsetSplitY])
             currentZ = float(currentFrame[offsetSplitZ])
-            currentDirectionX = self.calculateMovementDirectionChangeX(prevX, currentX, prevDirectionX, currentDirectionX) # update the self.movementDirectionChangX and return the current direction
-            currentDirectionY = self.calculateMovementDirectionChangeY(prevY, currentY, prevDirectionY, currentDirectionY)
-            currentDirectionZ = self.calculateMovementDirectionChangeZ(prevZ, currentZ, prevDirectionZ, currentDirectionZ)
-            prevFrame = currentFrame
-            currentFrame = self.frameArray[i]
+            currentDirectionX = self.calculateMovementDirectionChangeX(prevX, currentX, prevDirectionX, currentDirectionX) # update the self.movementDirectionChangX and return the current direction of X
+            currentDirectionY = self.calculateMovementDirectionChangeY(prevY, currentY, prevDirectionY, currentDirectionY) # update the self.movementDirectionChangY and return the current direction of Y
+            currentDirectionZ = self.calculateMovementDirectionChangeZ(prevZ, currentZ, prevDirectionZ, currentDirectionZ) # update the self.movementDirectionChangZ and return the current direction of Z
+            prevFrame = currentFrame # update the prevFrame be the current one
+            currentFrame = self.frameArray[i] # update the current frame
             # replace the previous direction with the current one
             prevDirectionX = currentDirectionX
             prevDirectionY = currentDirectionY
@@ -123,6 +124,8 @@ class LeapAnalyzerMackenzie:
                 self.movementDirectionChangeZ=self.movementDirectionChangeZ+1
         return currentDirectionZ
 
+    # MV
+    # the deviation of  movement error from the average value
     def calculateMovementVariability(self,movementOffset):
         sumMovementErrorDifference=0
         for i in range(0,len(self.frameArray)):
@@ -130,14 +133,16 @@ class LeapAnalyzerMackenzie:
             currentX=float(currentFrame[offsetSplitX])
             currentY=float(currentFrame[offsetSplitY])
             currentZ=float(currentFrame[offsetSplitZ])
+            # the movement offset represent the average movement error
             differenceMovementErrorSqr=math.pow(self.calculateRealMovementError(self.startX,self.startY,self.startZ,self.targetX,self.targetY,self.targetZ,currentX,currentY,currentZ)-movementOffset,2)
             sumMovementErrorDifference=sumMovementErrorDifference+differenceMovementErrorSqr
-        movementVariability=math.sqrt(sumMovementErrorDifference/(len(self.frameArray)-3.0))
+        # the deviation of  movement error from the average value
+        movementVariability=math.sqrt(sumMovementErrorDifference/(len(self.frameArray)-3.0)) # question why -3?
         self.movementVaribility=movementVariability
         return movementVariability
 
     # ME
-    # the sum of absolute value divided by numberOfFrame
+    # the average of absolute movement errors
     def calculateMovementError(self):
         sumMovementError = 0
         for i in range(0, len(self.frameArray)):
@@ -147,11 +152,12 @@ class LeapAnalyzerMackenzie:
             currentZ = float(currentFrame[offsetSplitZ])
             sumMovementError = sumMovementError + abs(self.calculateRealMovementError(self.startX, self.startY, self.startZ, self.targetX, self.targetY,
                                                                               self.targetZ, currentX, currentY, currentZ))
-        self.movementError=sumMovementError / (len(self.frameArray)-2.0)
+        self.movementError=sumMovementError / (len(self.frameArray)-2.0) # question
         return self.movementError
 
     # the mean movement error
-    # the sum of real values with sign divided by numberOfFrame
+    # the average of movement errors with sign
+    # each movement error is either positive or negtive depending on whether the finger location is above the task plane or below the task plane
     def calculateMeanMovementError(self):
         sumMovementError = 0
         for i in range(0, len(self.frameArray)):
@@ -164,14 +170,15 @@ class LeapAnalyzerMackenzie:
         self.meanmovementError = sumMovementError / (len(self.frameArray) - 2.0)
         return self.meanmovementError
 
-    # the distance of a point to the plane
-    # the real value with sign
+    # the movement error of the finger location
+    # this function calculates the distance between a point with the plane
+    # (x1,y1,z1) and (x2,y2,z2) are two points
+
     def calculateRealMovementError(self,x1,y1,z1,x2,y2,z2,x,y,z):
         # calculate the distance between a point and a line
         distancePoint=getDistanceOfPointAndLine(x1,y1,z1,x2,y2,z2,x,y,z)
-        if self.judgeUpOrBelowPlane(x,y,z)==False:
+        if self.judgeAboveOrBelowPlane(x,y,z)==False: # negative
             distancePoint=distancePoint*(-1)
-        #print "dis",distancePoint
         return distancePoint
 
     # task axis crossing happens when the path of the finger passes through the the task plane
@@ -183,14 +190,16 @@ class LeapAnalyzerMackenzie:
         startFrame=self.frameArray[0]
 
         # judge the initial direction
-        if self.judgeUpOrBelowPlane(float(startFrame[offsetSplitX]),float(startFrame[offsetSplitY]),float(startFrame[offsetSplitZ]))==True:
+        if self.judgeAboveOrBelowPlane(float(startFrame[offsetSplitX]),float(startFrame[offsetSplitY]),float(startFrame[offsetSplitZ]))==True:
             preAbove=True
         else:
             preAbove=False
 
+        # started from the second frame
         for  i in range(1,len(self.frameArray)):
             curFrame=self.frameArray[i]
-            curAbove=self.judgeUpOrBelowPlane(float(curFrame[offsetSplitX]),float(curFrame[offsetSplitY]),float(curFrame[offsetSplitZ]))
+            # judge in the current frame,
+            curAbove=self.judgeAboveOrBelowPlane(float(curFrame[offsetSplitX]),float(curFrame[offsetSplitY]),float(curFrame[offsetSplitZ]))
             if curAbove!=preAbove:
                 self.taskAxisCrossing=self.taskAxisCrossing+1 # task axis crossing happens
                 preAbove=curAbove
@@ -200,35 +209,38 @@ class LeapAnalyzerMackenzie:
 
 
 
-    # judge whether the current point is up or below the ipad plane
-    def judgeUpOrBelowPlane(self,curx,cury,curz):
-        # since the angle of the ipad is 45 degree,the normal vector of the ipad plane is (0,1,1)
-        # we can calculate it with three points on the plane
-        # let l represents the line started from start point and ended with the target point
-        # we can calculate the direction vector of l
+    # judge whether the current point is above or below the task plane
+    def judgeAboveOrBelowPlane(self,curx,cury,curz):
+        # let task axis represents the line started from start point and ended with the target point
+        # we can calculate the direction vector of task axis:(a,b,c)
         a=self.targetX-self.startX
         b=self.targetY-self.startY
         c=self.targetZ-self.startZ
-        # let n represents the plane vertical to the ipad and intersect with the ipad on l
-        # calculate the normal vector of n
-        # it should be vertical to l
-        # it should also be vertical to the normal vector of the ipad plane
-        # we calculate (an,bn,cn) the normal vector of n
+        # let task plane represents the plane vertical to the tablet and intersect with the ipad on task axis
+        # calculate the normal vector of task plane
+        # it should be vertical to task axis
+        # it should also be vertical to the normal vector of the tablet plane
+        # the normal vector of the tablet plane is (0,1,1)
+        # let (an,bn,cn) be the normal vector of task plane
+        # (0,1,1)*(an,bn,cn)=0 (1)
+        # (a,b,c)*(an,bn,cn)=0 (2)
+        # solve the simultaneous equations of (1) and (2), we can get the (an,bn,cn)
         an=b-c
         bn=-a
         cn=a
-        # the start point is on the plane
-        # the plane function is a*(x-startX)+b*(y-startY)+c*(z-startZ)=0
-        # to judge whether the point is up or below the plane
+        # since the start point is on the task plane,
+        # the task plane function is an*(x-startX)+bn*(y-startY)+cn*(z-startZ)=0
+
+        # to judge whether the point is up or below the task plane
         # put the cur point into the function
-        # if a*(curX-startX)+b*(curY-startY)+c*(curZ-startZ)=d
-        # if d > 0 , the current point is up the plane
-        # else , it is below the plane
-        translateValue=an*(curx-self.startX)+bn*(cury-self.startY)+cn*(curz-self.startZ)
-        if translateValue > 0:
-            return True
+        # let an*(curX-startX)+bn*(curY-startY)+cn*(curZ-startZ)=d
+        # if d > 0 , the current point is above the task plane
+        # else , it is below the task plane
+        CalculatedValue=an*(curx-self.startX)+bn*(cury-self.startY)+cn*(curz-self.startZ)
+        if CalculatedValue > 0:
+            return True # above the plane
         else:
-            return False
+            return False # below the plane
 
     # MO is the mean movement error
     # the sum of real values with sign divided by numberOfFrame
@@ -241,7 +253,7 @@ class LeapAnalyzerMackenzie:
             currentZ = float(currentFrame[offsetSplitZ])
             sumMovementError = sumMovementError + self.calculateRealMovementError(self.startX, self.startY, self.startZ, self.targetX, self.targetY,
                                                                                   self.targetZ, currentX, currentY, currentZ)
-        self.movementOffset = sumMovementError / (len(self.frameArray) - 2.0)
+        self.movementOffset = sumMovementError / (len(self.frameArray) - 2.0) # question
         return self.movementOffset
 
 # test the measures from MacKenzies

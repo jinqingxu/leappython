@@ -2,7 +2,7 @@
 import csv
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from CalculateOfCircle import calculate_3D_Dis_Of_Two_Points
-from SpaceUtils import getIntersactionPointOfLineAndPlane
+from SpaceUtils import  getIntersactionPointOfPointAndPlane
 from GlobalVariables import path2
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
@@ -10,6 +10,7 @@ from GlobalVariables import offsetSplitZ
 from GlobalVariables import  offsetSplitTimestamp
 from GlobalVariables import  offsetSplitWidth
 from SpaceUtils import getTargetLocationFor3D
+
 class LeapAnalyzerOriginal:
     pid = 0
     block = 0
@@ -60,7 +61,10 @@ class LeapAnalyzerOriginal:
     # secondly,the distance between p and A should be very small
     def judgeNearTarget(self,curX,curY,curZ,targetX,targetY,targetZ,width):
         margin=15 # the max distance of p and A
-        intersactionX,intersactionY,intersactionZ=getIntersactionPointOfLineAndPlane(curX,curY,curZ,targetX,targetY,targetZ)
+        # let the line vertical to the plane and  passing through curX,curY,curZ  be l
+        # this function calculate the intersaction point of l and the plane
+        # the normal vector of the tablet plane is (0,1,1)
+        intersactionX,intersactionY,intersactionZ=getIntersactionPointOfPointAndPlane(curX,curY,curZ,targetX,targetY,targetZ,0,1,1)
         # find the distance between p and A
         dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,intersactionX,intersactionY,intersactionZ)
         if dis > margin:
@@ -109,7 +113,7 @@ class LeapAnalyzerOriginal:
                             i=j # find the next spiral
                             break
             i=i+1
-        mind, maxd, averaged, deviationd = get_min_max_mean_deviation_from_list(self.decisionMakingDuration)
+        mind, maxd, averaged, deviationd = get_min_max_mean_deviation_from_list(self.decisionMakingDuration) # get the statistics of the decisionMaking list
         self.meanDecideMakingDuration=averaged
 
 
