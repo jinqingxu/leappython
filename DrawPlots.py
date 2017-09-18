@@ -8,7 +8,10 @@ import math
 import os
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-
+from GlobalVariables import startThreeCor
+from GlobalVariables import  offset3DX
+from GlobalVariables import  offset3DY
+from GlobalVariables import offset3DZ
 # import helper functions from other script
 
 from GlobalVariables import path2
@@ -17,6 +20,7 @@ from GlobalVariables import  offsetSplitY
 from GlobalVariables import offsetSplitZ
 from GlobalVariables import  offsetSplitTimestamp
 from GlobalVariables import offsetSplitDirection
+from GlobalVariables import  offsetSplitAmplitude
 from GlobalVariables import offsetAndroidBlock
 from GlobalVariables import offsetAndroidTrial
 from GlobalVariables import  offsetAndroidTargetX
@@ -28,8 +32,38 @@ from GlobalVariables import startThreeCor
 from FileUtils import getSortedSplitFile
 from GlobalVariables import path
 from GlobalVariables import offsetSplitWidth
-from SpaceUtils import getTargetLocationFor3D
+from SpaceUtils import getTargetLocationFor3DWithDirection
+from  SpaceUtils import  getTargetLocationFor3D
 from GlobalVariables import ThreeCorPoint
+
+# used for draw plots of path
+class FingerPath:
+    # the start point of the path
+    StartPathX=[]
+    StartPathY=[]
+    StartPathZ=[]
+    # the end point of the path
+    EndPathX=[]
+    EndPathY=[]
+    EndPathZ=[]
+    # the points in the  intermediate path
+    InterPathX=[]
+    InterPathY=[]
+    InterPathZ=[]
+
+    def __init__(self,StartPathX,StartPathY,StartPathZ,EndPathX,EndPathY,EndPathZ,InterPathX,InterPathY,InterPathZ):
+        self.StartPathX=StartPathX
+        self.StartPathY=StartPathY
+        self.StartPathZ=StartPathZ
+        self.EndPathX=EndPathX
+        self.EndPathY=EndPathY
+        self.EndPathZ=EndPathZ
+        self.InterPathX=InterPathX
+        self.InterPathY=InterPathY
+        self.InterPathZ=InterPathZ
+
+
+
 
 class DrawPlots:
     pid = 0
@@ -45,6 +79,8 @@ class DrawPlots:
     direction=0
     startPathThreeCor=0
     endPathThreeCor=0
+    width=0
+    amplitude=0
 
     def __init__(self,pid):
         self.pid=pid
@@ -69,11 +105,12 @@ class DrawPlots:
         self.targetY = targetThreeCor.y
         self.targetZ = targetThreeCor.z
         self.targetTime = float(targetFrame[offsetSplitTimestamp])
-        self.direction=self.frameArray[0][offsetSplitDirection]
+        self.direction=float(self.frameArray[0][offsetSplitDirection])
         # the start of the path is the first frame
         # construct a three-cor class with x,y and z
         self.startPathThreeCor=ThreeCorPoint(float(self.frameArray[0][offsetSplitX]),float(self.frameArray[0][offsetSplitY]),float(self.frameArray[0][offsetSplitZ]))
         self.endPathThreeCor=ThreeCorPoint(float(self.frameArray[self.numberFrame-1][offsetSplitX]),float(self.frameArray[self.numberFrame-1][offsetSplitY]),float(self.frameArray[self.numberFrame-1][offsetSplitZ]))
+        self.amplitude=float(self.frameArray[0][offsetSplitAmplitude])
 
 
     # go through all the trials in one experiment
@@ -290,6 +327,8 @@ class DrawPlots:
             changeX += step
         return X, Y, Z
 
+    '''
+    # this function is not used any more
     # draw the path of the finger
     def drawPath(self):
         files = getSortedSplitFile(path2, self.pid)
@@ -342,19 +381,14 @@ class DrawPlots:
         plt.title('path of fingers in an experiment')
         plt.legend()
         plt.show()
+    '''
 
     # draw the path of the finger
-    def drawStartAndEnd(self,numOfDirection):
+    def drawStartAndEnd(self,mode):
         files = getSortedSplitFile(path2, self.pid)
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        colors = cm.rainbow(np.linspace(0, 1, numOfDirection))  # different color represent different trial
         # the key is the direction
-        # the value is a list of start point of each trial
-        startPoint_map = {}
-        # the key is the direction
-        # the value is a list of end point of each trial
-        endPoint_map= {}
+        # the value is a list of value in the class of FingerPath
+        FingerPath_map = {}
         for file in files:
             self.readFile = path2 + file
             keys = file.split('_')
@@ -363,51 +397,111 @@ class DrawPlots:
             self.loadLeapData()
             # if the current direction does not exist in the map
             # create new position list for the current direction
-            if not startPoint_map.has_key(self.direction):
-                startPoint_map[self.direction]=[]
-                endPoint_map[self.direction]=[]
+            if not FingerPath_map.has_key(self.direction):
+               FingerPath_map[self.direction]=[]
             # else just append in the original list
-            startPoint_map[self.direction].append(self.startPathThreeCor)
-            endPoint_map[self.direction].append(self.endPathThreeCor)
-        k=0
-        for key in startPoint_map.keys():
-            # construct the x,y,z list for drawing plots
-            startX_list=[] # the x value of a start point
-            startY_list=[] # the y value of a start point
-            startZ_list=[] # the z value of a start point
-            endX_list=[] # the x value of an end point
-            endY_list=[] # the y value of an end point
-            endZ_list=[] # the z value of an end point
-            # go through the start point list for the current direction
-            for p in startPoint_map[key]:
-                startX_list.append(p.x)
-                startY_list.append(p.y)
-                startZ_list.append(p.z)
-            for p in endPoint_map[key]:
-                endX_list.append(p.x)
-                endY_list.append(p.y)
-                endZ_list.append(p.z)
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
+            # the start point of the path
+            StartPathX = []
+            StartPathY = []
+            StartPathZ = []
+            # the end point of the path
+            EndPathX = []
+            EndPathY = []
+            EndPathZ = []
+            # the points in the  intermediate path
+            InterPathX = []
+            InterPathY = []
+            InterPathZ = []
 
-            ax.scatter(startX_list, startY_list, startZ_list, c='b', label = 'Start', alpha = 1,
-                                                                                     marker = '+', s = 30, edgecolors = 'black')
-            ax.scatter(endX_list, endY_list, endZ_list, c=colors[k], label='First Lift Up', alpha=1,
-                       marker='o', s=30, edgecolors='black')
-            ax.set_xlabel('x(mm)')
-            ax.set_ylabel('y(mm)')
-            ax.set_zlabel('z(mm)')
+            # store the location of the start of the path
+            StartPathX.append(self.startPathThreeCor.x+offset3DX)
+            StartPathY.append(self.startPathThreeCor.y+offset3DY)
+            StartPathZ.append(self.startPathThreeCor.z+offset3DZ)
+            # store the location of the end of the path
+            EndPathX.append(self.endPathThreeCor.x+offset3DX)
+            EndPathY.append(self.endPathThreeCor.y+offset3DY)
+            EndPathZ.append(self.endPathThreeCor.z+offset3DZ)
+            # store the path of the finger excluding the start and end
+
+            for i in range(1,self.numberFrame-1):
+                InterPathX.append(float(self.frameArray[i][offsetSplitX])+offset3DX)
+                InterPathY.append(float(self.frameArray[i][offsetSplitY])+offset3DY)
+                InterPathZ.append(float(self.frameArray[i][offsetSplitZ])+offset3DZ)
+
+            fingerPath = FingerPath(StartPathX,StartPathY,StartPathZ,EndPathX,EndPathY,EndPathZ,InterPathX,InterPathY,InterPathZ)
+            FingerPath_map[self.direction].append(fingerPath)
+
+        maxPath=30
+        colors = cm.rainbow(np.linspace(0, 1, maxPath))
+
+        for key in FingerPath_map.keys():
+            # with accurate start coordinate in 3D,calculate the target 3D
+            # key is the current direction
+            targetThreeCor = getTargetLocationFor3DWithDirection(key,self.amplitude)
+
+            # used for draw the real start button and real target
+            # the draw plot function need list for x,y,z as input
+
+            RealStartX_list=[]
+            RealStartY_list=[]
+            RealStartZ_list=[]
+            RealTargetX_list=[]
+            RealTargetY_list=[]
+            RealTargetZ_list=[]
+
+            RealStartX_list.append(startThreeCor.x)
+            RealStartY_list.append(startThreeCor.y)
+            RealStartZ_list.append(startThreeCor.z)
+
+            RealTargetX_list.append(targetThreeCor.x)
+            RealTargetY_list.append(targetThreeCor.y)
+            RealTargetZ_list.append(targetThreeCor.z)
+
+            fig = plt.figure()
+            if mode==3:
+                ax = fig.add_subplot(111, projection='3d')
+                if key == 90.0 or key == 270.0:
+                    ax.view_init(30, 35)
+
+            k=0
+            for p in FingerPath_map[key]:
+                if k==maxPath:
+                    break
+                if mode==3:
+                    ax.scatter(p.StartPathX, p.StartPathY,p.StartPathZ, c=colors[k], label = 'Start', alpha = 1,marker = '+', s = 30, edgecolors = 'black')
+                    ax.scatter(p.EndPathX,p.EndPathY,p.EndPathZ, c=colors[k], label='First Lift Up', alpha=1,marker='o', s=30, edgecolors='black')
+                    #ax.scatter(p.InterPathX, p.InterPathY,p.InterPathZ, c=colors[k], label = 'Start', alpha = 1,marker = 'o', s = 30)
+                else:
+                    plt.scatter(p.StartPathX, p.StartPathY, c=colors[k], label='Start', alpha=1,marker='+', s=30, edgecolors='black')
+                    plt.scatter(p.EndPathX, p.EndPathY, c=colors[k], label='First Lift Up', alpha=1,marker='o', s=30, edgecolors='black')
+                    #plt.scatter(p.InterPathX, p.InterPathY, c=colors[k], label='Start', alpha=1,marker='o', s=30)
+                k=k+1
+
+            if mode==3:
+                ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start', alpha=1,
+                       marker='o', s=200)
+                ax.scatter(RealTargetX_list, RealTargetY_list,RealTargetZ_list, c='y', label='First Lift Up', alpha=1,
+                       marker='o', s=200)
+            else:
+                plt.scatter(RealStartX_list, RealStartY_list, c='r', label='Real start', alpha=1,
+                           marker='o', s=200)
+                plt.scatter(RealTargetX_list, RealTargetY_list, c='y', label='First Lift Up', alpha=1,
+                           marker='o', s=200)
+
+            if mode==3:
+                ax.set_zlabel('Z(mm)')
+                ax.set_ylabel('Y(mm)')
+                ax.set_xlabel('X(mm)')
+            else:
+                plt.xlabel('X(mm)')
+                plt.ylabel('Y(mm)')
+
             plt.title('start and end points of path in an experiment with direction of '+str(key))
-            plt.legend()
+            if mode==2:
+                plt.grid()
             plt.show()
 
-            k=k+1
 
-        # draw the tablet plane
-        '''
-        X, Y, Z = self.drawTabletPlane()
-        ax.scatter(X, Y, Z, c='c', alpha=0.1, marker='o', s=1)
-        '''
 
 
 
@@ -418,9 +512,9 @@ class DrawPlots:
 # test function
 def test_DrawPlots():
     pid=851
-    numOfDirection=4
     drawPlots=DrawPlots(pid)
     #drawPlots.drawPath()
-    drawPlots.drawStartAndEnd(numOfDirection)
+    mode=2
+    drawPlots.drawStartAndEnd(mode)
 
 test_DrawPlots()

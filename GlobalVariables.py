@@ -1,5 +1,5 @@
 # used to store global variables that are used in many scripts
-
+import math
 # the index of data in android file
 offsetAndroidStartTime = 11
 offsetAndroidFinalLiftUp = 24
@@ -37,7 +37,7 @@ offsetSplitSpeedZ = 23
 offsetSplitWidth = 4
 offsetSplitSpeed=24
 offsetSplitDirection=5
-
+offsetSplitAmplitude=3
 
 # the index of data in dif file
 offsetDisBlock=0
@@ -74,9 +74,14 @@ class TwoCorPoint:
         self.y = y
 
 # 3D coordinates for the start button
-start3DX=0.170
-start3DY=76.584
-start3DZ=-87.45
+# measured by ruler
+start3DX=0.74
+start3DY=56.5
+start3DZ=-85
+# the offset of the start measured by leap motion relative to the real position is x,y,z
+offset3DX=-0.74
+offset3DY=-3.3
+offset3DZ=-5.5
 
 # 2D coordinates for the start button
 # in pixel
@@ -86,4 +91,14 @@ start2DY=695
 # start point in 2D
 startThreeCor=ThreeCorPoint(start3DX,start3DY,start3DZ)
 startTwoCor=TwoCorPoint(start2DX,start2DY)
+
+# the angle of the tablet
+tabletAngle=45
+
+
+# the normal vector of the tablet
+normalVectorX=0
+normalVectorY=1
+normalVectorZ=1
+
 

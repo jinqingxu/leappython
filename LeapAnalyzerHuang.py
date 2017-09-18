@@ -28,8 +28,12 @@ from GlobalVariables import startThreeCor
 from GlobalVariables import ThreeCorPoint
 from FileUtils import getSortedSplitFile
 from SpaceUtils import getTargetLocationFor3D
-
+from SpaceUtils import getDistanceBetweenPointAndPlane
+from GlobalVariables import  normalVectorX
+from GlobalVariables import  normalVectorY
+from GlobalVariables import  normalVectorZ
 class SubMovement:
+
     startTime=0 # the start time of frame
     endTime=0 # the end time of frame
     startX=0
@@ -40,15 +44,18 @@ class SubMovement:
     endZ=0
     peekSpeed = 0.0
     duration = 0.0  # how long does the submovement last ,the unit is in mm
+
     '''
     coincidentErrorValue=0
     coincidentErrorType=""
     perpendicularError=0
     '''
+
     def __init__(self,startTime,endTime,startX,startY,startZ,endX,endY,endZ,peekSpeed,duration):
-        self.startTime=startTime
+
+        self.startTime=startTime # the start timestamp of a submovement
         self.endTime=endTime
-        self.startX=startX
+        self.startX=startX # the start location of a submovement
         self.startY=startY
         self.startZ=startZ
         self.endX=endX
@@ -56,6 +63,7 @@ class SubMovement:
         self.endZ=endZ
         self.peekSpeed=peekSpeed
         self.duration=duration
+
         '''
         self.coincidentErrorValue=coincidentErrorValue
         self.coincidentErrorType=coincidentErrorType
@@ -63,32 +71,44 @@ class SubMovement:
 
 
 class LeapAnalyzerHuang:
+
+    # LeapAnalyzerHuang is focus on a specific trial
     pid=0
     block=0
     trial=0
-    readFile=""
+    readFile="" # the trial file
     frameArray=[]
     numberFrame=0
-    peekSpeed=0 # tmp variable for submovement peek speed
-    trialPeekSpeed=0 # peek speed in the whole trial
-    meanPauseDuration=0
-    pauseTime=0
-    pauseDuration=[]
-    pauseLocation=[]
+
+    # variables for the peek submovement speed
+    peekSpeed=0 # temporary variable for submovement peek speed
+    trialPeekSpeed=0 # peek submovement speed in the whole trial
+
+    # variables for the pasue
+    meanPauseDuration=0 # the average pause duration in one trial
+    pauseTime=0  # how many times pauses happen
+    pauseDuration=[] # the duration of pause
+    pauseLocation=[] # the distribution of pause location
     pauseMarginSpeed=0.01 # due to the measure mistake of leap motion,the pauseMargin should not be 0
-    brakeMarginAcc=1
-    submovement_list=[]
-    width=0
-    # store target data,initialized in the loaddata function
+
+    # variables for judging the start and end of a submovement
+    brakeMarginAcc=1 # if the acc is up to brakeMarginAcc,that means the end of the submovement
+    submovement_list=[] # the list of submovements
+
+    width=0 # the width of the target
+
+    # the location of the target,initialized in the loaddata function
     targetX=0
     targetY=0
     targetZ=0
-    targetTime=0
-    RelativeEndCors=[] # store the 3D points of end of submovements
+
+    finalLiftUpTime=0  # the timestamp of the final lift up
+
     verificationTime=0.0 # the verification time,the duration from the end of the last submovement to the end of the trial
 
     # initialize
     def __init__(self,readFile,pid,block,trial):
+
         self.readFile=readFile
         self.pid=pid
         self.block=block
@@ -96,35 +116,38 @@ class LeapAnalyzerHuang:
         self.submovement_list=[]
         self.frameArray = []
         self.numberFrame = 0
-        self.peekSpeed = 0  # tmp variable for submovement peek speed
+        self.peekSpeed = 0  # temporary variable for submovement peek speed
         self.trialPeekSpeed = 0  # peek speed in the whole trial
         self.meanPauseDuration = 0
         self.pauseTime = 0
         self.pauseDuration = []
         self.pauseLocation = []
         self.verificationTime=0.0
-        self.RelativeEndCors=[]
+
 
     def loadLeapData(self):
-        file = self.readFile
+
+        file = self.readFile # the trial data file
         self.frameArray=[]
+
         with open(file) as f:
             f_csv = csv.reader(f)
             next(f_csv) # skip the header
             for row in f_csv:
-                self.frameArray.append(row)
+                self.frameArray.append(row) # fullfil the frameArray
+
         self.numberFrame = len(self.frameArray)
-        firstFrame=self.frameArray[0]
-        self.width=float(firstFrame[offsetSplitWidth])
-        targetFrame=self.frameArray[self.numberFrame-1]
+        firstFrame=self.frameArray[0] # the first frame of a trial
+        self.width=float(firstFrame[offsetSplitWidth]) # the width of target
+        finalLiftUpFrame=self.frameArray[self.numberFrame-1] # the final lift up frame of a trial
         targetThreeCor=getTargetLocationFor3D(self.pid,self.block,self.trial) # with accurate start coordinate in 3D,calculate the target 3D
         self.targetX=targetThreeCor.x
         self.targetY=targetThreeCor.y
         self.targetZ=targetThreeCor.z
-        self.targetTime=float(targetFrame[offsetSplitTimestamp])
+        self.finalLiftUpTime=float(finalLiftUpFrame[offsetSplitTimestamp])
 
 
-    def calculateNumberOfFrame(self):
+    def calculateNumberOfFrame(self): # the length of self.frameArray
         return self.numberFrame
 
     # let the finger point be p ,the laptop plane be A, the line passing though p and vertical to A be l
@@ -134,33 +157,23 @@ class LeapAnalyzerHuang:
     # secondly,the distance between p and A should be very small
     def judgeInsideTarget(self, curX, curY, curZ, targetX, targetY, targetZ, width):
         margin = 15  # the max distance of p and A
-        # since the angle of the laptop is 45 degree,the normal vector of the laptop plane is (0,1,1)
-        # so the function of line l is (x-curX)/0=(y-curY)/1=(z-curZ)/1 ,that is y-curY=z-curZ=k
-        # let y=curY+k,z=curZ+k
-        # the function of the laptop is 0*(x-targetX)+1*(y-targetY)+1*(z-targetZ)=0
-        # put y and z into the laptop function
-        # k=(targetY+targetZ-curY-curZ)/2
-        # so y=curY+k=(targetY+targetZ+curY-curZ)/2
-        # z=curZ+k=(targetY+targetZ+curZ-curY)/2
-        # x=curX
-        intersactionX = curX
-        intersactionY = (targetY + targetZ + curY - curZ) / 2
-        intersactionZ = (targetY + targetZ + curZ - curY) / 2
+        intersactionX, intersactionY, intersactionZ=getDistanceBetweenPointAndPlane(curX,curY,curZ,targetX,targetY,targetZ,normalVectorX,normalVectorY,normalVectorZ)
         # find the distance between p and A
         dis = calculate_3D_Dis_Of_Two_Points(curX, curY, curZ, intersactionX, intersactionY, intersactionZ)
-        if dis > margin:
+        if dis > margin: # dis should be smaller or equal to margin
             return False
-        else:  # dis should be smaller or equal to margin
+        else:
+            # dis2 means the distance between the intersaction point and the center of the target
             dis2 = calculate_3D_Dis_Of_Two_Points(targetX, targetY, targetZ, intersactionX, intersactionY,
                                                   intersactionZ)
-            if dis2 > width:
+            if dis2 > width: # dis2 must be smaller than the radius of the circle which means the intersaction point should be located inside the target
                 return False
             else:
                 return True
 
     # the current speed is near zero
     def judgePause(self,speed):
-        if speed< self.pauseMarginSpeed:
+        if speed < self.pauseMarginSpeed: # pauseMarginSpeed is the maximum of pause speed which is 0.01
             return True
         else:
             return False
@@ -168,10 +181,10 @@ class LeapAnalyzerHuang:
     # for one trial,get the average pause duration
     # the unit of duration is ms
     def getMeanPauseDuration(self):
-        if len(self.pauseDuration)==0:
+        if len(self.pauseDuration)==0: # if the pause duration list is empty,return 0
             return 0
-        minp, maxp, averagep, deviationp = get_min_max_mean_deviation_from_list(self.pauseDuration)
-        self.meanPauseDuration=averagep
+        minp, maxp, averagep, deviationp = get_min_max_mean_deviation_from_list(self.pauseDuration) # get the statistic value of the puase duration list
+        self.meanPauseDuration=averagep # the average pause duration
         return averagep
 
     #calculate the pause time and each pause duration
@@ -180,45 +193,52 @@ class LeapAnalyzerHuang:
     def calculatePauseTime(self):
         i=0
         while i <self.numberFrame:
-            curFrame=self.frameArray[i]
-            curSpeed=float(curFrame[offsetSplitSpeed])
+            curFrame=self.frameArray[i] # the current frame
+            curSpeed=float(curFrame[offsetSplitSpeed]) # the speed of the current frame
             startTime=float(curFrame[offsetSplitTimestamp]) # the start time of the pause
-            if self.judgePause(curSpeed) == True:
-                self.pauseTime=self.pauseTime+1
-                curX=float(curFrame[offsetSplitX])
+            # find the start frame of pause
+            if self.judgePause(curSpeed) == True: #  pause meansthe speed is within the pauseMargin
+                self.pauseTime=self.pauseTime+1 # pauseTime means how many times do pauses happen
+                curX=float(curFrame[offsetSplitX]) # currate X location
                 curY=float(curFrame[offsetSplitY])
                 curZ=float(curFrame[offsetSplitZ])
-                self.calculatePauseLocation(curX,curY,curZ)
+                self.calculatePauseLocation(curX,curY,curZ) # the location means the distance between the current location and the target
                 if i==self.numberFrame-1: # if the current frame is the end one
                     self.pauseDuration.append(0) # pause time is zero
                 else:
-                    for j in range(i + 1, self.numberFrame):
+                    for j in range(i + 1, self.numberFrame): # find the end frame of the pause
                         nextFrame = self.frameArray[j]
-                        nextSpeed=float(nextFrame[offsetSplitSpeed])
-                        if self.judgePause(nextSpeed) == False:
-                            endTime = float(nextFrame[offsetSplitTimestamp])
-                            duration = endTime - startTime
-                            self.pauseDuration.append(duration)
-                            i=j
+                        nextSpeed=float(nextFrame[offsetSplitSpeed]) # nextSpeed means the speed of next frame
+                        if self.judgePause(nextSpeed) == False: # if the nextSpeed is not within the pause Margin,that means the end of the pause
+                            endTime = float(nextFrame[offsetSplitTimestamp]) # the end time of a pause
+                            duration = endTime - startTime  # the duration of a pause
+                            self.pauseDuration.append(duration) # save the duration in a duration list for a trial
+                            i=j # to find the start of next pause,loop started from frameArray[j+1]
                             break
             i=i+1
-        self.getMeanPauseDuration()
+        self.getMeanPauseDuration() # calculate the mean value of pause durations and set the value of self.meanPauseDuration
 
-
+    '''
+    # this function will not be used anymore
     # get number of submovements before final entry
     # be inside the target but before lift up
     # alsp get number of submovements slip off
     # return numBeforeFinal,numSlipOff
     def getNumOfSubmovementInTwoSets(self):
-        numBeforeFinal=0
-        numSlipOff=0
+
+        numBeforeFinal=0 # number of submovements before final lift up
+        numSlipOff=0 # number of submovements slip off
+
         for s in self.submovement_list:
             if self.judgeInsideTarget(s.startX,s.startY,s.startZ,self.targetX,self.targetY,self.targetZ,self.width)==True: # the start of the submovement is inside the target
+
                 if self.judgeInsideTarget(s.endX,s.endY,s.endZ,self.targetX,self.targetY,self.targetZ,self.width)==True: # before the final entry
                     numBeforeFinal=numBeforeFinal+1
                 else: # the start is inside the target,the end is outside the target.That means slip off
                     numSlipOff=numSlipOff+1
+
         return numBeforeFinal,numSlipOff
+    '''
 
 
 
@@ -227,26 +247,32 @@ class LeapAnalyzerHuang:
     # append it in the pauseLoction
     # the location means the distance between the current location and the target
     def calculatePauseLocation(self,curX,curY,curZ):
+
         dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,self.targetX,self.targetY,self.targetZ)
         self.pauseLocation.append(dis)
 
     # return the acceleration speed of the current offset
     def calculateAccelerationSpeed(self,offset):
+
         prevFrame = self.frameArray[offset - 1]
         prevTimeStamp = float(prevFrame[offsetSplitTimestamp])
         prevSpeed = float(prevFrame[offsetSplitSpeed])
+
         curFrame=self.frameArray[offset]
         curSpeed=float(curFrame[offsetSplitSpeed])
         curTimeStamp = float(curFrame[offsetSplitTimestamp])
-        curDuration = curTimeStamp - prevTimeStamp
-        curAcc = (curSpeed-prevSpeed)/(curDuration+0.0)
+
+        curDuration = curTimeStamp - prevTimeStamp # the duration between the prevSpeed and the curSpeed
+        curAcc = (curSpeed-prevSpeed)/(curDuration+0.0) # the acceleration speed equals to the difference of curSpeed and prevSpeed divided by the time duration
+
         return curAcc
 
 
-    # offset means the current index of frame
-    # begin with current offset
+    # offset means the current index of frameArray
+    # the loop begins with current offset
     # return the start index of next submovement
     def getSubmovementStart(self,offset):
+
         sumDuration=0
         for i in range(offset,self.numberFrame):
             if sumDuration >= 100: # speed >0 up to 100 ms
@@ -345,7 +371,7 @@ class LeapAnalyzerHuang:
     def getVerificatonTime(self):
         endSubmovement=self.submovement_list[len(self.submovement_list)-1]
         endTime=endSubmovement.endTime
-        self.verificationTime=self.targetTime-endTime
+        self.verificationTime=self.finalLiftUpTime-endTime
         return self.verificationTime
 
 

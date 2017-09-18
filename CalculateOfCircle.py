@@ -1,8 +1,9 @@
 #author:Irene
-#find the best matched record from leap motion file for trials and output as files
+
+# calculate the difference between the calculated distance from start to end  and the real amplitude
+
 import csv
 
-import os
 from SpaceUtils import calculate_3D_Dis_Of_Two_Points
 
 from GlobalVariables import offsetAndroidBlock
@@ -37,15 +38,18 @@ class ThreeCorPoint:
         self.y=y
         self.z=z
 
+# this class is used to store the caluclated distance and its error
 class Dis_leap_android:
+
     block=0
     trial=0
-    amplitude=0
-    width=0
-    direction=0
-    distance=0
-    difference=0
-    abs_difference=0
+    amplitude=0 # the real distance from start to target
+    width=0 # the diameter of the target
+    direction=0 # the direction of the target
+    distance=0 # the calculated distance
+    difference=0 # the error compared to the amplitude
+    abs_difference=0 # the absoulte error
+
     def __init__(self,block,trial,amplitude,width,direction,distance,difference,abs_difference):
         self.block=block
         self.trial=trial
@@ -59,15 +63,17 @@ class Dis_leap_android:
 
 # distance between two 3D points
 class Distance:
-    startPointIndex=0
-    endPointIndex=0
+
+    startPointIndex=0 # the index of the start point,that is which row is the start of the path
+    endPointIndex=0 # the index of the end point,that is which row is the end of the path
     startXCor=0.0
     startYCor=0.0
     startZCor=0.0
     endXCor=0.0
     endYCor=0.0
     endZCor=0.0
-    dis=0.0
+    dis=0.0 # the calculated distance
+
     def __init__(self,startPointIndex,endPointIndex,startXCor,startYCor,startZCor,endXCor,endYCor,endZCor,dis):
         self.startPointIndex=startPointIndex
         self.endPointIndex=endPointIndex
@@ -81,28 +87,36 @@ class Distance:
 
 # get the min(l),max(l),avergae(l),difference of min and max
 def get_min_max_mean_deviation_from_list(l):
+
+    # if the list is empty,just return zero
     if len(l)==0:
         return 0,0,0,0
+
     min_l=float(l[0])
     max_l=float(l[0])
     sum_l=0
+
     for i in range(0,len(l)):
         if float(l[i])>max_l:
             max_l=float(l[i])
         if float(l[i])<min_l:
             min_l=float(l[i])
         sum_l+=float(l[i])
+
     return min_l, max_l, sum_l / (len(l) + 0.0),max_l-min_l
 
-# write PID_XXX_Dis_Difference_Android_Leap
+# write PID_XXX_Dis_Difference_Android_Leap.csv
 def write_dis_difference(pid):
+
     file2 = path + 'PID_' + str(pid) + '_TwoDFittsData_External.csv'  # android data
-    new_headers=['Block','Trial','Amplitude(mm)','Width(mm)','Direction','Start TipX(mm)','End TipX(mm)','Distance(mm)','Difference(mm)','AbsDifference(mm)','AbsDiffX(mm)','AbsDiff_Dis_X(mm)'] # headers for the written file
-    file3 = path + 'PID_' + str(pid) + '_DIS_Difference_Android_Leap.csv'
+    # headers for the new written file
+    new_headers=['Block','Trial','Amplitude(mm)','Width(mm)','Direction','Start TipX(mm)','End TipX(mm)','Distance(mm)','Difference(mm)','AbsDifference(mm)','AbsDiffX(mm)','AbsDiff_Dis_X(mm)']
+    file3 = path + 'PID_' + str(pid) + '_DIS_Difference_Android_Leap.csv' # the new file
     difference_dis_list=[] # record the difference between the calculated distance and amplitude
     absolute_difference_dis_list=[]  # record the absolute difference between the calculated distance and amplitude
     absolute_difference_X_list=[] # record the absolute difference of startX and endX
-    absolute_difference_Dis_X_list=[]
+    absolute_difference_Dis_X_list=[] # record the difference between the distance calculated by x,y,z and the distance calculated only by x
+
     with open(file3, 'w') as f:
         w_csv = csv.writer(f)
         w_csv.writerow(new_headers)
@@ -196,31 +210,39 @@ def write_dis_difference(pid):
 
 # find the min,max,average abs_difference of all combinations of amplitude,width and direction
 def statistic_combination(pid):
-    dis_list = []
-    file=path+'PID_'+str(pid)+'_DIS_Difference_Android_Leap.csv'
-    length=0
+
+    dis_list = [] # the statistic data list
+
+    file=path+'PID_'+str(pid)+'_DIS_Difference_Android_Leap.csv' # append the result at the bottom of the statistic file
+
     with open(file) as f:
-        length=len(f.readlines())-4 # remove the header , the min,max,average in the bottom
+        length=len(f.readlines())-4 # remove the header,the min,max,average in the bottom
+
     with open(file) as f:
         f_csv = csv.reader(f)
-        headers = next(f_csv)  # get headers of csv
+        next(f_csv)  # skip the headers
         j=0
         for row in f_csv:
-            if j==length:
+            if j==length: # do not include the min,max,average value in the dis_list
                 break
             tmp_dis=Dis_leap_android(row[offsetDisBlock],row[offsetDisTrial],row[offsetDisAmplitude],row[offsetDisWidth],row[offsetDisDirection],row[offsetDisDistance],row[offsetDisDifference],row[offsetDisAbsDifference])
             dis_list.append(tmp_dis)
             j=j+1
+
+    # to find the min,max abs_difference of each combination
+    # we can first sort the list with the priority of amplitude,width,direction and abs_difference
+    # then the same combination will come together as a group
+    # so the first one in the group is the min
+    # and the last one in the group is the max
     dis_list=sorted(dis_list,dis_cmp)
-    #for i in range(len(dis_list)):
-        #print dis_list[i].amplitude,dis_list[i].width,dis_list[i].direction,dis_list[i].abs_difference
+
     # suppose the combination with the same amplitude,width and direction is a group
     # each group will occur only once in one block
-    with open(file, 'a') as f2:
+    with open(file, 'a') as f2: # append in the end of the original statistic file
         w_csv = csv.writer(f2)
         empty=[' ',' ', ' '] # an empty line
-        w_csv.writerow(empty)
-        headers=['amplitude(mm)','width(mm)','direction','minAbsDiff(mm)','maxAbsDiff(mm)','avgAbsDiff(mm)']
+        w_csv.writerow(empty) # write an empty line in the beginning
+        headers=['amplitude(mm)','width(mm)','direction','minAbsDifference(mm)','maxAbsDifference(mm)','avgAbsDifference(mm)']
         w_csv.writerow(headers)
         # initial
         prevAmplitude=dis_list[0].amplitude
@@ -243,8 +265,6 @@ def statistic_combination(pid):
                 if tmp_dis > max_group:
                     max_group = tmp_dis
             if curAmplitude!=prevAmplitude or curWidth!=prevWidth or curDirection!=prevDirection or i==len(dis_list)-1: # the beginning of next combination
-                #print "sum",sum_group
-                #print "lenOfConbination",lenOfCombination
                 avg_group = sum_group / (lenOfCombination + 0.0)
                 outdata = []
                 outdata.append(dis_list[i-1].amplitude)
@@ -264,11 +284,7 @@ def statistic_combination(pid):
 
 
 
-# to find the min,max abs_difference of each combination
-# we can first sort the list with the priority of amplitude,width,direction and abs_difference
-# then the same combination will come together as a group
-# so the first one in the group is the min
-# and the last one in the group is the max
+# sort the list with the priority of amplitude,width,direction and abs_difference
 def dis_cmp(x,y):
     if x.amplitude<y.amplitude:
         return -1

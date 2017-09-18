@@ -1,13 +1,21 @@
+# author:Irene
 # seven measures from Mackenzie's paper
+# already add comments
+
 import csv
 import math
-from SpaceUtils import getDistanceOfPointAndLine
+from SpaceUtils import getDistanceBetweenPointAndPlane
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
 from GlobalVariables import offsetSplitZ
 from GlobalVariables import  path2
 from GlobalVariables import  startThreeCor
 from SpaceUtils import getTargetLocationFor3D
+# the normal vector of the tablet
+# used to calculate MO
+from GlobalVariables import normalVectorX
+from GlobalVariables import normalVectorY
+from  GlobalVariables import normalVectorZ
 
 class LeapAnalyzerMackenzie:
     pid=0
@@ -137,7 +145,14 @@ class LeapAnalyzerMackenzie:
             differenceMovementErrorSqr=math.pow(self.calculateRealMovementError(self.startX,self.startY,self.startZ,self.targetX,self.targetY,self.targetZ,currentX,currentY,currentZ)-movementOffset,2)
             sumMovementErrorDifference=sumMovementErrorDifference+differenceMovementErrorSqr
         # the deviation of  movement error from the average value
-        movementVariability=math.sqrt(sumMovementErrorDifference/(len(self.frameArray)-3.0)) # question why -3?
+        # movementVariability=math.sqrt(sumMovementErrorDifference/(len(self.frameArray)-3.0))
+        # changed by Irene
+        # orignally, we assume the first frame representing the start button and the last frame stands for the target.
+        # so the ME of the first and end frame will be zero since these two points are lying on the task axis.
+        # thus we need to exclude them when doing the division
+        # But since there is 11 millisecond interval between frames,these two frames can not be exactly the start and target.
+        # we do not need to exclude them now.
+        movementVariability = math.sqrt(sumMovementErrorDifference / (len(self.frameArray) - 1.0)) # MV is sample standard deviation rather than standard deviation so we need to divide by length-1
         self.movementVaribility=movementVariability
         return movementVariability
 
@@ -152,7 +167,14 @@ class LeapAnalyzerMackenzie:
             currentZ = float(currentFrame[offsetSplitZ])
             sumMovementError = sumMovementError + abs(self.calculateRealMovementError(self.startX, self.startY, self.startZ, self.targetX, self.targetY,
                                                                               self.targetZ, currentX, currentY, currentZ))
-        self.movementError=sumMovementError / (len(self.frameArray)-2.0) # question
+        # self.movementError=sumMovementError / (len(self.frameArray)-2.0)
+        # changed by Irene
+        # orignally, we assume the first frame representing the start button and the last frame stands for the target.
+        # so the ME of the first and end frame will be zero since these two points are lying on the task axis.
+        # thus we need to exclude them when doing the division
+        # But since there is 11 millisecond interval between frames,these two frames can not be exactly the start and target.
+        # we do not need to exclude them now.
+        self.movementError = sumMovementError / len(self.frameArray)
         return self.movementError
 
     # the mean movement error
@@ -167,16 +189,24 @@ class LeapAnalyzerMackenzie:
             currentZ = float(currentFrame[offsetSplitZ])
             sumMovementError = sumMovementError + self.calculateRealMovementError(self.startX, self.startY, self.startZ, self.targetX, self.targetY,
                                                 self.targetZ, currentX, currentY, currentZ)
-        self.meanmovementError = sumMovementError / (len(self.frameArray) - 2.0)
+        # self.meanmovementError = sumMovementError / (len(self.frameArray) - 2.0)
+        # changed by Irene
+        # orignally, we assume the first frame representing the start button and the last frame stands for the target.
+        # so the ME of the first and end frame will be zero since these two points are lying on the task axis.
+        # thus we need to exclude them when doing the division
+        # But since there is 11 millisecond interval between frames,these two frames can not be exactly the start and target.
+        # we do not need to exclude them now.
+        self.meanmovementError = sumMovementError / len(self.frameArray)
         return self.meanmovementError
 
     # the movement error of the finger location
-    # this function calculates the distance between a point with the plane
-    # (x1,y1,z1) and (x2,y2,z2) are two points
-
+    # this function calculates the distance between a point with the vertical plane
+    # (x1,y1,z1) and (x2,y2,z2) are two points on the tablet
+    # (x,y,z) is the current point
     def calculateRealMovementError(self,x1,y1,z1,x2,y2,z2,x,y,z):
-        # calculate the distance between a point and a line
-        distancePoint=getDistanceOfPointAndLine(x1,y1,z1,x2,y2,z2,x,y,z)
+        # calculate the distance between the finger point and the vertical plane
+        distancePoint=getDistanceBetweenPointAndPlane(x,y,z,startThreeCor.x,startThreeCor.y,startThreeCor.z,normalVectorX,normalVectorY,normalVectorZ)
+
         if self.judgeAboveOrBelowPlane(x,y,z)==False: # negative
             distancePoint=distancePoint*(-1)
         return distancePoint

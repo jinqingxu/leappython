@@ -1,4 +1,7 @@
+# author:Irene
 # the original measurements not from the paper
+# already add comments
+
 import csv
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from CalculateOfCircle import calculate_3D_Dis_Of_Two_Points
@@ -10,20 +13,29 @@ from GlobalVariables import offsetSplitZ
 from GlobalVariables import  offsetSplitTimestamp
 from GlobalVariables import  offsetSplitWidth
 from SpaceUtils import getTargetLocationFor3D
+from GlobalVariables import normalVectorX
+from GlobalVariables import normalVectorY
+from GlobalVariables import normalVectorZ
+
+# deciding making is a measure representing uncertainty
+# a supplement for verification time
+# an original measure brought up by our work
 
 class LeapAnalyzerOriginal:
+
     pid = 0
     block = 0
     trial = 0
     readFile=""
     frameArray=[]
     numberFrame=0
-    decisionMakingTime=0
-    decisionMakingDuration=[]
-    meanDecideMakingDuration=0
+    decisionMakingTime=0 # how many times decision making happend
+    decisionMakingDuration=[] # the duration list
+    meanDecideMakingDuration=0 # the mean time duration of decision meaning in a trial
     targetX = 0
     targetY = 0
     targetZ = 0
+
     def __init__(self,readFile,pid,block,trial):
         self.frameArray=[]
         self.numberFrame=0
@@ -63,8 +75,13 @@ class LeapAnalyzerOriginal:
         margin=15 # the max distance of p and A
         # let the line vertical to the plane and  passing through curX,curY,curZ  be l
         # this function calculate the intersaction point of l and the plane
-        # the normal vector of the tablet plane is (0,1,1)
-        intersactionX,intersactionY,intersactionZ=getIntersactionPointOfPointAndPlane(curX,curY,curZ,targetX,targetY,targetZ,0,1,1)
+        # firstly,tan(tabletAngle)=1.6003
+        # then one of the direction vector of the tablet plane is (0,1.6,-1)
+        # the other direction vector is (1,0,0)
+        # since the normal vector of the plane (a,b,c) should be vertical to the two direction vector
+        # (a,b,c)*(1,0,0)=0 and (a,b,c)*(0,1.6,-1)=0
+        # so the normal vector of the tablet plane is (0,1,1.6)
+        intersactionX,intersactionY,intersactionZ=getIntersactionPointOfPointAndPlane(curX,curY,curZ,targetX,targetY,targetZ,normalVectorX,normalVectorY,normalVectorZ)
         # find the distance between p and A
         dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,intersactionX,intersactionY,intersactionZ)
         if dis > margin:

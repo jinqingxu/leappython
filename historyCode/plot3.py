@@ -1,36 +1,27 @@
-import matplotlib.pyplot as plt
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep 24 16:37:21 2015
+
+@author: Eddy_zheng
+"""
+
+
 from mpl_toolkits.mplot3d import Axes3D
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-X=[]
-Y=[]
-Z=[]
+import matplotlib.pyplot as plt
 
-# use points to draw the tablet planee
-startX=-90
-startY=0
-startZ=-48
-lengthX=90
-# 45 * sqrt(2)
-lengthY=32
-changeX=0
-changeY=0
-step=0.5 # the density of the points in the plane
-while changeX <lengthX:
-    changeY=0
-    while changeY<lengthY:
-        X.append(startX+changeX)
-        Y.append(startY+changeY)
-        Z.append(startZ-changeY) # the angle is 45 degree, so the absolute change of Y and Z should be the same
-        changeY+=step
-    changeX+=step
+x=[0]
+y=[10]
+z=[0]
+ax=plt.subplot(111,projection='3d') #创建一个三维的绘图工程
+ax.view_init(30, 35)
+#将数据点分成三部分画，在颜色上有区分度
+ax.scatter(x[:1000],y[:1000],z[:1000],c='y') #绘制数据点
+ax.scatter(x[1000:4000],y[1000:4000],z[1000:4000],c='r')
+ax.scatter(x[4000:],y[4000:],z[4000:],c='g')
 
+ax.set_zlabel('Z') #坐标轴
+ax.set_ylabel('Y')
+ax.set_xlabel('X')
 
-ax.scatter(X, Y, Z,c='c', alpha=0.1,  marker='o', s = 1)
-ax.set_xlabel('longitude')
-
-ax.set_ylabel('latitude')
-
-ax.set_zlabel('deepth')
 
 plt.show()
