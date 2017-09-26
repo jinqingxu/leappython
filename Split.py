@@ -11,9 +11,11 @@ from GlobalVariables import offsetAndroidTrial
 from GlobalVariables import  offsetAndroidAmplitude
 from GlobalVariables import  offsetAndroidWidth
 from GlobalVariables import offsetAndroidDirection
+from GlobalVariables import  path2
+
 import shutil
 
-from GlobalVariables import path
+
 
 #a global array to store data from leap motion
 leapdata=[]
@@ -38,8 +40,8 @@ def best_match_end(etime,offset):
     return -1 # not found
 
 #write the split data into files
-def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction):
-    file=path+'split/'+'PID_'+str(pid)+'_Block_'+block+'_Trial_'+trial+'.csv' #one trial matches one file
+def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction,path):
+    file=path2+'PID_'+str(pid)+'_Block_'+block+'_Trial_'+trial+'.csv' #one trial matches one file
     with open(file, 'w') as f:
         f_csv = csv.writer(f)
         f_csv.writerow(headers)
@@ -56,15 +58,11 @@ def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction)
     f.close()
 
 # split the data from leap motion with the timstamp from android file
-def process_split(pid,mode):
-    shutil.rmtree('/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split')
-    os.mkdir('/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split')
+def process_split(pid,path):
+    shutil.rmtree(path2)
+    os.mkdir(path2)
     file1=path+'Data from LEAPtest_results_PID_'+str(pid)+'_Frame.csv' #leap data
-    file2=''
-    if mode=='redcross':# for test experiment
-        file2=path+'PID_'+str(pid)+'_FingerCalibData_Internal.csv'
-    else:   # for real experiment
-        file2=path+'PID_'+str(pid)+'_TwoDFittsData_External.csv' #android data
+    file2=path+'PID_'+str(pid)+'_TwoDFittsData_External.csv' #android data
     headers=[] # for headers of the csv file
     #read leap data
     with open(file1) as f:
@@ -103,8 +101,9 @@ def process_split(pid,mode):
                 return
             end=offset #the end index of the split data
             # use the start and end offset to split the data
-            split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction)
+            split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction,path)
 
+'''
 pid=851
-mode='circle' # redcross means test experiment,circle means real experiment
-process_split(pid,mode)
+process_split(pid)
+'''

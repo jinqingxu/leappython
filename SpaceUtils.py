@@ -10,7 +10,6 @@ from GlobalVariables import TwoCorPoint
 from GlobalVariables import ThreeCorPoint
 from GlobalVariables import  startTwoCor
 from GlobalVariables import  startThreeCor
-from GlobalVariables import path
 from GlobalVariables import offsetAndroidBlock
 from GlobalVariables import offsetAndroidTrial
 from GlobalVariables import offsetAndroidTargetX
@@ -83,7 +82,7 @@ def getRelativeXandY(curX,curY,curZ,startX,startY,startZ,targetX,targetY,targetZ
 # input pid,block,trial
 # find the 3D position for a target
 
-def getTargetLocationFor3D(pid,block,trial):
+def getTargetLocationFor3D(pid,block,trial,path):
 
     file = path + "PId_" + str(pid) + "_TwoDFittsData_External.csv"
 
@@ -141,6 +140,19 @@ def getTargetLocationFor3DWithDirection(direction,amplitude):
     newZ=startThreeCor.z+changeZ
 
     return ThreeCorPoint(newX,newY,newZ)
+
+# input a point in 3D
+# output the position in the projected plane
+
+def LocationInProjectedPlane(oldThreeCor):
+    # project the point in a new system that the y is the y axis in the 2D system on the tablet,the z is vertical to the tablet
+    # in a word, in the new system, our tablet is vertical to the ground now
+    newX=oldThreeCor.x # there is no change on X
+    newY=oldThreeCor.y/math.sin(tabletAngle/180.0*Pi)
+    newZ=oldThreeCor.z/math.sin(tabletAngle/180.0*Pi)
+    return ThreeCorPoint(newX,newY,newZ)
+
+
 
 
 
@@ -289,7 +301,7 @@ def getIntersactionPointOfFingerAndTabletPlane(curX,curY,curZ,targetX,targetY,ta
 # (nx,ny,nz) is the direction vector of l
 # so the function of l is (x-curX)/nx=(y-curY)/ny=(z-curZ)/nz=k
 # thus x=k*nx+curX y=k*ny+curY z=k*nz+curZ
-# put x,y,z into function (1)
+# put x,y,z into equation (1)
 # k=(-nx*curX+nx*planeX-ny*curY+ny*planeY-nz*curZ+nz*planeZ)/((nx)^2+(ny)^2+(nz)^2)
 def getIntersactionPointOfPointAndPlane(curX,curY,curZ,planeX,planeY,planeZ,nx,ny,nz):
     k=(-nx*curX+nx*planeX-ny*curY+ny*planeY-nz*curZ+nz*planeZ)/((nx)^2+(ny)^2+(nz)^2)

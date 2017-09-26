@@ -37,8 +37,9 @@ class LeapAnalyzerMackenzie:
     startY=0
     startZ=0
     taskAxisCrossing=0
+    path=""
 
-    def __init__(self,readFile,pid,block,trial):
+    def __init__(self,readFile,pid,block,trial,path):
         self.readFile=readFile
         self.pid=pid
         self.block=block
@@ -51,17 +52,18 @@ class LeapAnalyzerMackenzie:
         self.movementOffset = 0
         self.movementError = 0
         self.movementVaribility = 0
+        self.path=path
 
     def loadLeapData(self):
+        # load the split file
         self.frameArray=[]
-        file = self.readFile
+        file = self.readFile # the split file
         with open(file) as f:
             f_csv = csv.reader(f)
             next(f_csv)
             for row in f_csv:
                 self.frameArray.append(row)
-        targetThreeCor = getTargetLocationFor3D(self.pid, self.block,
-                                                self.trial)  # with accurate start coordinate in 3D,calculate the target 3D
+        targetThreeCor = getTargetLocationFor3D(self.pid, self.block,self.trial,self.path)  # with accurate start coordinate in 3D,calculate the target 3D
         self.targetX = targetThreeCor.x
         self.targetY = targetThreeCor.y
         self.targetZ = targetThreeCor.z
@@ -91,7 +93,10 @@ class LeapAnalyzerMackenzie:
             currentX = float(currentFrame[offsetSplitX])
             currentY = float(currentFrame[offsetSplitY])
             currentZ = float(currentFrame[offsetSplitZ])
-            currentDirectionX = self.calculateMovementDirectionChangeX(prevX, currentX, prevDirectionX, currentDirectionX) # update the self.movementDirectionChangX and return the current direction of X
+            # update the self.movementDirectionChangX and return the current direction of X
+            # if the same direction self.movementDirectionChangX++
+            # else self.movementDirectionChangX--
+            currentDirectionX = self.calculateMovementDirectionChangeX(prevX, currentX, prevDirectionX, currentDirectionX)
             currentDirectionY = self.calculateMovementDirectionChangeY(prevY, currentY, prevDirectionY, currentDirectionY) # update the self.movementDirectionChangY and return the current direction of Y
             currentDirectionZ = self.calculateMovementDirectionChangeZ(prevZ, currentZ, prevDirectionZ, currentDirectionZ) # update the self.movementDirectionChangZ and return the current direction of Z
             prevFrame = currentFrame # update the prevFrame be the current one
@@ -177,44 +182,54 @@ class LeapAnalyzerMackenzie:
         self.movementError = sumMovementError / len(self.frameArray)
         return self.movementError
 
-    # the mean movement error
-    # the average of movement errors with sign
-    # each movement error is either positive or negtive depending on whether the finger location is above the task plane or below the task plane
-    def calculateMeanMovementError(self):
+
+    # the movement error of the finger location
+    # this function calculates the distance between a point with the vertical plane
+    # (x1,y1,z1) and (x2,y2,z2) are two points on the tablet
+    # (x,y,z) is the current point
+    def calculateRealMovementError(self, x1, y1, z1, x2, y2, z2, x, y, z):
+
+        # calculate the distance between the finger point and the vertical plane
+        distancePoint = getDistanceBetweenPointAndPlane(x, y, z, startThreeCor.x, startThreeCor.y, startThreeCor.z,normalVectorX, normalVectorY, normalVectorZ)
+
+        if self.judgeAboveOrBelowPlane(x, y, z) == False:  # negative
+            distancePoint = distancePoint * (-1)
+        return distancePoint
+
+
+
+
+    # MO is the mean movement error
+    # the sum of real values with sign divided by numberOfFrame
+
+    def calculateMovementOffset(self):
+
         sumMovementError = 0
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
             currentX = float(currentFrame[offsetSplitX])
             currentY = float(currentFrame[offsetSplitY])
             currentZ = float(currentFrame[offsetSplitZ])
-            sumMovementError = sumMovementError + self.calculateRealMovementError(self.startX, self.startY, self.startZ, self.targetX, self.targetY,
-                                                self.targetZ, currentX, currentY, currentZ)
-        # self.meanmovementError = sumMovementError / (len(self.frameArray) - 2.0)
+            sumMovementError = sumMovementError + self.calculateRealMovementError(self.startX, self.startY, self.startZ,self.targetX, self.targetY,self.targetZ, currentX, currentY,currentZ)
+
+
+        # self.movementOffset=sumMovementError/(len(self.frameArray)-2.0)
         # changed by Irene
         # orignally, we assume the first frame representing the start button and the last frame stands for the target.
         # so the ME of the first and end frame will be zero since these two points are lying on the task axis.
         # thus we need to exclude them when doing the division
         # But since there is 11 millisecond interval between frames,these two frames can not be exactly the start and target.
         # we do not need to exclude them now.
-        self.meanmovementError = sumMovementError / len(self.frameArray)
-        return self.meanmovementError
+        self.movementOffset=sumMovementError/len(self.frameArray)
+        return self.movementOffset
 
-    # the movement error of the finger location
-    # this function calculates the distance between a point with the vertical plane
-    # (x1,y1,z1) and (x2,y2,z2) are two points on the tablet
-    # (x,y,z) is the current point
-    def calculateRealMovementError(self,x1,y1,z1,x2,y2,z2,x,y,z):
-        # calculate the distance between the finger point and the vertical plane
-        distancePoint=getDistanceBetweenPointAndPlane(x,y,z,startThreeCor.x,startThreeCor.y,startThreeCor.z,normalVectorX,normalVectorY,normalVectorZ)
 
-        if self.judgeAboveOrBelowPlane(x,y,z)==False: # negative
-            distancePoint=distancePoint*(-1)
-        return distancePoint
+
 
     # task axis crossing happens when the path of the finger passes through the the task plane
     # the task plane means a plane vertical to the tablet plane
     # the task plane and the tablet plane intersects at the task axis
-    # this function calculate the mean time of task axis crossing happened per trial
+    # this function calculate the mean frequency of task axis crossing happened per trial
     def calculateTaskAxisCrossing(self):
 
         startFrame=self.frameArray[0]
@@ -258,6 +273,7 @@ class LeapAnalyzerMackenzie:
         an=b-c
         bn=-a
         cn=a
+
         # since the start point is on the task plane,
         # the task plane function is an*(x-startX)+bn*(y-startY)+cn*(z-startZ)=0
 
@@ -266,25 +282,14 @@ class LeapAnalyzerMackenzie:
         # let an*(curX-startX)+bn*(curY-startY)+cn*(curZ-startZ)=d
         # if d > 0 , the current point is above the task plane
         # else , it is below the task plane
-        CalculatedValue=an*(curx-self.startX)+bn*(cury-self.startY)+cn*(curz-self.startZ)
-        if CalculatedValue > 0:
+
+        calculatedValue=an*(curx-self.startX)+bn*(cury-self.startY)+cn*(curz-self.startZ)
+        if calculatedValue > 0:
             return True # above the plane
         else:
             return False # below the plane
 
-    # MO is the mean movement error
-    # the sum of real values with sign divided by numberOfFrame
-    def calculateMovementOffset(self):
-        sumMovementError = 0
-        for i in range(0, len(self.frameArray)):
-            currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[offsetSplitX])
-            currentY = float(currentFrame[offsetSplitY])
-            currentZ = float(currentFrame[offsetSplitZ])
-            sumMovementError = sumMovementError + self.calculateRealMovementError(self.startX, self.startY, self.startZ, self.targetX, self.targetY,
-                                                                                  self.targetZ, currentX, currentY, currentZ)
-        self.movementOffset = sumMovementError / (len(self.frameArray) - 2.0) # question
-        return self.movementOffset
+
 
 # test the measures from MacKenzies
 def test():

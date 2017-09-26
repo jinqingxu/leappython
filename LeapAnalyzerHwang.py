@@ -13,7 +13,7 @@ from mpl_toolkits.mplot3d import Axes3D
 # import helper functions from other script
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from SpaceUtils import calculate_3D_Dis_Of_Two_Points
-from GlobalVariables import path
+
 from GlobalVariables import path2
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
@@ -70,7 +70,7 @@ class SubMovement:
         '''
 
 
-class LeapAnalyzerHuang:
+class LeapAnalyzerHwang:
 
     # LeapAnalyzerHuang is focus on a specific trial
     pid=0
@@ -81,7 +81,7 @@ class LeapAnalyzerHuang:
     numberFrame=0
 
     # variables for the peek submovement speed
-    peekSpeed=0 # temporary variable for submovement peek speed
+    tmpPeekSpeed=0 # temporary variable for submovement peek speed
     trialPeekSpeed=0 # peek submovement speed in the whole trial
 
     # variables for the pasue
@@ -106,8 +106,10 @@ class LeapAnalyzerHuang:
 
     verificationTime=0.0 # the verification time,the duration from the end of the last submovement to the end of the trial
 
+    path=""
+
     # initialize
-    def __init__(self,readFile,pid,block,trial):
+    def __init__(self,readFile,pid,block,trial,path):
 
         self.readFile=readFile
         self.pid=pid
@@ -116,13 +118,14 @@ class LeapAnalyzerHuang:
         self.submovement_list=[]
         self.frameArray = []
         self.numberFrame = 0
-        self.peekSpeed = 0  # temporary variable for submovement peek speed
+        self.tmpPeekSpeed = 0  # temporary variable for submovement peek speed
         self.trialPeekSpeed = 0  # peek speed in the whole trial
         self.meanPauseDuration = 0
         self.pauseTime = 0
         self.pauseDuration = []
         self.pauseLocation = []
         self.verificationTime=0.0
+        self.path=path
 
 
     def loadLeapData(self):
@@ -140,11 +143,15 @@ class LeapAnalyzerHuang:
         firstFrame=self.frameArray[0] # the first frame of a trial
         self.width=float(firstFrame[offsetSplitWidth]) # the width of target
         finalLiftUpFrame=self.frameArray[self.numberFrame-1] # the final lift up frame of a trial
-        targetThreeCor=getTargetLocationFor3D(self.pid,self.block,self.trial) # with accurate start coordinate in 3D,calculate the target 3D
+
+        targetThreeCor=getTargetLocationFor3D(self.pid,self.block,self.trial,self.path) # with accurate start coordinate in 3D,calculate the target 3D
+
         self.targetX=targetThreeCor.x
         self.targetY=targetThreeCor.y
         self.targetZ=targetThreeCor.z
+
         self.finalLiftUpTime=float(finalLiftUpFrame[offsetSplitTimestamp])
+
 
 
     def calculateNumberOfFrame(self): # the length of self.frameArray
@@ -187,35 +194,56 @@ class LeapAnalyzerHuang:
         self.meanPauseDuration=averagep # the average pause duration
         return averagep
 
+    # record the pause location
+    # append it in the pauseLoction
+    # the location means the distance between the current location and the target
+    def calculatePauseLocation(self,curX,curY,curZ):
+
+        dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,self.targetX,self.targetY,self.targetZ)
+        self.pauseLocation.append(dis)
+
     #calculate the pause time and each pause duration
     # no return value
     # change the value of self.pauseTime,self.pauseDuration
     def calculatePauseTime(self):
+
         i=0
+
         while i <self.numberFrame:
+
             curFrame=self.frameArray[i] # the current frame
             curSpeed=float(curFrame[offsetSplitSpeed]) # the speed of the current frame
             startTime=float(curFrame[offsetSplitTimestamp]) # the start time of the pause
+
             # find the start frame of pause
             if self.judgePause(curSpeed) == True: #  pause meansthe speed is within the pauseMargin
+
                 self.pauseTime=self.pauseTime+1 # pauseTime means how many times do pauses happen
                 curX=float(curFrame[offsetSplitX]) # currate X location
                 curY=float(curFrame[offsetSplitY])
                 curZ=float(curFrame[offsetSplitZ])
                 self.calculatePauseLocation(curX,curY,curZ) # the location means the distance between the current location and the target
+
                 if i==self.numberFrame-1: # if the current frame is the end one
+
                     self.pauseDuration.append(0) # pause time is zero
+
                 else:
+
                     for j in range(i + 1, self.numberFrame): # find the end frame of the pause
+
                         nextFrame = self.frameArray[j]
                         nextSpeed=float(nextFrame[offsetSplitSpeed]) # nextSpeed means the speed of next frame
+
                         if self.judgePause(nextSpeed) == False: # if the nextSpeed is not within the pause Margin,that means the end of the pause
+
                             endTime = float(nextFrame[offsetSplitTimestamp]) # the end time of a pause
                             duration = endTime - startTime  # the duration of a pause
                             self.pauseDuration.append(duration) # save the duration in a duration list for a trial
                             i=j # to find the start of next pause,loop started from frameArray[j+1]
                             break
             i=i+1
+
         self.getMeanPauseDuration() # calculate the mean value of pause durations and set the value of self.meanPauseDuration
 
     '''
@@ -240,135 +268,172 @@ class LeapAnalyzerHuang:
         return numBeforeFinal,numSlipOff
     '''
 
+    # go through the self.Frames
+    # find all submovements and put them into submovement_list
+    def getSubmovements(self):
+
+        offset = 0 # the current index of frame
+
+        while offset < self.numberFrame:
+
+            offset = self.getSubmovementStart(offset)  # the start index of the submovement
+            startIndex = offset
+            startTime = float(self.frameArray[startIndex][offsetSplitTimestamp])
+
+            startX = float(self.frameArray[startIndex][offsetSplitX])
+            startY = float(self.frameArray[startIndex][offsetSplitY])
+            startZ = float(self.frameArray[startIndex][offsetSplitZ])
+
+            if startIndex == -1:  # there is no submovements int the future
+                break
+
+            offset = self.getSubmovementEnd(startIndex + 1)  # the end Index must be after the startIndex, so start at startIndex+1
+            endIndex = offset
+
+            endX = float(self.frameArray[endIndex][offsetSplitX])
+            endY = float(self.frameArray[endIndex][offsetSplitY])
+            endZ = float(self.frameArray[endIndex][offsetSplitZ])
+            endTime = float(self.frameArray[endIndex][offsetSplitTimestamp])
+
+            # relaendX,relaendY,relaendZ=self.getRelativeCors(endX,endY,endZ)
+            # coincidentErrorValue,coincidentErrorType=self.calculateCoincidentError(endX)
+
+            if self.tmpPeekSpeed > self.trialPeekSpeed:
+                self.trialPeekSpeed = self.tmpPeekSpeed
+
+            self.submovement_list.append(
+                SubMovement(startTime, endTime, startX, startY, startZ, endX, endY, endZ, self.tmpPeekSpeed,
+                            endTime - startTime))
+
+            self.tmpPeekSpeed = 0  # only a temporary variability,initized as 0 for the next submovement
+
+            offset = offset + 1  # the start of next submovement begins after the end
 
 
-
-    # record the pause location
-    # append it in the pauseLoction
-    # the location means the distance between the current location and the target
-    def calculatePauseLocation(self,curX,curY,curZ):
-
-        dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,self.targetX,self.targetY,self.targetZ)
-        self.pauseLocation.append(dis)
-
-    # return the acceleration speed of the current offset
-    def calculateAccelerationSpeed(self,offset):
-
-        prevFrame = self.frameArray[offset - 1]
-        prevTimeStamp = float(prevFrame[offsetSplitTimestamp])
-        prevSpeed = float(prevFrame[offsetSplitSpeed])
-
-        curFrame=self.frameArray[offset]
-        curSpeed=float(curFrame[offsetSplitSpeed])
-        curTimeStamp = float(curFrame[offsetSplitTimestamp])
-
-        curDuration = curTimeStamp - prevTimeStamp # the duration between the prevSpeed and the curSpeed
-        curAcc = (curSpeed-prevSpeed)/(curDuration+0.0) # the acceleration speed equals to the difference of curSpeed and prevSpeed divided by the time duration
-
-        return curAcc
 
 
     # offset means the current index of frameArray
     # the loop begins with current offset
     # return the start index of next submovement
+
     def getSubmovementStart(self,offset):
 
         sumDuration=0
+
         for i in range(offset,self.numberFrame):
+
             if sumDuration >= 100: # speed >0 up to 100 ms
                 return i-1
+
             curFrame=self.frameArray[i]
             curTimeStamp=float(curFrame[offsetSplitTimestamp])
             duration=0
+
             if i!=0: # if i==0 prevFrame equals to curFrame
                 prevFrame=self.frameArray[i-1]
                 prevTimeStamp=float(prevFrame[offsetSplitTimestamp])
                 duration=curTimeStamp-prevTimeStamp
+
             curSpeed=float(curFrame[offsetSplitSpeed])
+
             if curSpeed>self.pauseMarginSpeed:
                 sumDuration+=duration
+
         return -1
 
-    # go through the self.Frames
-    # find all submovements and put them into submovement_list
-    def getSubmovements(self):
-        offset=0
-        while offset<self.numberFrame:
-            offset=self.getSubmovementStart(offset) # the start index of the submovement
-            startIndex=offset
-            startTime=float(self.frameArray[startIndex][offsetSplitTimestamp])
-            startX=float(self.frameArray[startIndex][offsetSplitX])
-            startY=float(self.frameArray[startIndex][offsetSplitY])
-            startZ=float(self.frameArray[startIndex][offsetSplitZ])
-            if startIndex==-1: # there is no submovements int the future
-                break
-            offset=self.getSubmovementEnd(offset+1) # after the start
-            endIndex=offset
-            endX=float(self.frameArray[endIndex][offsetSplitX])
-            endY=float(self.frameArray[endIndex][offsetSplitY])
-            endZ=float(self.frameArray[endIndex][offsetSplitZ])
-            endTime=float(self.frameArray[endIndex][offsetSplitTimestamp])
-            #relaendX,relaendY,relaendZ=self.getRelativeCors(endX,endY,endZ)
-            #coincidentErrorValue,coincidentErrorType=self.calculateCoincidentError(endX)
-            if self.peekSpeed>self.trialPeekSpeed:
-                self.trialPeekSpeed=self.peekSpeed
-            self.submovement_list.append(SubMovement(startTime,endTime,startX,startY,startZ,endX,endY,endZ,self.peekSpeed,endTime-startTime))
-            self.peekSpeed=0 # prepared for the next submovement
-            offset=offset+1 # the start of next submovement begins after the end
+        # return the acceleration speed of the current offset
+
+    def calculateAccelerationSpeed(self, offset):
+
+        prevFrame = self.frameArray[offset - 1]
+        prevTimeStamp = float(prevFrame[offsetSplitTimestamp])
+        prevSpeed = float(prevFrame[offsetSplitSpeed])
+
+        curFrame = self.frameArray[offset]
+        curSpeed = float(curFrame[offsetSplitSpeed])
+        curTimeStamp = float(curFrame[offsetSplitTimestamp])
+
+        curDuration = curTimeStamp - prevTimeStamp  # the duration between the prevSpeed and the curSpeed
+        curAcc = (curSpeed - prevSpeed) / (
+        curDuration + 0.0)  # the acceleration speed equals to the difference of curSpeed and prevSpeed divided by the time duration
+
+        return curAcc
 
 
-    # curoffset means the current index
+    # curoffset means the current index of frame
     # judge if the submovement ends
     # there are three cases:
     # firstly,pause
     # secondly,acceleration speed changes from negtive to positive and the current speed < 75% of peek speed
     # thirdly,the negtive acceleration speed reached its relative max value
+
     def getSubmovementEnd(self,offset):
+
         prevAcc = 0
         maxAcc = 0 # the max of absolute acc
-        negtive=0 # record how many continuous negtive acc occurs
-        if offset > 1:  # if offset<=1,there will be no grandFrame,so the second situation is meaningless
-            prevAcc = self.calculateAccelerationSpeed(offset - 1)
+        negtiveTime=0 # record how many times continuous negtive acc occurs
+
+        if offset > 1:  # if offset<=1,there will be no frameArray[curoffset-2],so there will be no prevAcc. Thus,the second situation is meaningless
+            prevAcc = self.calculateAccelerationSpeed(offset - 1) # the initial value for prevAcc
+
         for j in range(offset,self.numberFrame):
+
             curFrame = self.frameArray[j]
             curSpeed = float(curFrame[offsetSplitSpeed])
-            if curSpeed>self.peekSpeed:
-                self.peekSpeed=curSpeed
+
+            if curSpeed>self.tmpPeekSpeed:
+                self.tmpPeekSpeed=curSpeed
+
             curAcc = self.calculateAccelerationSpeed(j)
-            # pause
+
+            # first situation: pause
             if curSpeed < self.pauseMarginSpeed:
                 return j
+
+            # second situation
             if offset>1 :
                 # if curoffset<=1,there will be no grandFrame,so the second situation is meaningless
                 # acceleration speed change from negtive to positive and the current speed < 75% of peek speed
-                if prevAcc<0 and curAcc>0 and curSpeed < 0.75*self.peekSpeed:
+                if prevAcc<0 and curAcc>0 and curSpeed < 0.75*self.tmpPeekSpeed:
                     return j
+
             # the third situation,reach a relative max negtive acc
             # sudden brake
             # relative max means larger than the previous maximum and the next two frame
-            if negtive>0:
+
+            if negtiveTime>0:
+                # if the curAcc reaches maximum, it should > prevAcc and > nextAcc
                 if abs(curAcc)>maxAcc and abs(curAcc)>self.brakeMarginAcc:
+
                     if j<self.numberFrame-2: # the last two does not have next two frame
+
                         nextAcc=self.calculateAccelerationSpeed(j+1)
                         nextNextAcc=self.calculateAccelerationSpeed(j+2)
+
                         if abs(curAcc)>abs(nextAcc) and abs(curAcc)>abs(nextNextAcc):
                             return j
                     else:
                         return j
+
             if abs(curAcc) > maxAcc:
                 maxAcc = abs(curAcc)
+
             if curAcc >= 0:
-                negtive = 0
+                negtiveTime = 0
+
             else:
-                negtive = negtive + 1
+                negtiveTime = negtiveTime + 1
+
             prevAcc=curAcc
-        return self.numberFrame-1
+
+        return self.numberFrame-1 # if no ends are found, return the end of the frame
 
     def getTotalNumOfSubMovement(self):
         return len(self.submovement_list)
 
     # the verification time is the duration from the end of last submovement to the end of the trial
     def getVerificatonTime(self):
+
         endSubmovement=self.submovement_list[len(self.submovement_list)-1]
         endTime=endSubmovement.endTime
         self.verificationTime=self.finalLiftUpTime-endTime
@@ -458,7 +523,7 @@ def calculatePercentageContainingPause(pid):
     return percentages
 '''
 
-
+'''
 def test_submovement():
     pid = 891
     block=1
@@ -477,13 +542,7 @@ def test_submovement():
     print 'numOfSubmovementsBeforeFinal',numBeforeFinal
     print 'numOfSubmovementSlipOff',numSlipOff
     
-    leap.drawTargetFirstLiftUpPlot2D()
-    leap.drawRelativeTargetFirstLiftUpPlot2D(1,7)
-    leap.drawTargetFirstLiftUpPlot3D()
-    leap.drawRelativeTargetFirstLiftUpPlot3D(1,2)
-    
-    leap.drawPath()
-
+'''
 
 #print "percentage of pause"
 #print calculatePercentageContainingPause(pid)

@@ -35,8 +35,8 @@ class LeapAnalyzerOriginal:
     targetX = 0
     targetY = 0
     targetZ = 0
-
-    def __init__(self,readFile,pid,block,trial):
+    path=""
+    def __init__(self,readFile,pid,block,trial,path):
         self.frameArray=[]
         self.numberFrame=0
         self.readFile=readFile
@@ -46,6 +46,7 @@ class LeapAnalyzerOriginal:
         self.pid=pid
         self.block=block
         self.trial=trial
+        self.path=path
 
     def loadLeapData(self):
         file = self.readFile
@@ -56,8 +57,7 @@ class LeapAnalyzerOriginal:
             for row in f_csv:
                 self.frameArray.append(row)
         self.numberFrame=len(self.frameArray)
-        targetThreeCor = getTargetLocationFor3D(self.pid, self.block,
-                                                self.trial)  # with accurate start coordinate in 3D,calculate the target 3D
+        targetThreeCor = getTargetLocationFor3D(self.pid, self.block,self.trial,self.path)  # with accurate start coordinate in 3D,calculate the target 3D
         self.targetX = targetThreeCor.x
         self.targetY = targetThreeCor.y
         self.targetZ = targetThreeCor.z
@@ -100,36 +100,49 @@ class LeapAnalyzerOriginal:
     # spiral means the finger is very close to the ipad
     # and is within the 5/4 redius circle
     def calculateDecisionMakingDuration(self):
-        targetFrame = self.frameArray[self.numberFrame - 1]  # end frame represent the target
-        width=float(targetFrame[offsetSplitWidth])
+
+        endFrame = self.frameArray[self.numberFrame - 1]  # end Frame is the last frame
+        width=float(endFrame[offsetSplitWidth]) # the width of the target
+
         i=1 # skip the start frame
+
         while i < self.numberFrame-1: # skip the end frame
+
             curFrame=self.frameArray[i]
             curX=float(curFrame[offsetSplitX])
             curY=float(curFrame[offsetSplitY])
             curZ=float(curFrame[offsetSplitZ])
-            if self.judgeNearTarget(curX,curY,curZ,self.targetX,self.targetY,self.targetZ,width)==True:
+
+            if self.judgeNearTarget(curX,curY,curZ,self.targetX,self.targetY,self.targetZ,width)==True: # decisionMaking started
+
                 self.decisionMakingTime=self.decisionMakingTime+1
                 startTime=float(curFrame[offsetSplitTimestamp]) # the start time of the spiral
-                if i==self.numberFrame-2: # if the current one is the one before the end one,the loop beneath will not be executed
+
+                if i==self.numberFrame-2: # if the current one is the one before the end one,the loop  will not be executed since the end Frame should be frame[numberOfFrame-1]
                     nextFrame = self.frameArray[self.numberFrame-1]
                     endTime = float(nextFrame[offsetSplitTimestamp])
                     duration = endTime - startTime
                     self.decisionMakingDuration.append(duration)
+
                 else:
+
                     for j in range(i + 1, self.numberFrame - 1):
+
                         nextFrame = self.frameArray[j]
                         nextX = float(nextFrame[offsetSplitX])
                         nextY = float(nextFrame[offsetSplitY])
                         nextZ = float(nextFrame[offsetSplitZ])
+
                         if self.judgeNearTarget(nextX, nextY, nextZ, self.targetX, self.targetY,
-                                                self.targetZ,width) == False or j == self.numberFrame - 2:  # stop spiral or arriving at the last frame
+                                                self.targetZ,width) == False or j == self.numberFrame - 2:  # stop decisionMaking or arriving at the last frame
                             endTime = float(nextFrame[offsetSplitTimestamp])
                             duration = endTime - startTime
                             self.decisionMakingDuration.append(duration)
                             i=j # find the next spiral
                             break
+
             i=i+1
+
         mind, maxd, averaged, deviationd = get_min_max_mean_deviation_from_list(self.decisionMakingDuration) # get the statistics of the decisionMaking list
         self.meanDecideMakingDuration=averaged
 
@@ -138,7 +151,7 @@ class LeapAnalyzerOriginal:
 
 
 
-
+'''
 # test the measures from MacKenzies
 def test():
     readFile=path2+"PID_901_Block_1_Trial_3.csv"
@@ -154,7 +167,7 @@ def test():
         mins,maxs,averages,deviations=get_min_max_mean_deviation_from_list(sDuration)
         print 'min:',mins,' max:',maxs,' average:',averages,' deviations:',deviations
 
-
+'''
 
 
 #test()

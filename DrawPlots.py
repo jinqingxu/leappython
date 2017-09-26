@@ -1,19 +1,17 @@
 # this function is used to draw plots
-import numpy as np
-import matplotlib.pyplot as plt
+
 import matplotlib.cm as cm
 import numpy as np
 import csv
-import math
-import os
 import matplotlib.pyplot as plt
+from GlobalVariables import *
 from mpl_toolkits.mplot3d import Axes3D
+
+# import helper functions from other script
 from GlobalVariables import startThreeCor
 from GlobalVariables import  offset3DX
 from GlobalVariables import  offset3DY
 from GlobalVariables import offset3DZ
-# import helper functions from other script
-
 from GlobalVariables import path2
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
@@ -29,15 +27,20 @@ from GlobalVariables import offsetAndroidFirstLiftUpX
 from GlobalVariables import  offsetAndroidFirstLiftUpY
 from GlobalVariables import PixelToM
 from GlobalVariables import startThreeCor
-from FileUtils import getSortedSplitFile
-from GlobalVariables import path
+
 from GlobalVariables import offsetSplitWidth
-from SpaceUtils import getTargetLocationFor3DWithDirection
-from  SpaceUtils import  getTargetLocationFor3D
 from GlobalVariables import ThreeCorPoint
+
+from FileUtils import getSortedSplitFile
+
+from SpaceUtils import getTargetLocationFor3DWithDirection
+from SpaceUtils import  getTargetLocationFor3D
+from SpaceUtils import LocationInProjectedPlane
+
 
 # used for draw plots of path
 class FingerPath:
+
     # the start point of the path
     StartPathX=[]
     StartPathY=[]
@@ -50,6 +53,8 @@ class FingerPath:
     InterPathX=[]
     InterPathY=[]
     InterPathZ=[]
+
+
 
     def __init__(self,StartPathX,StartPathY,StartPathZ,EndPathX,EndPathY,EndPathZ,InterPathX,InterPathY,InterPathZ):
         self.StartPathX=StartPathX
@@ -66,6 +71,7 @@ class FingerPath:
 
 
 class DrawPlots:
+
     pid = 0
     block = 0
     trial = 0
@@ -77,17 +83,23 @@ class DrawPlots:
     targetY = 0
     targetZ = 0
     direction=0
-    startPathThreeCor=0
-    endPathThreeCor=0
+    projectedStartPathThreeCor=0
+    projectedEndPathThreeCor=0
+
     width=0
     amplitude=0
 
-    def __init__(self,pid):
+    path="" # the path for the raw file
+
+    def __init__(self,pid,path):
         self.pid=pid
         self.frameArray = []
         self.numberFrame = 0
+        self.path=path
+
 
     def loadLeapData(self):
+
         file = self.readFile
         self.frameArray = []
         with open(file) as f:
@@ -100,16 +112,24 @@ class DrawPlots:
         self.width = float(firstFrame[offsetSplitWidth])
         targetFrame = self.frameArray[self.numberFrame - 1]
         targetThreeCor = getTargetLocationFor3D(self.pid, self.block,
-                                                self.trial)  # with accurate start coordinate in 3D,calculate the target 3D
+                                                self.trial,self.path)  # with accurate start coordinate in 3D,calculate the target 3D
         self.targetX = targetThreeCor.x
         self.targetY = targetThreeCor.y
         self.targetZ = targetThreeCor.z
         self.targetTime = float(targetFrame[offsetSplitTimestamp])
         self.direction=float(self.frameArray[0][offsetSplitDirection])
+
         # the start of the path is the first frame
         # construct a three-cor class with x,y and z
-        self.startPathThreeCor=ThreeCorPoint(float(self.frameArray[0][offsetSplitX]),float(self.frameArray[0][offsetSplitY]),float(self.frameArray[0][offsetSplitZ]))
-        self.endPathThreeCor=ThreeCorPoint(float(self.frameArray[self.numberFrame-1][offsetSplitX]),float(self.frameArray[self.numberFrame-1][offsetSplitY]),float(self.frameArray[self.numberFrame-1][offsetSplitZ]))
+        # offset3DX,offset3DY,offset3DZ mean the offset between the position measured by leap motion and the real location measured by ruler
+        startPathThreeCor=ThreeCorPoint(float(self.frameArray[0][offsetSplitX])+offset3DX,float(self.frameArray[0][offsetSplitY])+offset3DY,float(self.frameArray[0][offsetSplitZ])+offset3DZ)
+
+        self.projectedStartPathThreeCor=LocationInProjectedPlane(startPathThreeCor) # project it in a system that tablet is vertical to the ground
+
+        endPathThreeCor=ThreeCorPoint(float(self.frameArray[self.numberFrame-1][offsetSplitX])+offset3DX,float(self.frameArray[self.numberFrame-1][offsetSplitY])+offset3DY,float(self.frameArray[self.numberFrame-1][offsetSplitZ])+offset3DZ)
+
+        self.projectedEndPathThreeCor=LocationInProjectedPlane(endPathThreeCor) # project it in a system that tablet is vertical to the ground
+
         self.amplitude=float(self.frameArray[0][offsetSplitAmplitude])
 
 
@@ -118,7 +138,7 @@ class DrawPlots:
     # the target is represented with green color
     # where the lift up points are represented with red color
     def drawTargetFirstLiftUpPlot2D(self):
-        file = path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
+        file = self.path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
         targetX_list = []
         targetY_list = []
         liftUpX_list = []
@@ -161,7 +181,7 @@ class DrawPlots:
 
     # the distribution of lift up in the first attempt
     def drawTargetFirstLiftUpPlot3D(self):
-        fileandroid = path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
+        fileandroid = self.path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
         firstLiftUpTime_list = []
         offsetFirstLiftUp = 20
         # store 3D cors for target
@@ -181,18 +201,20 @@ class DrawPlots:
         files = getSortedSplitFile(path2, self.pid)
         for i in range(len(firstLiftUpTime_list)):
             self.readFile = path2 + files[i]
+            filenameSplit=files[i].split('_')
+            self.block = int(filenameSplit[3])
+            self.trial = int(filenameSplit[5][0:-4])
             self.loadLeapData()
             targetX_list.append(float(self.targetX))
             targetY_list.append(float(self.targetY))
             targetZ_list.append(float(self.targetZ))
-            print firstLiftUpTime_list[i]
+            #print firstLiftUpTime_list[i]
             loc = self.getFirstLiftUpCors(firstLiftUpTime_list[i])
             firstLiftUpX_list.append(float(self.frameArray[loc][offsetSplitX]))
             firstLiftUpY_list.append(float(self.frameArray[loc][offsetSplitY]))
             firstLiftUpZ_list.append(float(self.frameArray[loc][offsetSplitZ]))
-            print 'targetX', 'targetY', 'targetZ', 'firstLiftUpX', 'firstLiftUpY', 'firstLiftUpZ'
-            print self.targetX, self.targetY, self.targetZ, self.frameArray[loc][offsetSplitX], self.frameArray[loc][
-                offsetSplitY], self.frameArray[loc][offsetSplitZ]
+            #print 'targetX', 'targetY', 'targetZ', 'firstLiftUpX', 'firstLiftUpY', 'firstLiftUpZ'
+            #print self.targetX, self.targetY, self.targetZ, self.frameArray[loc][offsetSplitX], self.frameArray[loc][offsetSplitY], self.frameArray[loc][offsetSplitZ]
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         # draw the tablet plane
@@ -210,7 +232,8 @@ class DrawPlots:
         plt.show()
 
     def drawRelativeTargetFirstLiftUpPlot3D(self, block, trial):
-        fileandroid = path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
+
+        fileandroid = self.path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
         offsetFirstLiftUp = 20
         # store 3D cors for target
         targetX_list = []
@@ -234,6 +257,8 @@ class DrawPlots:
                     break
         file = path2 + "PID_" + str(self.pid) + "_Block_" + str(block) + "_Trial_" + str(trial) + ".csv"
         self.readFile = file
+        self.block=block
+        self.trial=trial
         self.loadLeapData()
         loc = self.getFirstLiftUpCors(firstLiftUpTime)  # get the index of the first lift up frame
         firstLiftUpX_list.append(float(self.frameArray[loc][
@@ -258,7 +283,7 @@ class DrawPlots:
         plt.show()
 
     def drawRelativeTargetFirstLiftUpPlot2D(self, block, trial):
-        file = path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
+        file = self.path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
         targetX_list = []
         targetY_list = []
         liftUpX_list = []
@@ -303,26 +328,48 @@ class DrawPlots:
     # cumulate points to form a plane
     # return the point list of the plane
     def drawTabletPlane(self):
+
         X = []
         Y = []
         Z = []
-        # use points to draw the tablet planee
-        startX = -90
-        startY = 0
-        startZ = -48
-        lengthX = 200
-        # 45 * sqrt(2)
-        lengthY = 60
+
+        lengthX = 200 # half the length
+        lengthY = 40 # half the width
         changeX = 0
-        changeY = 0
-        step = 0.8  # the density of the points in the plane
+        step = 1.5  # the density of the points in the plane
         while changeX < lengthX:
             changeY = 0
             while changeY < lengthY:
-                X.append(startX + changeX)
-                Y.append(startY + changeY)
-                Z.append(
-                    startZ - changeY)  # the angle is 45 degree, so the absolute change of Y and Z should be the same
+                X.append(start3DX + changeX)
+                Y.append(start3DY + changeY)
+                Z.append(start3DZ - changeY)  # the angle is 45 degree, so the absolute change of Y and Z should be the same
+                changeY += step
+            changeX += step
+        changeX=0
+        while changeX < lengthX:
+            changeY = 0
+            while changeY < lengthY:
+                X.append(start3DX - changeX)
+                Y.append(start3DY - changeY)
+                Z.append(start3DZ + changeY)  # the angle is 45 degree, so the absolute change of Y and Z should be the same
+                changeY += step
+            changeX += step
+        changeX = 0
+        while changeX < lengthX:
+            changeY = 0
+            while changeY < lengthY:
+                X.append(start3DX + changeX)
+                Y.append(start3DY - changeY)
+                Z.append(start3DZ + changeY)  # the angle is 45 degree, so the absolute change of Y and Z should be the same
+                changeY += step
+            changeX += step
+        changeX = 0
+        while changeX < lengthX:
+            changeY = 0
+            while changeY < lengthY:
+                X.append(start3DX - changeX)
+                Y.append(start3DY + changeY)
+                Z.append(start3DZ - changeY)  # the angle is 45 degree, so the absolute change of Y and Z should be the same
                 changeY += step
             changeX += step
         return X, Y, Z
@@ -384,11 +431,13 @@ class DrawPlots:
     '''
 
     # draw the path of the finger
-    def drawStartAndEnd(self,mode):
+    def drawStartAndEnd(self,dimension,mode):
+
         files = getSortedSplitFile(path2, self.pid)
         # the key is the direction
         # the value is a list of value in the class of FingerPath
         FingerPath_map = {}
+
         for file in files:
             self.readFile = path2 + file
             keys = file.split('_')
@@ -414,30 +463,44 @@ class DrawPlots:
             InterPathZ = []
 
             # store the location of the start of the path
-            StartPathX.append(self.startPathThreeCor.x+offset3DX)
-            StartPathY.append(self.startPathThreeCor.y+offset3DY)
-            StartPathZ.append(self.startPathThreeCor.z+offset3DZ)
+            StartPathX.append(self.projectedStartPathThreeCor.x)
+            StartPathY.append(self.projectedStartPathThreeCor.y)
+            StartPathZ.append(self.projectedStartPathThreeCor.z)
             # store the location of the end of the path
-            EndPathX.append(self.endPathThreeCor.x+offset3DX)
-            EndPathY.append(self.endPathThreeCor.y+offset3DY)
-            EndPathZ.append(self.endPathThreeCor.z+offset3DZ)
+            EndPathX.append(self.projectedEndPathThreeCor.x)
+            EndPathY.append(self.projectedEndPathThreeCor.y)
+            EndPathZ.append(self.projectedEndPathThreeCor.z)
             # store the path of the finger excluding the start and end
 
             for i in range(1,self.numberFrame-1):
-                InterPathX.append(float(self.frameArray[i][offsetSplitX])+offset3DX)
-                InterPathY.append(float(self.frameArray[i][offsetSplitY])+offset3DY)
-                InterPathZ.append(float(self.frameArray[i][offsetSplitZ])+offset3DZ)
-
+                # construct a 3D point class for the path point
+                pathThreeCor=ThreeCorPoint(float(self.frameArray[i][offsetSplitX])+offset3DX,float(self.frameArray[i][offsetSplitY])+offset3DY,float(self.frameArray[i][offsetSplitZ])+offset3DZ)
+                # project it in the system that tablet is vertical to the ground
+                projectedPathThreeCor=LocationInProjectedPlane(pathThreeCor)
+                InterPathX.append(projectedPathThreeCor.x)
+                InterPathY.append(projectedPathThreeCor.y)
+                InterPathZ.append(projectedPathThreeCor.z)
             fingerPath = FingerPath(StartPathX,StartPathY,StartPathZ,EndPathX,EndPathY,EndPathZ,InterPathX,InterPathY,InterPathZ)
             FingerPath_map[self.direction].append(fingerPath)
 
-        maxPath=30
+        if mode==1:
+            maxPath=30
+        else:
+            maxPath=4 # too much path will make the whole plot a mass
+
         colors = cm.rainbow(np.linspace(0, 1, maxPath))
 
         for key in FingerPath_map.keys():
             # with accurate start coordinate in 3D,calculate the target 3D
             # key is the current direction
+            # we do not need to add offset3DX,offset3DY,offset3DZ to startThreeCor since it's the real position measured by ruler
+            # project it to a system that tablet is vertical to the ground
+            projectedStartThreeCor = LocationInProjectedPlane(startThreeCor)
+            # since targetThreeCor is calculated based on the startThreeCor,amplitude and direction,it also do not need to add offset3DX,offset3DY,offset3DZ
             targetThreeCor = getTargetLocationFor3DWithDirection(key,self.amplitude)
+            # project it to a system that tablet is vertical to the ground
+            projectedTargetThreeCor=LocationInProjectedPlane(targetThreeCor)
+
 
             # used for draw the real start button and real target
             # the draw plot function need list for x,y,z as input
@@ -449,59 +512,124 @@ class DrawPlots:
             RealTargetY_list=[]
             RealTargetZ_list=[]
 
-            RealStartX_list.append(startThreeCor.x)
-            RealStartY_list.append(startThreeCor.y)
-            RealStartZ_list.append(startThreeCor.z)
+            RealStartX_list.append(projectedStartThreeCor.x)
+            RealStartY_list.append(projectedStartThreeCor.y)
+            RealStartZ_list.append(projectedStartThreeCor.z)
 
-            RealTargetX_list.append(targetThreeCor.x)
-            RealTargetY_list.append(targetThreeCor.y)
-            RealTargetZ_list.append(targetThreeCor.z)
+            RealTargetX_list.append(projectedTargetThreeCor.x)
+            RealTargetY_list.append(projectedTargetThreeCor.y)
+            RealTargetZ_list.append(projectedTargetThreeCor.z)
 
             fig = plt.figure()
-            if mode==3:
+
+            # the range of x
+            minX = -60
+            maxX = 60
+            # the range of y
+            minY = 20
+            maxY = 140
+
+
+            if dimension==3:
                 ax = fig.add_subplot(111, projection='3d')
-                if key == 90.0 or key == 270.0:
-                    ax.view_init(30, 35)
+                ax.set_aspect('equal') # to ensure x,y and z have then same scale
+                # rotate the plot
+                #if key == 90.0 or key == 270.0:
+                    #ax.view_init(30, 35)
+
+            else: # 2D
+
+                width=5 # the width of the plot
+                rangeX=maxX-minX
+                rangeY=maxY-minY
+                height=(rangeY/(rangeX+0.0))*width
+                plt.figure(figsize=(width, height), dpi=100)
+                plt.xlim(minX,maxX)
+                plt.ylim(minY,maxY)
+
+            if dimension == 3:
+
+                # draw the center of the start circle
+                ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='b', label='Real start', alpha=1, marker='o', s=1)
+                # draw the start button at real size
+                ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start', alpha=1, marker='o', s=500)
+                # in case the center is covered by the circle, we draw it again
+                # draw the center of the start circle
+                ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='b', label='Real start', alpha=1,marker='o', s=1)
+                # draw the center of the target circle
+                ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='b', label='First Lift Up', alpha=1,marker='o', s=1)
+                # draw the target button at real size
+                ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='y', label='First Lift Up',alpha=1,marker='o', s=280)
+
+
+            else:
+
+                # draw the start button at real size
+                plt.scatter(RealStartX_list, RealStartY_list, c='r', label='Real start', alpha=1, marker='o',s=500)
+                # draw the center of the start circle
+                plt.scatter(RealStartX_list, RealStartY_list, c='b', label='Real start', alpha=1, marker='o', s=1)
+                # draw the target at real size
+                plt.scatter(RealTargetX_list, RealTargetY_list, c='y', label='First Lift Up', alpha=1, marker='o',s=280)
+                # draw the target center
+                plt.scatter(RealTargetX_list, RealTargetY_list, c='b', label='First Lift Up', alpha=1, marker='o',s=1)
 
             k=0
             for p in FingerPath_map[key]:
                 if k==maxPath:
                     break
-                if mode==3:
-                    ax.scatter(p.StartPathX, p.StartPathY,p.StartPathZ, c=colors[k], label = 'Start', alpha = 1,marker = '+', s = 30, edgecolors = 'black')
-                    ax.scatter(p.EndPathX,p.EndPathY,p.EndPathZ, c=colors[k], label='First Lift Up', alpha=1,marker='o', s=30, edgecolors='black')
-                    #ax.scatter(p.InterPathX, p.InterPathY,p.InterPathZ, c=colors[k], label = 'Start', alpha = 1,marker = 'o', s = 30)
+                if dimension==3:
+                    ax.scatter(p.StartPathX, p.StartPathY,p.StartPathZ, c=colors[k], label = 'Start', alpha = 1,marker = '+', s = 10, edgecolors = 'black')
+                    ax.scatter(p.EndPathX,p.EndPathY,p.EndPathZ, c=colors[k], label='First Lift Up', alpha=1,marker='o', s=10, edgecolors='black')
+                    if mode==2:
+                        ax.scatter(p.InterPathX, p.InterPathY,p.InterPathZ, c=colors[k], label = 'Start', alpha = 1,marker = 'o', s = 10)
                 else:
-                    plt.scatter(p.StartPathX, p.StartPathY, c=colors[k], label='Start', alpha=1,marker='+', s=30, edgecolors='black')
-                    plt.scatter(p.EndPathX, p.EndPathY, c=colors[k], label='First Lift Up', alpha=1,marker='o', s=30, edgecolors='black')
-                    #plt.scatter(p.InterPathX, p.InterPathY, c=colors[k], label='Start', alpha=1,marker='o', s=30)
+                    plt.scatter(p.StartPathX, p.StartPathY, c=colors[k],  alpha=1,marker='+', s=10)
+                    plt.scatter(p.EndPathX, p.EndPathY, c=colors[k],  alpha=1,marker='o', s=10)
+                    if mode==2:
+                        plt.scatter(p.InterPathX, p.InterPathY, c=colors[k],  alpha=1,marker='o', s=10)
                 k=k+1
 
-            if mode==3:
-                ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start', alpha=1,
-                       marker='o', s=200)
-                ax.scatter(RealTargetX_list, RealTargetY_list,RealTargetZ_list, c='y', label='First Lift Up', alpha=1,
-                       marker='o', s=200)
-            else:
-                plt.scatter(RealStartX_list, RealStartY_list, c='r', label='Real start', alpha=1,
-                           marker='o', s=200)
-                plt.scatter(RealTargetX_list, RealTargetY_list, c='y', label='First Lift Up', alpha=1,
-                           marker='o', s=200)
-
-            if mode==3:
+            if dimension==3:
                 ax.set_zlabel('Z(mm)')
                 ax.set_ylabel('Y(mm)')
                 ax.set_xlabel('X(mm)')
+                self.set_axes_equal(ax)
             else:
                 plt.xlabel('X(mm)')
                 plt.ylabel('Y(mm)')
 
-            plt.title('start and end points of path in an experiment with direction of '+str(key))
-            if mode==2:
+            plt.title('start and end in an experiment with direction of '+str(key))
+            if dimension==2:
                 plt.grid()
             plt.show()
 
 
+    # draw the distribution of pause
+
+
+    # this function is used for helping make the scale of x,y and z the same
+    def set_axes_equal(self, ax):
+
+        """Fix equal aspect bug for 3D plots."""
+
+        xlim = ax.get_xlim3d()
+        ylim = ax.get_ylim3d()
+        zlim = ax.get_zlim3d()
+
+        from numpy import mean
+        xmean = mean(xlim)-3
+        ymean = mean(ylim)
+        zmean = mean(zlim)
+
+        plot_radius = max([abs(lim - mean_)
+                           for lims, mean_ in ((xlim, xmean),
+                                               (ylim, ymean),
+                                               (zlim, zmean))
+                           for lim in lims])
+
+        ax.set_xlim3d([xmean - plot_radius, xmean + plot_radius])
+        ax.set_ylim3d([ymean - plot_radius, ymean + plot_radius])
+        ax.set_zlim3d([zmean - plot_radius, zmean + plot_radius])
 
 
 
@@ -509,12 +637,3 @@ class DrawPlots:
 
 
 
-# test function
-def test_DrawPlots():
-    pid=851
-    drawPlots=DrawPlots(pid)
-    #drawPlots.drawPath()
-    mode=2
-    drawPlots.drawStartAndEnd(mode)
-
-test_DrawPlots()

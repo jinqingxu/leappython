@@ -1,5 +1,6 @@
 # used to store global variables that are used in many scripts
 import math
+
 # the index of data in android file
 offsetAndroidStartTime = 11
 offsetAndroidFinalLiftUp = 24
@@ -22,9 +23,11 @@ offsetLeapX=3
 offsetLeapY=4
 offsetLeapZ=5
 
+
 #workpath
-path = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
-path2 = "/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/split/"
+pathheader = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
+
+path2 = pathheader+"split/"
 
 # index of the data from split files
 offsetSplitX = 9
@@ -45,9 +48,9 @@ offsetDisTrial=1
 offsetDisAmplitude=2
 offsetDisWidth=3
 offsetDisDirection=4
-offsetDisDistance=5
-offsetDisDifference=6
-offsetDisAbsDifference=7
+offsetDisDistance=7
+offsetDisDifference=8
+offsetDisAbsDifference=9
 
 # pixel to mm
 # 1 pixel = 0.0794 mm(calculated by Irene)
@@ -75,13 +78,19 @@ class TwoCorPoint:
 
 # 3D coordinates for the start button
 # measured by ruler
-start3DX=0.74
-start3DY=56.5
+start3DX=0
+start3DY=50
 start3DZ=-85
+
+# locations measured by leap motion
+startLeap3DX=3.38
+startLeap3DY=62.406
+startLeap3DZ=-78.133
+
 # the offset of the start measured by leap motion relative to the real position is x,y,z
-offset3DX=-0.74
-offset3DY=-3.3
-offset3DZ=-5.5
+offset3DX=start3DX-startLeap3DX
+offset3DY=start3DY-startLeap3DY
+offset3DZ=start3DZ-startLeap3DZ
 
 # 2D coordinates for the start button
 # in pixel

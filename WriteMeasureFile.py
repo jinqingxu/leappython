@@ -1,7 +1,6 @@
 # append errors,measures from Mackenzie,measures from Hwang and measures of our work in the TwoD_measurement.csv file
 
-from GlobalVariables import path2 # the split path
-from GlobalVariables import  path
+
 from LeapAnalyzerMackenzie import *
 from ErrorUtils import *
 
@@ -15,7 +14,7 @@ from GlobalVariables import  offsetAndroidFirstTouchDownY
 
 from FileUtils import  getSortedSplitFile
 
-from LeapAnalyzerHuang import LeapAnalyzerHuang
+from LeapAnalyzerHwang import *
 from LeapAnalyzerOriginal import LeapAnalyzerOriginal
 
 # since TRE and firstTRE are calculated in the android code,we need to move them to the mackenzie measures part
@@ -24,7 +23,7 @@ firstTRE=[]
 TRE=[]
 
 # restore the original data and append errors
-def writeErrorForEveryTrial(pid,datas,headers):
+def writeErrorForEveryTrial(pid,datas,path):
 
     androidfile=path+'PID_'+str(pid)+'_TwoDFittsData_External.csv'
 
@@ -62,8 +61,10 @@ def writeErrorForEveryTrial(pid,datas,headers):
 
     return datas,headers
 
+
+
 # append measures of mackenzie into datas and headers
-def writeMackenzieMeasurements(pid,files,datas,headers):
+def writeMackenzieMeasurements(pid,files,datas,headers,path):
 
     # headers for measures from mackenzie
     macHeaders = ['FirstRe-Entry', 'AverageNumOfRe-Entry', 'MovementDirectionChangeX', 'MovementDirectionChangeY',
@@ -76,7 +77,7 @@ def writeMackenzieMeasurements(pid,files,datas,headers):
         block = keys[3]
         trial = int(keys[5][0:-4])
 
-        leap = LeapAnalyzerMackenzie(path2 + files[i],pid,block,trial)
+        leap = LeapAnalyzerMackenzie(path2 + files[i],pid,block,trial,path)
         leap.loadLeapData()
         # leap.calculateNumberOfFrame()
         leap.calculateMovementDirectionChange() # get the movement change on X,Y,Z axis
@@ -97,18 +98,21 @@ def writeMackenzieMeasurements(pid,files,datas,headers):
     return datas,headers
 
 # append measures of Hwang and our work into datas and headers
-def writeHwangMeasurements(pid,files,datas,headers):
+def writeHwangMeasurements(pid,files,datas,headers,path):
 
     # headers for measures from Hwang
     hwangHeaders=['NumberOfPause','MeanPauseDuration(ms)','Verification Time(ms)','NumberOfSubmovement','PeekSpeed(mm/s)','NumberOfDecisionMaking','MeanDecisionMakingDuration(ms)']
     headers.extend(hwangHeaders)
 
     for i in range(len(files)):
+
         # get the current block and trial for the file
         keys = files[i].split('_')
         block = keys[3]
         trial = int(keys[5][0:-4])
-        leap = LeapAnalyzerHuang(path2+files[i], pid, block, trial)
+
+        # measurements for HWang
+        leap = LeapAnalyzerHwang(path2+files[i], pid, block, trial,path)
         leap.loadLeapData()
         leap.getSubmovements() # get the submovement_list,all measures from Hwang are based on this data
         leap.calculatePauseTime() # get how many pauses happens per trial and the mean pause duration
@@ -116,12 +120,15 @@ def writeHwangMeasurements(pid,files,datas,headers):
 
         # put data from measures of Hwang into an array
         hwangData=[leap.pauseTime,leap.meanPauseDuration,leap.getVerificatonTime(),leap.getTotalNumOfSubMovement(),leap.trialPeekSpeed]
-        # initial a Leap Analyzer for measures of our work
-        # there is current one measure called decision making
-        # decision making means when the finger tip is very close to the tablet and within the area of 5/4 radius.
-        leap2=LeapAnalyzerOriginal(path2+files[i],pid,block,trial)
+
+        # initial a Leap Analyzer for original measurments proposed in our work
+        # there is current one measure called decisionMaking
+        # decisionMaking means when the finger tip is very close to the tablet and within the area of 5/4 radius.
+        # it serves as a supplement for verification time
+        leap2=LeapAnalyzerOriginal(path2+files[i],pid,block,trial,path)
         leap2.loadLeapData()
         leap2.calculateDecisionMakingDuration() # get how many time decision making happens and the mean duration
+
         hwangData.append(leap2.decisionMakingTime) # append the data of decision making into the result array
         hwangData.append(leap2.meanDecideMakingDuration)
 
@@ -131,24 +138,25 @@ def writeHwangMeasurements(pid,files,datas,headers):
     return datas,headers
 
 
-def writeFiles():
+def writeFiles(pid,path):
     # first write the error
-    pid=851
     # the whole data list consists of the original data,error,measurement from Mackenzie and measurement form Huang
     # a two-dimentional array
     datas = []
     # the headers consists of the original headers,the error headers,mackenzie headers,hwang headers
     headers = []
 
-    datas,headers=writeErrorForEveryTrial(pid,datas,headers) # append error datas ,those data only need data from android
+    datas,headers=writeErrorForEveryTrial(pid,datas,path) # append error datas ,those data only need data from android
 
     # the measurement from mackenzie,hwang and our work need the split data from leap motion
     files = getSortedSplitFile(path2, pid)  # the files are sorted as the sequence of datas,block is of the highest priority,then trial
-    datas,headers=writeMackenzieMeasurements(pid,files,datas,headers)  # append measures from Mackenzie
-    datas,headers=writeHwangMeasurements(pid,files,datas,headers)   # append measures from Hwang
+    datas,headers=writeMackenzieMeasurements(pid,files,datas,headers,path)  # append measures from Mackenzie
+    datas,headers=writeHwangMeasurements(pid,files,datas,headers,path)   # append measures from Hwang
+
     # write the new TwoD_measurment file with all measurements
     # do not overwrite the old android data in case some problems occur. We need the raw data.
     newfile = path + 'PID_' + str(pid) + '_TwoDFittsData_External_Measurements.csv'
+
     with open(newfile, 'w') as f:
         w_csv = csv.writer(f)
         w_csv.writerow(headers)
@@ -156,4 +164,3 @@ def writeFiles():
             w_csv.writerow(d)
 
 
-writeFiles()

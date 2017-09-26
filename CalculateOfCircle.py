@@ -24,7 +24,7 @@ from GlobalVariables import offsetDisDirection
 from GlobalVariables import offsetDisDistance
 from GlobalVariables import offsetDisAbsDifference
 from GlobalVariables import offsetDisDifference
-from GlobalVariables import path
+
 from GlobalVariables import  path2
 from FileUtils import getSortedSplitFile
 
@@ -106,7 +106,7 @@ def get_min_max_mean_deviation_from_list(l):
     return min_l, max_l, sum_l / (len(l) + 0.0),max_l-min_l
 
 # write PID_XXX_Dis_Difference_Android_Leap.csv
-def write_dis_difference(pid):
+def write_dis_difference(pid,path):
 
     file2 = path + 'PID_' + str(pid) + '_TwoDFittsData_External.csv'  # android data
     # headers for the new written file
@@ -138,11 +138,9 @@ def write_dis_difference(pid):
                 datas.append(difdata)
             files=getSortedSplitFile(path2,pid)
             for i in range(len(datas)):
-                if i==0:
-                    continue
-                f = open(path + '/split/' + files[i], "r")
+                f = open(path2 + files[i], "r")
                 length = len(f.readlines())  # get the length of the csv file
-                with open(path + '/split/' + files[i]) as f:
+                with open(path2 + files[i]) as f:
                     f_csv = csv.reader(f)
                     next(f_csv)  # skip headers of csv
                     k = 1  # begin with the second line
@@ -209,7 +207,7 @@ def write_dis_difference(pid):
 
 
 # find the min,max,average abs_difference of all combinations of amplitude,width and direction
-def statistic_combination(pid):
+def statistic_combination(pid,path):
 
     dis_list = [] # the statistic data list
 
@@ -303,13 +301,13 @@ def dis_cmp(x,y):
                 return 1
             if x.direction==y.direction:
                 return 0
-
-
+'''
 # the range of x is from -6 to 6
 # the accurate value for y is 66,for z is -87.85
 pid=851
 write_dis_difference(pid)
 statistic_combination(pid)
+'''
 
 
 

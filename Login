@@ -1,0 +1,30 @@
+# start the whole program
+
+from GlobalVariables import  pathheader
+from WriteMeasureFile import *
+from CalculateOfCircle import *
+from Split import *
+from DrawPlots import *
+def startProgram():
+
+    pid = input("Please enter pid:")
+    path=pathheader+'PID_'+str(pid)+'/'
+    process_split(pid,path)
+    write_dis_difference(pid,path)
+    statistic_combination(pid,path)
+    writeFiles(pid,path)
+
+    drawPlots = DrawPlots(pid,path)
+    '''
+    drawPlots.drawTargetFirstLiftUpPlot3D()
+    drawPlots.drawRelativeTargetFirstLiftUpPlot3D(1,1)
+    drawPlots.drawTargetFirstLiftUpPlot2D()
+    drawPlots.drawRelativeTargetFirstLiftUpPlot2D(1,1)
+    '''
+    dimension = input("Please enter dimension for plots:3 represents 3D,2 represents 2D")
+    mode = input("Please enter mode for plots: 1 represent start and end/ 2 represent path")
+    drawPlots.drawStartAndEnd(dimension,mode)
+
+startProgram()
+
+
