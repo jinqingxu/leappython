@@ -83,9 +83,9 @@ start3DY=50
 start3DZ=-85
 
 # locations measured by leap motion
-startLeap3DX=3.38
-startLeap3DY=62.406
-startLeap3DZ=-78.133
+startLeap3DX=3.82
+startLeap3DY=61.43
+startLeap3DZ=-76.92
 
 # the offset of the start measured by leap motion relative to the real position is x,y,z
 offset3DX=start3DX-startLeap3DX

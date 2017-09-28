@@ -5,9 +5,12 @@ from WriteMeasureFile import *
 from CalculateOfCircle import *
 from Split import *
 from DrawPlots import *
-def startProgram():
 
-    pid = input("Please enter pid:")
+def processOneExperiment(pid):
+
+    dimensionList = [2, 3]
+    modeList = ['start_and_end', 'path']
+
     path=pathheader+'PID_'+str(pid)+'/'
     process_split(pid,path)
     write_dis_difference(pid,path)
@@ -15,16 +18,51 @@ def startProgram():
     writeFiles(pid,path)
 
     drawPlots = DrawPlots(pid,path)
+
+
+    pathForFirstLiftUpPlots=path+'firstLiftUpPlots/'
+    os.mkdir(pathForFirstLiftUpPlots)
+    os.mkdir(pathForFirstLiftUpPlots + 'relative_3d'  + '/')
+    os.mkdir(pathForFirstLiftUpPlots + 'relative_2d' + '/')
+
     '''
-    drawPlots.drawTargetFirstLiftUpPlot3D()
-    drawPlots.drawRelativeTargetFirstLiftUpPlot3D(1,1)
-    drawPlots.drawTargetFirstLiftUpPlot2D()
-    drawPlots.drawRelativeTargetFirstLiftUpPlot2D(1,1)
+    drawPlots.drawRelativeTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
+    drawPlots.drawTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
+    drawPlots.drawRelativeTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
+    drawPlots.drawTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
     '''
-    dimension = input("Please enter dimension for plots:3 represents 3D,2 represents 2D")
-    mode = input("Please enter mode for plots: 1 represent start and end/ 2 represent path")
-    drawPlots.drawStartAndEnd(dimension,mode)
+
+    pathForFinalLiftUpPlots = path + 'finalLiftUpPlots/'
+
+
+    os.mkdir(pathForFinalLiftUpPlots)
+
+    for d in dimensionList:
+        for m in modeList:
+            os.mkdir(pathForFinalLiftUpPlots + str(d) + 'd_' + 'mode_' + str(m)+'/')
+
+
+
+    drawPlots.drawStartAndEnd(pathForFinalLiftUpPlots)
+
+def startProgram():
+
+    for dir in os.listdir(pathheader):
+        child = os.path.join(pathheader, dir)
+        if os.path.isdir(child):
+            keys=child.split('/')
+            if keys[len(keys)-1][0:4]=='PID_': # go through all the folder that contain datas from experiment
+                keys2=keys[len(keys)-1].split('_') # split PID_pid to get the pid
+                pid=keys2[len(keys2)-1]
+                if pid!='8888':  # 8888 is for crossHair experiment
+                    print pid
+                    processOneExperiment(pid)
+
+
+
+
 
 startProgram()
+
 
 

@@ -2,6 +2,7 @@
 from numpy import *
 import numpy as np
 import matplotlib.pyplot as plt
+'''
 N = 50 # 点的个数
 x=[1,2,3]
 y=[4,5,6]
@@ -20,3 +21,26 @@ plt.zlabel('First Lift Up X(pixel)')
 plt.legend()
 plt.grid(True)
 plt.show()
+'''
+
+
+class we:
+
+    a=0
+    b=0
+    c=0
+
+    def __eq__(self, other):
+
+        return self.a==other.a and self.b==other.b and self.c==other.c
+
+    def __init__(self,a,b,c):
+
+        self.a=a
+        self.b=b
+        self.c=c
+
+q1=we(1,1,1)
+q2=we(1,1,1)
+if q1== q2:
+    print "ok"
