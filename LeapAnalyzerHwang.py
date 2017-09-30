@@ -14,7 +14,7 @@ from mpl_toolkits.mplot3d import Axes3D
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from SpaceUtils import calculate_3D_Dis_Of_Two_Points
 
-from GlobalVariables import path2
+
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
 from GlobalVariables import offsetSplitZ

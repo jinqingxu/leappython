@@ -21,25 +21,24 @@ def processOneExperiment(pid):
 
 
     pathForFirstLiftUpPlots=path+'firstLiftUpPlots/'
-    os.mkdir(pathForFirstLiftUpPlots)
-    os.mkdir(pathForFirstLiftUpPlots + 'relative_3d'  + '/')
-    os.mkdir(pathForFirstLiftUpPlots + 'relative_2d' + '/')
+    if not os.path.exists(pathForFirstLiftUpPlots):
+        os.mkdir(pathForFirstLiftUpPlots)
+        os.mkdir(pathForFirstLiftUpPlots + 'relative_3d' + '/')
+        os.mkdir(pathForFirstLiftUpPlots + 'relative_2d' + '/')
 
-    '''
     drawPlots.drawRelativeTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
     drawPlots.drawTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
     drawPlots.drawRelativeTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
     drawPlots.drawTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
-    '''
 
     pathForFinalLiftUpPlots = path + 'finalLiftUpPlots/'
+    if not os.path.exists(pathForFinalLiftUpPlots):
 
+        os.mkdir(pathForFinalLiftUpPlots)
 
-    os.mkdir(pathForFinalLiftUpPlots)
-
-    for d in dimensionList:
-        for m in modeList:
-            os.mkdir(pathForFinalLiftUpPlots + str(d) + 'd_' + 'mode_' + str(m)+'/')
+        for d in dimensionList:
+            for m in modeList:
+                os.mkdir(pathForFinalLiftUpPlots + str(d) + 'd_' + 'mode_' + str(m) + '/')
 
 
 
@@ -62,7 +61,7 @@ def startProgram():
 
 
 
-startProgram()
-
+#startProgram()
+processOneExperiment(100)
 
 

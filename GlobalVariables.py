@@ -1,6 +1,7 @@
 # used to store global variables that are used in many scripts
 import math
-
+import csv
+import time
 # the index of data in android file
 offsetAndroidStartTime = 11
 offsetAndroidFinalLiftUp = 24
@@ -27,7 +28,7 @@ offsetLeapZ=5
 #workpath
 pathheader = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
 
-path2 = pathheader+"split/"
+#path2 = pathheader+"split/"
 
 # index of the data from split files
 offsetSplitX = 9
@@ -83,14 +84,47 @@ start3DY=50
 start3DZ=-85
 
 # locations measured by leap motion
-startLeap3DX=3.82
-startLeap3DY=61.43
-startLeap3DZ=-76.92
+startLeap3DX=3.42
+startLeap3DY=58.42
+startLeap3DZ=-75.76
 
 # the offset of the start measured by leap motion relative to the real position is x,y,z
 offset3DX=start3DX-startLeap3DX
 offset3DY=start3DY-startLeap3DY
 offset3DZ=start3DZ-startLeap3DZ
+
+# input a pid
+# output the offsetX,offsetY,offsetZ of the nearest experiment before PID_XXX
+def getOffetXYZ(pid):
+
+    readfile=pathheader+'PID_'+pid+'/'+"PID_"+str(pid)+"_Data_from_LEAPtest_results_Frame.csv"
+
+    # get the dateTime of the target select experiment
+    with open(readfile) as f:
+
+        f_csv = csv.reader(f)
+        i=0
+        dateTimeStr=""
+        for row in f_csv:
+            if i==1: # date
+                dateList=row.Split(':')
+                dateList2=dateList[1].strip().split('/') # demo value: 2017 09 30  use strip to remove space
+                dateTimeStr=dateList2[0]+'-'+dateList2[1]+'-'+dateList2[2]
+            if i==2: # time
+                timeStr=row[5:len(row)]
+                dateTimeStr+=timeStr
+            i=i+1
+            if i>=3:
+                break
+
+        dateTimeTargetSelect=time.strptime(dateTimeStr, "%Y-%m-%d %H:%M:%S")
+        print(dateTimeTargetSelect)
+
+
+
+
+
+
 
 # 2D coordinates for the start button
 # in pixel

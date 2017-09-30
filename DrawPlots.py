@@ -14,7 +14,7 @@ from GlobalVariables import startThreeCor
 from GlobalVariables import  offset3DX
 from GlobalVariables import  offset3DY
 from GlobalVariables import offset3DZ
-from GlobalVariables import path2
+
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
 from GlobalVariables import offsetSplitZ
@@ -109,14 +109,18 @@ class DrawPlots:
     targetZ = 0
 
 
+
+
     path="" # the path for the raw file
 
+    path2=""
     def __init__(self,pid,path):
 
         self.pid=pid
         self.frameArray = []
         self.numberFrame = 0
         self.path=path
+        self.path2=self.path+'split/'
 
 
     def loadLeapData(self):
@@ -166,21 +170,43 @@ class DrawPlots:
             f_csv = csv.reader(f)
             for i in range(0, 10):  # skip the beginning
                 next(f_csv)
-            for row in f_csv:
-                targetX_list.append(float(row[offsetAndroidTargetX]) * PixelToM)  # change from Pixel to mm
-                targetY_list.append(float(row[offsetAndroidTargetY]) * PixelToM)
-                liftUpX_list.append(float(row[offsetAndroidFirstLiftUpX]) * PixelToM)
-                liftUpY_list.append(float(row[offsetAndroidFirstLiftUpY]) * PixelToM)
-            matplotlib.rcParams.update({'font.size': 10})
-            # draw the picture
+             # draw the picture
             plotTitle = 'Distribution of First Lift Up in 2D in one trial'
             # we need to make the scale of x and y equal
             plt.figure(figsize=(5, 5), dpi=100)
             plt.title(plotTitle)
-            plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o', label='Target', s=100,
+
+            width=0
+
+            for row in f_csv:
+
+                targetX_list=[]
+                targetY_list=[]
+
+                if width == 0:
+                    width = float(row[offsetAndroidWidth])
+                    #print width
+                    sizeOfTarget = 0
+                    if abs(width - 4.88) < 0.5:
+                        sizeOfTarget = 180
+                    if abs(width - 7.22) < 0.5:
+                        sizeOfTarget = 340
+                    if abs(width - 9.22) < 0.5:
+                        sizeOfTarget = 500
+                    width=0
+                targetX_list.append(float(row[offsetAndroidTargetX]) * PixelToM)  # change from Pixel to mm
+                targetY_list.append(float(row[offsetAndroidTargetY]) * PixelToM)
+                liftUpX_list.append(float(row[offsetAndroidFirstLiftUpX]) * PixelToM)
+                liftUpY_list.append(float(row[offsetAndroidFirstLiftUpY]) * PixelToM)
+                plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o', s=sizeOfTarget,
                             edgecolors='black')
-            plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o', label='FLU', s=30,
-                            edgecolors='black')
+
+
+            matplotlib.rcParams.update({'font.size': 10})
+
+            plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o', s=30,
+                        edgecolors='black')
+
             plt.xlabel('First Lift Up X(mm)')
             plt.ylabel('First Left Up Y(mm)')
             plt.legend()
@@ -220,11 +246,23 @@ class DrawPlots:
             f_csv = csv.reader(f)
             for i in range(0, 10):  # skip the beginning
                 next(f_csv)
+
             for row in f_csv:
+
+                width = float(row[offsetAndroidWidth])
+                sizeOfTarget = 0
+                if abs(width - 4.88) < 0.5:
+                    sizeOfTarget = 120
+                if abs(width - 7.22) < 0.5:
+                    sizeOfTarget = 320
+                if abs(width - 9.22) < 0.5:
+                    sizeOfTarget = 600
+
                 firstLiftUpTime_list.append(float(row[20]))  # first lift up timestamp
-        files = getSortedSplitFile(path2, self.pid)
+
+        files = getSortedSplitFile(self.path2, self.pid)
         for i in range(len(firstLiftUpTime_list)):
-            self.readFile = path2 + files[i]
+            self.readFile = self.path2 + files[i]
             filenameSplit=files[i].split('_')
             self.block = int(filenameSplit[3])
             self.trial = int(filenameSplit[5][0:-4])
@@ -278,9 +316,9 @@ class DrawPlots:
                 firstLiftUpTimeList.append(float(row[offsetFirstLiftUp]))  # first lift up timestamp
 
 
-        files = getSortedSplitFile(path2, self.pid)
+        files = getSortedSplitFile(self.path2, self.pid)
 
-        i=0
+
 
         for file in files:
             keys = file.split('_')
@@ -301,13 +339,24 @@ class DrawPlots:
             firstLiftUpZ_list = []
 
 
-            file = path2 + "PID_" + str(self.pid) + "_Block_" + str(block) + "_Trial_" + str(trial) + ".csv"
+            file = self.path+'split/' + "PID_" + str(self.pid) + "_Block_" + str(block) + "_Trial_" + str(trial) + ".csv"
             self.readFile = file
             self.block = block
             self.trial = trial
             self.loadLeapData()
+            width = float(self.frameArray[0][offsetSplitWidth])
+
+
+            sizeOfTarget = 0
+            if abs(width - 4.88) < 0.5:
+                sizeOfTarget = 250
+            if abs(width - 7.22) < 0.5:
+                sizeOfTarget = 600
+            if abs(width - 9.22) < 0.5:
+                sizeOfTarget = 1000
 
             index = self.getFirstLiftUpCors(firstLiftUpTimeList[i])  # get the index of the first lift up frame
+
             firstLiftUpX_list.append(float(self.frameArray[index][
                                                offsetSplitX]) - self.targetX)  # frameArray[loc] is the first Lift Up frame.Get the first List Up X cors.Then get the relative X
             firstLiftUpY_list.append(float(self.frameArray[index][offsetSplitY]) - self.targetY)
@@ -317,7 +366,7 @@ class DrawPlots:
             ax = fig.add_subplot(111, projection='3d')
             ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='r', label='First Lift Up', alpha=1,
                        marker='o', s=30, edgecolors='black')
-            ax.scatter(targetX_list, targetY_list, targetZ_list, c='c', label='target', alpha=1, marker='o', s=100,
+            ax.scatter(targetX_list, targetY_list, targetZ_list, c='c', label='target', alpha=1, marker='o', s=sizeOfTarget,
                        edgecolors='black')
 
             margin = 40  # the margin of the plot
@@ -333,7 +382,7 @@ class DrawPlots:
             plt.legend()
             plt.savefig(pathForPlot + 'relative_3d' +'/'+ plotTitle + '.png')
             #plt.show()
-            i=i+1
+
 
     def drawRelativeTargetFirstLiftUpPlot2D(self,pathForPlot):
         file = self.path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
@@ -347,7 +396,19 @@ class DrawPlots:
             f_csv = csv.reader(f)
             for i in range(0, 10):  # skip the beginning
                 next(f_csv)
+
             for row in f_csv:
+
+                width = float(row[offsetAndroidWidth])
+
+                sizeOfTarget = 0
+                if abs(width - 4.88) < 0.5:
+                    sizeOfTarget = 250
+                if abs(width - 7.22) < 0.5:
+                    sizeOfTarget = 600
+                if abs(width - 9.22) < 0.5:
+                    sizeOfTarget = 1000
+
                 targetX_list = []
                 targetY_list = []
                 liftUpX_list = []
@@ -368,10 +429,10 @@ class DrawPlots:
                 plotTitle = 'Distribution Of Relative First attempt in 2D with block_' + str(
                     row[offsetAndroidBlock]) + ' trial_' + str(row[offsetAndroidTrial])
                 plt.title(plotTitle)
-                plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o', label='target', s=100,
-                            edgecolors='black')
-                plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o', label='First_Lift_Up', s=30,
-                            edgecolors='black')
+                plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o',  s=sizeOfTarget,
+                            )
+                plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o',  s=30,
+                            )
                 margin = 40  # the margin of the plot
                 plt.xlim(-1 * (margin), margin)  # set the target point to be the center
                 plt.ylim(-1 * (margin), margin)
@@ -381,6 +442,7 @@ class DrawPlots:
                 plt.grid(True)
                 plt.savefig(pathForPlot + 'relative_2d' +'/'+ plotTitle + '.png')
                 #plt.show()
+
 
     # a helper function for drawing the tablet plane in a 3D plot
     # cumulate points to form a plane
@@ -437,7 +499,7 @@ class DrawPlots:
     # this function is used to store the data of fingers in a map
     def setUpForFingerPath_map(self):
 
-        files = getSortedSplitFile(path2, self.pid)
+        files = getSortedSplitFile(self.path2, self.pid)
 
         # the key is the direction
         # the value is a list of value in the class of FingerPath
@@ -445,7 +507,7 @@ class DrawPlots:
 
         for file in files:
 
-            self.readFile = path2 + file
+            self.readFile = self.path2 + file
             keys = file.split('_')
             self.block = keys[3]
             self.trial = int(keys[5][0:-4])
@@ -584,13 +646,15 @@ class DrawPlots:
                     if abs(key.width - 9.22) < 0.5:
                         sizeOfTargetCircle = 500
 
+                    '''
                     # how many paths of trials will be shown in the plot
                     if mode == 'start_and_end':
                         maxNumOfPath = 30
                     else:
                         maxNumOfPath = 4  # too much path will make the whole plot a mass
+                    '''
 
-                    colors = cm.rainbow(np.linspace(0, 1, maxNumOfPath))  # color list for different trial in one plot
+                    colors = cm.rainbow(np.linspace(0, 1, 10))  # color list for different trial in one plot
 
                     if dimension == 3:
 
@@ -644,8 +708,8 @@ class DrawPlots:
                     k = 0
                     for p in fingerPath_map[key]: # all the trials with the same combination of width,direction and amplitude
 
-                        if k == maxNumOfPath:
-                            break
+                        #if k == maxNumOfPath:
+                            #break
 
                         if dimension == 3:
 

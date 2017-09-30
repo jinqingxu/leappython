@@ -8,7 +8,7 @@ from SpaceUtils import getDistanceBetweenPointAndPlane
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
 from GlobalVariables import offsetSplitZ
-from GlobalVariables import  path2
+
 from GlobalVariables import  startThreeCor
 from SpaceUtils import getTargetLocationFor3D
 # the normal vector of the tablet
@@ -290,13 +290,13 @@ class LeapAnalyzerMackenzie:
             return False # below the plane
 
 
-
+'''
 # test the measures from MacKenzies
 def test():
     pid=893
     block=1
     trial=3
-    readFile=path2+"PID_"+str(pid)+"_Block_"+str(block)+"_Trial_"+str(trial)+".csv"
+    readFile="PID_"+str(pid)+"_Block_"+str(block)+"_Trial_"+str(trial)+".csv"
     leap=LeapAnalyzerMackenzie(readFile)
     leap.loadLeapData()
     print 'numberOfFrame', leap.calculateNumberOfFrame()
@@ -308,7 +308,7 @@ def test():
     print 'MV',leap.calculateMovementVariability(leap.movementOffset)
     print 'ME',leap.calculateMovementError()
 
-
+'''
 
 
 #test()

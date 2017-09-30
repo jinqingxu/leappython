@@ -77,7 +77,7 @@ def writeMackenzieMeasurements(pid,files,datas,headers,path):
         block = keys[3]
         trial = int(keys[5][0:-4])
 
-        leap = LeapAnalyzerMackenzie(path2 + files[i],pid,block,trial,path)
+        leap = LeapAnalyzerMackenzie(path+'split/' + files[i],pid,block,trial,path)
         leap.loadLeapData()
         # leap.calculateNumberOfFrame()
         leap.calculateMovementDirectionChange() # get the movement change on X,Y,Z axis
@@ -112,7 +112,7 @@ def writeHwangMeasurements(pid,files,datas,headers,path):
         trial = int(keys[5][0:-4])
 
         # measurements for HWang
-        leap = LeapAnalyzerHwang(path2+files[i], pid, block, trial,path)
+        leap = LeapAnalyzerHwang(path+'split/'+files[i], pid, block, trial,path)
         leap.loadLeapData()
         leap.getSubmovements() # get the submovement_list,all measures from Hwang are based on this data
         leap.calculatePauseTime() # get how many pauses happens per trial and the mean pause duration
@@ -125,7 +125,7 @@ def writeHwangMeasurements(pid,files,datas,headers,path):
         # there is current one measure called decisionMaking
         # decisionMaking means when the finger tip is very close to the tablet and within the area of 5/4 radius.
         # it serves as a supplement for verification time
-        leap2=LeapAnalyzerOriginal(path2+files[i],pid,block,trial,path)
+        leap2=LeapAnalyzerOriginal(path+'split/'+files[i],pid,block,trial,path)
         leap2.loadLeapData()
         leap2.calculateDecisionMakingDuration() # get how many time decision making happens and the mean duration
 
@@ -149,7 +149,7 @@ def writeFiles(pid,path):
     datas,headers=writeErrorForEveryTrial(pid,datas,path) # append error datas ,those data only need data from android
 
     # the measurement from mackenzie,hwang and our work need the split data from leap motion
-    files = getSortedSplitFile(path2, pid)  # the files are sorted as the sequence of datas,block is of the highest priority,then trial
+    files = getSortedSplitFile(path+'split/', pid)  # the files are sorted as the sequence of datas,block is of the highest priority,then trial
     datas,headers=writeMackenzieMeasurements(pid,files,datas,headers,path)  # append measures from Mackenzie
     datas,headers=writeHwangMeasurements(pid,files,datas,headers,path)   # append measures from Hwang
 

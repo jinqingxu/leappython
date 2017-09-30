@@ -11,7 +11,7 @@ from GlobalVariables import offsetAndroidTrial
 from GlobalVariables import  offsetAndroidAmplitude
 from GlobalVariables import  offsetAndroidWidth
 from GlobalVariables import offsetAndroidDirection
-from GlobalVariables import  path2
+
 
 import shutil
 
@@ -41,7 +41,7 @@ def best_match_end(etime,offset):
 
 #write the split data into files
 def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction,path):
-    file=path2+'PID_'+str(pid)+'_Block_'+block+'_Trial_'+trial+'.csv' #one trial matches one file
+    file=path+'split/'+'PID_'+str(pid)+'_Block_'+block+'_Trial_'+trial+'.csv' #one trial matches one file
     with open(file, 'w') as f:
         f_csv = csv.writer(f)
         f_csv.writerow(headers)
@@ -59,9 +59,10 @@ def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction,
 
 # split the data from leap motion with the timstamp from android file
 def process_split(pid,path):
-    shutil.rmtree(path2)
-    os.mkdir(path2)
-    file1=path+'Data from LEAPtest_results_PID_'+str(pid)+'_Frame.csv' #leap data
+    #shutil.rmtree(path+'split/')
+    if not os.path.exists(path+'split/'):
+        os.mkdir(path+'split/')
+    file1=path+'PID_'+str(pid)+'_Data_from_LEAPtest_results_Frame.csv' #leap data
     file2=path+'PID_'+str(pid)+'_TwoDFittsData_External.csv' #android data
     headers=[] # for headers of the csv file
     #read leap data

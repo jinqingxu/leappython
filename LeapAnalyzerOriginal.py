@@ -6,7 +6,7 @@ import csv
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from CalculateOfCircle import calculate_3D_Dis_Of_Two_Points
 from SpaceUtils import  getIntersactionPointOfPointAndPlane
-from GlobalVariables import path2
+
 from GlobalVariables import offsetSplitX
 from GlobalVariables import  offsetSplitY
 from GlobalVariables import offsetSplitZ

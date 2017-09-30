@@ -25,7 +25,7 @@ from GlobalVariables import offsetDisDistance
 from GlobalVariables import offsetDisAbsDifference
 from GlobalVariables import offsetDisDifference
 
-from GlobalVariables import  path2
+
 from FileUtils import getSortedSplitFile
 
 # 3D point
@@ -136,6 +136,7 @@ def write_dis_difference(pid,path):
                 difdata.append(row[offsetAndroidWidth])  # width in mm
                 difdata.append(row[offsetAndroidDirection])  # direction
                 datas.append(difdata)
+            path2=path+'split/'
             files=getSortedSplitFile(path2,pid)
             for i in range(len(datas)):
                 f = open(path2 + files[i], "r")

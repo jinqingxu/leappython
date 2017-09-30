@@ -1,4 +1,6 @@
+# this script is replaced bt java and not used anymore
 # this script is used for helping find the accurate position of start button
+
 import csv
 from GlobalVariables import *
 from CalculateOfCircle import get_min_max_mean_deviation_from_list

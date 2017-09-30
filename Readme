@@ -1,0 +1,27 @@
+
+
+#Instruction#
+
+1. Run the CrossHairApp.
+2. Run the TargetSelectionApp.
+3. Put the android data and detailed data in the folder of that pid
+4. Run login, that program will scan all the datas to do analysis and draw plots
+
+# how to change path in python program
+
+1. Open GlobalVariables.py
+2. change pathheader to your workspace
+
+# how to change path in leap motion program
+
+1. Open LeapLogin.java
+2. change writePath to your workspace
+
+# What if the android program suddenly stops in the block 0 #
+
+it's probably because of the network
+
+The solution
+1. check if both laptop and tablet are online
+2. check if the server of GetTime has been started
+
