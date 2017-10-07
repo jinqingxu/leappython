@@ -7,37 +7,34 @@ from CalculateOfCircle import get_min_max_mean_deviation_from_list
 
 def setStartPosition(pid):
 
-    xBoundary = 5  # the abs(x) should be less than 5, or it's an error frame
-    file1 = pathheader + 'PID_' + str(pid) + '/' + 'Data from LEAPtest_results_PID_' + str(
-        pid) + '_Frame.csv'  # leap data
-
+    #xBoundary = 5  # the abs(x) should be less than 5, or it's an error frame
+    file1 = pathHeaderForCrossHair + 'PID_' + str(pid) + '/' + 'PID_'+str(pid)+'_Data_from_LEAPtest_results_Frame.csv'
     headers = []  # for headers of the csv file
     x_list = []
     y_list = []
     z_list = []
+    warmpUpTimeStamp = float(raw_input("please enter the warm up timestamp: "))
     # read leap data
     with open(file1) as f:
 
         f_csv = csv.reader(f)
-        for i in range(0, 4):  # skip the beginning
+        for i in range(0, 5):  # skip the beginning
             next(f_csv)
-        headers = next(f_csv)  # get headers of csv
-        headers2 = ['PID', 'Block', 'Trial', 'Amplitude(mm)', 'Width(mm)', 'Direction']
-        headers2.extend(headers)  # headers2 is for the result file
 
         for row in f_csv:
 
-            if abs(float(row[offsetLeapX]))<xBoundary:
-
-                x_list.append(float(row[offsetLeapX]))
-                y_list.append(float(row[offsetLeapY]))
-                z_list.append(float(row[offsetLeapZ]))
+            if float(row[2])>=warmpUpTimeStamp:
+                x_list.append(float(row[colNumLeapX]))
+                y_list.append(float(row[colNumLeapY]))
+                z_list.append(float(row[colNumLeapZ]))
 
     minX,maxX,averageX,deviationX=get_min_max_mean_deviation_from_list(x_list)
     minY, maxY, averageY, deviationY = get_min_max_mean_deviation_from_list(y_list)
     minZ, maxZ, averageZ, deviationZ = get_min_max_mean_deviation_from_list(z_list)
 
-    print round(averageX,2),round(averageY,2),round(averageZ,2)
+    #print round(averageX,2),round(averageY,2),round(averageZ,2)
+    print 'Y:',round(averageY,2)
+    print 'Z:',round(averageZ,2)
 
 pid=8888
 setStartPosition(pid)

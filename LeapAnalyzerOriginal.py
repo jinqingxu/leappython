@@ -7,15 +7,10 @@ from CalculateOfCircle import get_min_max_mean_deviation_from_list
 from CalculateOfCircle import calculate_3D_Dis_Of_Two_Points
 from SpaceUtils import  getIntersactionPointOfPointAndPlane
 
-from GlobalVariables import offsetSplitX
-from GlobalVariables import  offsetSplitY
-from GlobalVariables import offsetSplitZ
-from GlobalVariables import  offsetSplitTimestamp
-from GlobalVariables import  offsetSplitWidth
+
+from GlobalVariables import *
 from SpaceUtils import getTargetLocationFor3D
-from GlobalVariables import normalVectorX
-from GlobalVariables import normalVectorY
-from GlobalVariables import normalVectorZ
+
 
 # deciding making is a measure representing uncertainty
 # a supplement for verification time
@@ -102,25 +97,25 @@ class LeapAnalyzerOriginal:
     def calculateDecisionMakingDuration(self):
 
         endFrame = self.frameArray[self.numberFrame - 1]  # end Frame is the last frame
-        width=float(endFrame[offsetSplitWidth]) # the width of the target
+        width=float(endFrame[colNumSplitWidth]) # the width of the target
 
         i=1 # skip the start frame
 
         while i < self.numberFrame-1: # skip the end frame
 
             curFrame=self.frameArray[i]
-            curX=float(curFrame[offsetSplitX])
-            curY=float(curFrame[offsetSplitY])
-            curZ=float(curFrame[offsetSplitZ])
+            curX=float(curFrame[colNumSplitX])
+            curY=float(curFrame[colNumSplitY])
+            curZ=float(curFrame[colNumSplitZ])
 
             if self.judgeNearTarget(curX,curY,curZ,self.targetX,self.targetY,self.targetZ,width)==True: # decisionMaking started
 
                 self.decisionMakingTime=self.decisionMakingTime+1
-                startTime=float(curFrame[offsetSplitTimestamp]) # the start time of the spiral
+                startTime=float(curFrame[colNumSplitTimestamp]) # the start time of the spiral
 
                 if i==self.numberFrame-2: # if the current one is the one before the end one,the loop  will not be executed since the end Frame should be frame[numberOfFrame-1]
                     nextFrame = self.frameArray[self.numberFrame-1]
-                    endTime = float(nextFrame[offsetSplitTimestamp])
+                    endTime = float(nextFrame[colNumSplitTimestamp])
                     duration = endTime - startTime
                     self.decisionMakingDuration.append(duration)
 
@@ -129,13 +124,13 @@ class LeapAnalyzerOriginal:
                     for j in range(i + 1, self.numberFrame - 1):
 
                         nextFrame = self.frameArray[j]
-                        nextX = float(nextFrame[offsetSplitX])
-                        nextY = float(nextFrame[offsetSplitY])
-                        nextZ = float(nextFrame[offsetSplitZ])
+                        nextX = float(nextFrame[colNumSplitX])
+                        nextY = float(nextFrame[colNumSplitY])
+                        nextZ = float(nextFrame[colNumSplitZ])
 
                         if self.judgeNearTarget(nextX, nextY, nextZ, self.targetX, self.targetY,
                                                 self.targetZ,width) == False or j == self.numberFrame - 2:  # stop decisionMaking or arriving at the last frame
-                            endTime = float(nextFrame[offsetSplitTimestamp])
+                            endTime = float(nextFrame[colNumSplitTimestamp])
                             duration = endTime - startTime
                             self.decisionMakingDuration.append(duration)
                             i=j # find the next spiral

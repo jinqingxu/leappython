@@ -4,13 +4,9 @@
 from LeapAnalyzerMackenzie import *
 from ErrorUtils import *
 
-from GlobalVariables import offsetAndroidWidthInPixel
-from GlobalVariables import offsetAndroidFirstLiftUpX
-from GlobalVariables import offsetAndroidFirstLiftUpY
-from GlobalVariables import offsetAndroidTargetX
-from GlobalVariables import  offsetAndroidTargetY
-from GlobalVariables import offsetAndroidFirstTouchDownX
-from GlobalVariables import  offsetAndroidFirstTouchDownY
+
+from GlobalVariables import *
+from Split import LeapTimeStamp
 
 from FileUtils import  getSortedSplitFile
 
@@ -22,10 +18,31 @@ from LeapAnalyzerOriginal import LeapAnalyzerOriginal
 firstTRE=[]
 TRE=[]
 
-# restore the original data and append errors
-def writeErrorForEveryTrial(pid,datas,path):
+def loadLeapTimeStampData(path,pid):
 
-    androidfile=path+'PID_'+str(pid)+'_TwoDFittsData_External.csv'
+    leapTimeStamp_list=[]
+
+    leapTimeStampFile = path + 'PID_' + str(pid) + '_Leap_TimeStamp_Data.csv'
+
+    with open(leapTimeStampFile) as f:
+
+        f_csv=csv.reader(f)
+        next(f_csv) # skip the header
+
+        for row in f_csv:
+            leapTimeStamp=LeapTimeStamp(row[0],row[1],row[2],row[3],row[4])
+            leapTimeStamp_list.append(leapTimeStamp)
+
+    os.remove(leapTimeStampFile)
+
+    return leapTimeStamp_list
+
+# restore the original data and append errors
+def writeErrorForEveryTrial(pid,datas,pathFordata):
+
+    androidfile=pathFordata+'PID_'+str(pid)+'_TwoDFittsData_External.csv'
+
+    leapTimeStamp_list=loadLeapTimeStampData(pathFordata,pid)
 
     with open(androidfile) as f:
         f_csv = csv.reader(f)
@@ -36,22 +53,27 @@ def writeErrorForEveryTrial(pid,datas,path):
         # since first TRE and TRE are from Mackenzie,we need to move them behind
         headers=oldheaders # store the original header
         headers=headers[0:len(headers)-2] # remove the 'firstTRE' and 'TRE'
+        headers.extend(['leapStartTimestamp','leapFirstLiftUpTimeStamp','leapFinalLiftUpTimeStamp'])
         errorheaders=['Error','SlipError','NarrowSlipError','ModerateSlipError','LargeSlipError','VeryLargeSlipError','MissError','NearMissError','NotSoNearMissError','OtherError','AccidentalTap','AccidentalHit'] # the headers for the error data
         headers.extend(errorheaders) # append the error header to the headers
-
+        i=0
         for row in f_csv:
-            # restore the firstTRE and TRE
+            # restore the firstTRE and average TRE
             firstTRE.append(row[len(row)-2])
             TRE.append(row[len(row)-1])
 
-            row = row[0:len(row) - 2]
-            targetX=float(row[offsetAndroidTargetX])
-            targetY=float(row[offsetAndroidTargetY])
-            firstTouchDownX=float(row[offsetAndroidFirstTouchDownX])
-            firstTouchDownY=float(row[offsetAndroidFirstTouchDownY])
-            firstLiftUpX=float(row[offsetAndroidFirstLiftUpX])
-            firstLiftUpY=float(row[offsetAndroidFirstLiftUpY])
-            targetWidthInPixel=float(row[offsetAndroidWidthInPixel])
+            row = row[0:len(row) - 2] # omit the firstTRE and average TRE
+
+            row.extend([leapTimeStamp_list[i].leapStartTimeStamp,leapTimeStamp_list[i].leapFirstLiftUpTimeStamp,leapTimeStamp_list[i].leapFinalLiftUpTime])
+
+
+            targetX=float(row[colNumAndroidTargetX])
+            targetY=float(row[colNumAndroidTargetY])
+            firstTouchDownX=float(row[colNumAndroidFirstTouchDownX])
+            firstTouchDownY=float(row[colNumAndroidFirstTouchDownY])
+            firstLiftUpX=float(row[colNumAndroidFirstLiftUpX])
+            firstLiftUpY=float(row[colNumAndroidFirstLiftUpY])
+            targetWidthInPixel=float(row[colNumAndroidWidthInPixel])
             errorUtils=ErrorUtils(firstLiftUpX,firstLiftUpY,firstTouchDownX,firstTouchDownY,targetWidthInPixel,targetX,targetY)
             errorUtils.calculateErrors() # this function is used to calculate all kinds of errors,the results are the variables of ErrorUntils
             # restore the result in an array
@@ -64,7 +86,7 @@ def writeErrorForEveryTrial(pid,datas,path):
 
 
 # append measures of mackenzie into datas and headers
-def writeMackenzieMeasurements(pid,files,datas,headers,path):
+def writeMackenzieMeasurements(pid,files,datas,headers,path,wrongIndex):
 
     # headers for measures from mackenzie
     macHeaders = ['FirstRe-Entry', 'AverageNumOfRe-Entry', 'MovementDirectionChangeX', 'MovementDirectionChangeY',
@@ -79,26 +101,36 @@ def writeMackenzieMeasurements(pid,files,datas,headers,path):
 
         leap = LeapAnalyzerMackenzie(path+'split/' + files[i],pid,block,trial,path)
         leap.loadLeapData()
-        # leap.calculateNumberOfFrame()
-        leap.calculateMovementDirectionChange() # get the movement change on X,Y,Z axis
-        leap.calculateMovementOffset() # movement offset means the mean deviation from task plane based on the raw distance
-        leap.calculateMovementVariability(leap.movementOffset) # movement variability means the deviation from the average location
-        leap.calculateMovementError() # movement error means the deviation from task plane based on the absolute distance
-        leap.calculateTaskAxisCrossing() # task axis crossing means passing through the task plane. we count how many times does it happend
-        # since firstTRE and TRE belongs to the measures of Mackenzie,we append them as the begining of mackenzie data
-        datas[i].append(firstTRE[i])
-        datas[i].append(TRE[i])
 
-        macData = [leap.movementDirectionChangeX, leap.movementDirectionChangeY, leap.movementDirectionChangeZ,
-                   leap.movementOffset, leap.movementError, leap.movementVaribility,leap.taskAxisCrossing]
+        try:
+            # leap.calculateNumberOfFrame()
+            leap.calculateMovementDirectionChange()  # get the movement change on X,Y,Z axis
 
-        # datas[i] means the current row of android data and error data
-        datas[i].extend(macData) # append mackenzie data
+            leap.calculateMovementOffset()  # movement offset means the mean deviation from task plane based on the raw distance
+            leap.calculateMovementVariability(
+                leap.movementOffset)  # movement variability means the deviation from the average location
+            leap.calculateMovementError()  # movement error means the deviation from task plane based on the absolute distance
+            leap.calculateTaskAxisCrossing()  # task axis crossing means passing through the task plane. we count how many times does it happend
+            # since firstTRE and TRE belongs to the measures of Mackenzie,we append them as the begining of mackenzie data
+            datas[i].append(firstTRE[i])
+            datas[i].append(TRE[i])
 
-    return datas,headers
+            macData = [leap.movementDirectionChangeX, leap.movementDirectionChangeY, leap.movementDirectionChangeZ,
+                       leap.movementOffset, leap.movementError, leap.movementVaribility, leap.taskAxisCrossing]
+
+            # datas[i] means the current row of android data and error data
+            datas[i].extend(macData)  # append mackenzie data
+
+        except Exception as e:
+            print "wrong pid,block,trial",leap.pid,leap.block,leap.trial
+            wrongIndex.append(i)
+            continue
+
+
+    return datas,headers,wrongIndex
 
 # append measures of Hwang and our work into datas and headers
-def writeHwangMeasurements(pid,files,datas,headers,path):
+def writeHwangMeasurements(pid,files,datas,headers,path,wrongIndex):
 
     # headers for measures from Hwang
     hwangHeaders=['NumberOfPause','MeanPauseDuration(ms)','Verification Time(ms)','NumberOfSubmovement','PeekSpeed(mm/s)','NumberOfDecisionMaking','MeanDecisionMakingDuration(ms)']
@@ -106,39 +138,49 @@ def writeHwangMeasurements(pid,files,datas,headers,path):
 
     for i in range(len(files)):
 
-        # get the current block and trial for the file
-        keys = files[i].split('_')
-        block = keys[3]
-        trial = int(keys[5][0:-4])
+        try:
+            # get the current block and trial for the file
+            keys = files[i].split('_')
+            block = keys[3]
+            trial = int(keys[5][0:-4])
 
-        # measurements for HWang
-        leap = LeapAnalyzerHwang(path+'split/'+files[i], pid, block, trial,path)
-        leap.loadLeapData()
-        leap.getSubmovements() # get the submovement_list,all measures from Hwang are based on this data
-        leap.calculatePauseTime() # get how many pauses happens per trial and the mean pause duration
-        leap.pid=pid
+            # measurements for HWang
+            leap = LeapAnalyzerHwang(path + 'split/' + files[i], pid, block, trial, path)
+            leap.loadLeapData()
+            leap.getSubmovements()  # get the submovement_list,all measures from Hwang are based on this data
+            leap.calculatePauseTime()  # get how many pauses happens per trial and the mean pause duration
+            leap.pid = pid
 
-        # put data from measures of Hwang into an array
-        hwangData=[leap.pauseTime,leap.meanPauseDuration,leap.getVerificatonTime(),leap.getTotalNumOfSubMovement(),leap.trialPeekSpeed]
+            # put data from measures of Hwang into an array
+            hwangData = [leap.getVerificatonTime(), leap.pauseTime, leap.meanPauseDuration, leap.trialPeekSpeed,
+                         leap.getTotalNumOfSubMovement()]
 
-        # initial a Leap Analyzer for original measurments proposed in our work
-        # there is current one measure called decisionMaking
-        # decisionMaking means when the finger tip is very close to the tablet and within the area of 5/4 radius.
-        # it serves as a supplement for verification time
-        leap2=LeapAnalyzerOriginal(path+'split/'+files[i],pid,block,trial,path)
-        leap2.loadLeapData()
-        leap2.calculateDecisionMakingDuration() # get how many time decision making happens and the mean duration
+            # initial a Leap Analyzer for original measurments proposed in our work
+            # there is current one measure called decisionMaking
+            # decisionMaking means when the finger tip is very close to the tablet and within the area of 5/4 radius.
+            # it serves as a supplement for verification time
+            leap2 = LeapAnalyzerOriginal(path + 'split/' + files[i], pid, block, trial, path)
+            leap2.loadLeapData()
+            leap2.calculateDecisionMakingDuration()  # get how many time decision making happens and the mean duration
+            originData = []
+            originData.append(leap2.decisionMakingTime)  # append the data of decision making into the result array
+            originData.append(leap2.meanDecideMakingDuration)
 
-        hwangData.append(leap2.decisionMakingTime) # append the data of decision making into the result array
-        hwangData.append(leap2.meanDecideMakingDuration)
+            # append datas from hwang and our work into the datas
+            datas[i].extend(originData)
+            datas[i].extend(hwangData)
 
-        # append datas from hwang and our work into the datas
-        datas[i].extend(hwangData)
+        except Exception as e:
+            print "wrong pid,block,trial", leap.pid,leap.block, leap.trial
+            # how to remove data[i]?
+            wrongIndex.append(i)
+            continue
 
-    return datas,headers
+
+    return datas,headers,wrongIndex
 
 
-def writeFiles(pid,path):
+def writeFiles(pid,pathForResult,pathForData):
     # first write the error
     # the whole data list consists of the original data,error,measurement from Mackenzie and measurement form Huang
     # a two-dimentional array
@@ -146,21 +188,24 @@ def writeFiles(pid,path):
     # the headers consists of the original headers,the error headers,mackenzie headers,hwang headers
     headers = []
 
-    datas,headers=writeErrorForEveryTrial(pid,datas,path) # append error datas ,those data only need data from android
+    datas,headers=writeErrorForEveryTrial(pid,datas,pathForData) # append error datas ,those data only need data from android
 
     # the measurement from mackenzie,hwang and our work need the split data from leap motion
-    files = getSortedSplitFile(path+'split/', pid)  # the files are sorted as the sequence of datas,block is of the highest priority,then trial
-    datas,headers=writeMackenzieMeasurements(pid,files,datas,headers,path)  # append measures from Mackenzie
-    datas,headers=writeHwangMeasurements(pid,files,datas,headers,path)   # append measures from Hwang
+    files = getSortedSplitFile(pathForData+'split/', pid)  # the files are sorted as the sequence of datas,block is of the highest priority,then trial
+    wrongIndex=[]
+    datas,headers,wrongIndex=writeMackenzieMeasurements(pid,files,datas,headers,pathForData,wrongIndex)  # append measures from Mackenzie
+    datas,headers,wrongIndex=writeHwangMeasurements(pid,files,datas,headers,pathForData,wrongIndex)   # append measures from Hwang
 
     # write the new TwoD_measurment file with all measurements
     # do not overwrite the old android data in case some problems occur. We need the raw data.
-    newfile = path + 'PID_' + str(pid) + '_TwoDFittsData_External_Measurements.csv'
+    newfile = pathForResult + 'PID_' + str(pid) + '_TwoDFittsData_External_Measurements.csv'
 
     with open(newfile, 'w') as f:
         w_csv = csv.writer(f)
         w_csv.writerow(headers)
-        for d in datas:
-            w_csv.writerow(d)
+        i=0
+        for i in range(len(datas)):
+            if i not in wrongIndex:
+                w_csv.writerow(datas[i])
 
 

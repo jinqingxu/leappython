@@ -1,37 +1,58 @@
 # start the whole program
 
-from GlobalVariables import  pathheader
+from GlobalVariables import  *
 from WriteMeasureFile import *
 from CalculateOfCircle import *
 from Split import *
 from DrawPlots import *
+from FileUtils import *
 
 def processOneExperiment(pid):
 
     dimensionList = [2, 3]
     modeList = ['start_and_end', 'path']
 
-    path=pathheader+'PID_'+str(pid)+'/'
-    process_split(pid,path)
-    write_dis_difference(pid,path)
-    statistic_combination(pid,path)
-    writeFiles(pid,path)
+    if float(pid)<200:
+        pathForData = pathHeaderForData+'Old Adults/' + 'PID_' + str(pid) + '/'
 
-    drawPlots = DrawPlots(pid,path)
+    else:
+        pathForData = pathHeaderForData+'Young Adults/' + 'PID_' + str(pid) + '/'
+
+    if float(pid)<200:
+        pathForResult = pathHeaderForResult +'Old Adults/'+ 'PID_' + str(pid) + '/'
+    else:
+        pathForResult = pathHeaderForResult +'Young Adults/'+ 'PID_' + str(pid) + '/'
+
+    if not os.path.exists(pathForResult):
+        os.mkdir(pathForResult)
+
+    process_split(pid,pathForData)
+    write_dis_difference(pid,pathForResult,pathForData)
+    statistic_combination(pid,pathForResult,pathForData)
+    writeFiles(pid,pathForResult,pathForData)
 
 
-    pathForFirstLiftUpPlots=path+'firstLiftUpPlots/'
+    drawPlots = DrawPlots()
+    drawPlots.pid = pid
+    drawPlots.path = pathForData
+    drawPlots.path2 = drawPlots.path + 'split/'
+
+
+
+    pathForFirstLiftUpPlots=pathForResult+'firstLiftUpPlots/'
     if not os.path.exists(pathForFirstLiftUpPlots):
         os.mkdir(pathForFirstLiftUpPlots)
-        os.mkdir(pathForFirstLiftUpPlots + 'relative_3d' + '/')
-        os.mkdir(pathForFirstLiftUpPlots + 'relative_2d' + '/')
+        #os.mkdir(pathForFirstLiftUpPlots + 'relative_3d' + '/')
+        #os.mkdir(pathForFirstLiftUpPlots + 'relative_2d' + '/')
 
-    drawPlots.drawRelativeTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
-    drawPlots.drawTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
-    drawPlots.drawRelativeTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
+    #drawPlots.drawRelativeTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
     drawPlots.drawTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
+    drawPlots.drawTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
+    #drawPlots.drawRelativeTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
 
-    pathForFinalLiftUpPlots = path + 'finalLiftUpPlots/'
+
+
+    pathForFinalLiftUpPlots = pathForResult +'finalLiftUpPlots/'
     if not os.path.exists(pathForFinalLiftUpPlots):
 
         os.mkdir(pathForFinalLiftUpPlots)
@@ -44,24 +65,149 @@ def processOneExperiment(pid):
 
     drawPlots.drawStartAndEnd(pathForFinalLiftUpPlots)
 
+def loadMeasurementData(pathHeaderForResult):
+
+    pid_list = getAllPids(pathHeaderForResult+'Old Adults/')
+    pid_list2 = getAllPids(pathHeaderForResult+'Young Adults/')
+    pid_list.extend(pid_list2)
+    datasForAllOlds = []
+    datasForAllYoungs = []
+
+    for p in pid_list:
+        if float(p)<200:
+            file = pathHeaderForResult +'Old Adults/'+ 'PID_' + str(p) + '/' + 'PID_' + str(p) + '_TwoDFittsData_External_Measurements.csv'
+        else:
+            file = pathHeaderForResult +'Young Adults/'+ 'PID_' + str(p) + '/' + 'PID_' + str(p) + '_TwoDFittsData_External_Measurements.csv'
+
+        with open(file) as f:
+
+            f_csv = csv.reader(f)
+            header = next(f_csv)
+
+            for row in f_csv:
+                if row[0] == '1':
+                    datasForAllOlds.append(row)
+                else:
+                    datasForAllYoungs.append(row)
+
+    return header,datasForAllOlds,datasForAllYoungs
+
+
+def getAverageValueForAllColumns(datas):
+
+    result=[]
+    length=len(datas[0])
+    for i in range(29,length):
+
+        value_list=[]
+        for j in range(0,len(datas)):
+            print 'i',i,'j',j,datas[j][1],datas[j][2],datas[j][3]
+            print 'length',len(datas[j])
+            value_list.append(datas[j][i])
+
+        min_v,max_v,average_v,deviation_v=get_min_max_mean_deviation_from_list(value_list)
+        result.append(average_v)
+
+    return result
+
+
+
+
+
+def mergeMeasurementFiles():
+
+
+    header,datasForAllOlds,datasForAllYoungs=loadMeasurementData(pathHeaderForResult)
+    fileForAllOlds = pathHeaderForAllOldAdults + 'Measurements_For_All_Old_Adults.csv'
+    ''''
+    average_results_old=getAverageValueForAllColumns(datasForAllOlds)
+    average_results_young=getAverageValueForAllColumns(datasForAllYoungs)
+    fileForAverageOlds = pathHeaderForAllOldAdults + 'Average_Old_Adults_Measurements.csv'
+    fileForAverageYoungs= pathHeaderForAllYoungAdults + 'Average_Young_Adults_Measurements.csv'
+    fileForAverageAll=pathHeaderForAllParticipiants+'Average_All_Participants_Measurements.csv'
+
+    with open(fileForAverageOlds, 'w') as f:
+        w_csv = csv.writer(f)
+        w_csv.writerow(header[29:len(header)]) # skip the columns before measurements
+        w_csv.writerow(average_results_old)
+
+    with open(fileForAverageYoungs, 'w') as f:
+        w_csv = csv.writer(f)
+        w_csv.writerow(header[29:len(header)]) # skip the columns before measurements
+        w_csv.writerow(average_results_young)
+
+    with open(fileForAverageAll, 'w') as f:
+        w_csv = csv.writer(f)
+        header.insert(0,'type')
+        w_csv.writerow(header[29:len(header)]) # skip the columns before measurements
+        average_results_old.insert(0,'old')
+        average_results_young.insert(0,'young')
+        w_csv.writerow(average_results_old)
+        w_csv.writerow(average_results_young)
+
+    '''
+
+    with open(fileForAllOlds, 'w') as f:
+        w_csv = csv.writer(f)
+        w_csv.writerow(header)
+
+        for d in datasForAllOlds:
+            w_csv.writerow(d)
+
+    fileForAllYoungs = pathHeaderForAllYoungAdults + 'Measurements_For_All_Young_Adults.csv'
+
+    with open(fileForAllYoungs, 'w') as f:
+
+        w_csv = csv.writer(f)
+        w_csv.writerow(header)
+
+        for d in datasForAllYoungs:
+            w_csv.writerow(d)
+
+    fileForAllParticipants = pathHeaderForAllParticipiants + 'Measurements_For_All_Participants.csv'
+
+    with open(fileForAllParticipants, 'w') as f:
+
+        w_csv = csv.writer(f)
+        w_csv.writerow(header)
+
+        for d in datasForAllOlds:
+            w_csv.writerow(d)
+
+        for d in datasForAllYoungs:
+
+            w_csv.writerow(d)
+
+
+
+
 def startProgram():
 
-    for dir in os.listdir(pathheader):
-        child = os.path.join(pathheader, dir)
-        if os.path.isdir(child):
-            keys=child.split('/')
-            if keys[len(keys)-1][0:4]=='PID_': # go through all the folder that contain datas from experiment
-                keys2=keys[len(keys)-1].split('_') # split PID_pid to get the pid
-                pid=keys2[len(keys2)-1]
-                if pid!='8888':  # 8888 is for crossHair experiment
-                    print pid
-                    processOneExperiment(pid)
+    pid_list=getAllPids(pathHeaderForData+'Old Adults/')
+    pid_list2=getAllPids(pathHeaderForData+'Young Adults/')
+    pid_list.extend(pid_list2)
+
+    '''
+    for pid in pid_list:
+
+        processOneExperiment(pid)
+    '''
+
+
+
+    mergeMeasurementFiles()
+    drawPlots=DrawPlots()
+    drawPlots.drawAllTargetFirstLiftUpPlot2D(pathHeaderForAllParticipiants)
 
 
 
 
 
-#startProgram()
-processOneExperiment(100)
+
+
+
+startProgram()
+#processOneExperiment(190)
+
 
 

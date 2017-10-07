@@ -24,4 +24,16 @@ it's probably because of the network
 The solution
 1. check if both laptop and tablet are online
 2. check if the server of GetTime has been started
+3. if you have already checked 1. and 2. but the program still suddenly stops, you can just restart the whole program.
 
+# how to judge whether there are wrong trials in one experiment
+
+The simplest way is to check the size of split data, if its size is less than 5KB, probably sometimes the leap motion fail to track the finger trace.
+The python program will also print the pid,block and trial of wrong data.
+
+# how to connect the internet
+
+choose wpa.mcgill.ca , I have already logged in with my mgcill account.
+since the ip of this laptop is fixed, if there is a message that 'there is another device using the ip(142.157.179.209)' , you need to change the ip address.
+
+You

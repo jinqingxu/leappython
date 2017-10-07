@@ -4,18 +4,8 @@
 
 import csv
 import math
-from GlobalVariables import Pi
-from GlobalVariables import PixelToM
-from GlobalVariables import TwoCorPoint
-from GlobalVariables import ThreeCorPoint
-from GlobalVariables import  startTwoCor
-from GlobalVariables import  startThreeCor
-from GlobalVariables import offsetAndroidBlock
-from GlobalVariables import offsetAndroidTrial
-from GlobalVariables import offsetAndroidTargetX
-from GlobalVariables import offsetAndroidTargetY
-from GlobalVariables import tabletAngle
 
+from GlobalVariables import *
 '''
 # this function is not used any more
 # find the Relative X and Y cors for point on the tablet
@@ -89,15 +79,15 @@ def getTargetLocationFor3D(pid,block,trial,path):
     with open(file) as f:
 
         f_csv = csv.reader(f)
-        for i in range(0, 10):  # skip the beginning
+        for i in range(0, 9):  # skip the beginning
             next(f_csv)
 
         for row in f_csv:
 
-            if str(row[offsetAndroidBlock])==str(block) and str(row[offsetAndroidTrial])==str(trial): # find the exact row of the trial
+            if str(row[colNumAndroidBlock])==str(block) and str(row[colNumAndroidTrial])==str(trial): # find the exact row of the trial
 
-                targetX=float(row[offsetAndroidTargetX]) # the 2D targetX
-                targetY=float(row[offsetAndroidTargetY]) # the 2D targetY
+                targetX=float(row[colNumAndroidTargetX]) # the 2D targetX
+                targetY=float(row[colNumAndroidTargetY]) # the 2D targetY
                 targetTwoCor=TwoCorPoint(targetX,targetY) # the target point in 2D world
                 targetThreeCor=TwoCorToThreeCor(targetTwoCor) # the target point in 3D world,with x,y,z
                 return targetThreeCor

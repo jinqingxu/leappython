@@ -2,56 +2,65 @@
 import math
 import csv
 import time
+
 # the index of data in android file
-offsetAndroidStartTime = 11
-offsetAndroidFinalLiftUp = 24
-offsetAndroidBlock=2
-offsetAndroidTrial=3
-offsetAndroidAmplitude=5
-offsetAndroidWidth=7
-offsetAndroidWidthInPixel=6
-offsetAndroidDirection=8
-offsetAndroidTargetX=12
-offsetAndroidTargetY=13
-offsetAndroidFirstLiftUpX=16
-offsetAndroidFirstLiftUpY=17
-offsetAndroidFirstTouchDownX=14
-offsetAndroidFirstTouchDownY=15
+colNumAndroidStartTime = 17
+colNumAndroidFinalLiftUp = 24
+colNumAndroidBlock=2
+colNumAndroidTrial=3
+colNumAndroidAmplitude=5
+colNumAndroidWidth=7
+colNumAndroidWidthInPixel=6
+colNumAndroidDirection=8
+colNumAndroidTargetX=11
+colNumAndroidTargetY=12
+colNumAndroidFirstLiftUpX=15
+colNumAndroidFirstLiftUpY=16
+colNumAndroidFirstTouchDownX=13
+colNumAndroidFirstTouchDownY=14
+colNumAndroidFirstLiftUpTimeStamp=20
 
 
 # the index of data in leap file
-offsetLeapX=3
-offsetLeapY=4
-offsetLeapZ=5
+colNumLeapX=3
+colNumLeapY=4
+colNumLeapZ=5
+colNumLeapTimeStamp=2
 
 
 #workpath
-pathheader = '/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/Experiment Data/'
+pathHeader='/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/'
+pathHeaderForData = pathHeader+'Experiment Data/'
+pathHeaderForResult=pathHeader+'All Individual Experiment Result/'
+pathHeaderForAllOldAdults=pathHeader+'All Old Adults Experiment Result/'
+pathHeaderForAllYoungAdults=pathHeader+'All Young Adults Experiment Result/'
+pathHeaderForAllParticipiants=pathHeader+'All Participants Experiment Result/'
+pathHeaderForCrossHair=pathHeader+'Leap Accuracy'+'CrossHair Data/'
 
-#path2 = pathheader+"split/"
+
 
 # index of the data from split files
-offsetSplitX = 9
-offsetSplitY = 10
-offsetSplitZ = 11
-offsetSplitTimestamp = 8
-offsetSplitSpeedX = 21
-offsetSplitSpeedY = 22
-offsetSplitSpeedZ = 23
-offsetSplitWidth = 4
-offsetSplitSpeed=24
-offsetSplitDirection=5
-offsetSplitAmplitude=3
+colNumSplitX = 9
+colNumSplitY = 10
+colNumSplitZ = 11
+colNumSplitTimestamp = 8
+colNumSplitSpeedX = 21
+colNumSplitSpeedY = 22
+colNumSplitSpeedZ = 23
+colNumSplitWidth = 4
+colNumSplitSpeed=24
+colNumSplitDirection=5
+colNumSplitAmplitude=3
 
 # the index of data in dif file
-offsetDisBlock=0
-offsetDisTrial=1
-offsetDisAmplitude=2
-offsetDisWidth=3
-offsetDisDirection=4
-offsetDisDistance=7
-offsetDisDifference=8
-offsetDisAbsDifference=9
+colNumDisBlock=0
+colNumDisTrial=1
+colNumDisAmplitude=2
+colNumDisWidth=3
+colNumDisDirection=4
+colNumDisDistance=7
+colNumDisDifference=8
+colNumDisAbsDifference=9
 
 # pixel to mm
 # 1 pixel = 0.0794 mm(calculated by Irene)
@@ -83,48 +92,72 @@ start3DX=0
 start3DY=50
 start3DZ=-85
 
-# locations measured by leap motion
-startLeap3DX=3.42
-startLeap3DY=58.42
-startLeap3DZ=-75.76
 
-# the offset of the start measured by leap motion relative to the real position is x,y,z
-offset3DX=start3DX-startLeap3DX
-offset3DY=start3DY-startLeap3DY
-offset3DZ=start3DZ-startLeap3DZ
 
 # input a pid
 # output the offsetX,offsetY,offsetZ of the nearest experiment before PID_XXX
 def getOffetXYZ(pid):
 
-    readfile=pathheader+'PID_'+pid+'/'+"PID_"+str(pid)+"_Data_from_LEAPtest_results_Frame.csv"
+    if float(pid)<200:
+        readfile=pathHeaderForData+'Old Adults/'+'PID_'+str(pid)+'/'+"PID_"+str(pid)+"_Data_from_LEAPtest_results_Frame.csv"
+    else:
+        readfile = pathHeaderForData + 'Young Adults/' + 'PID_' + str(pid) + '/' + "PID_" + str(pid) + "_Data_from_LEAPtest_results_Frame.csv"
+
 
     # get the dateTime of the target select experiment
     with open(readfile) as f:
 
         f_csv = csv.reader(f)
+
         i=0
+
         dateTimeStr=""
+
         for row in f_csv:
+
             if i==1: # date
-                dateList=row.Split(':')
+                dateList=row[0].split(':')
                 dateList2=dateList[1].strip().split('/') # demo value: 2017 09 30  use strip to remove space
                 dateTimeStr=dateList2[0]+'-'+dateList2[1]+'-'+dateList2[2]
             if i==2: # time
-                timeStr=row[5:len(row)]
-                dateTimeStr+=timeStr
+                timeStr=row[0][5:len(row)-2]
+                dateTimeStr+=' '
+                dateTimeStr+=timeStr.strip()
             i=i+1
             if i>=3:
                 break
 
         dateTimeTargetSelect=time.strptime(dateTimeStr, "%Y-%m-%d %H:%M:%S")
-        print(dateTimeTargetSelect)
 
+    # find the nearest timestamp
 
+    #startPointFile=pathHeaderForData+'Records_Of_StartButton_Offset.csv'
+    startPointFile = pathHeaderForCrossHair + 'Records_Of_StartButton_Offset.csv'
 
+    with open(startPointFile) as f:
 
+        f_csv = csv.reader(f)
+        next(f_csv) # skip the header
+        i=0
+        for row in f_csv:
+            if i==0:
+                prevDateTimeStart = time.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+                prevStartX = float(row[1])
+                prevStartY = float(row[2])
+                prevStartZ = float(row[3])
 
+            dateTimeStartPoint=time.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+            if dateTimeStartPoint > dateTimeTargetSelect: # choose the prevDateTime which is earlier than the current dateTime
+                return prevStartX-start3DX,prevStartY-start3DY,prevStartZ-start3DZ
 
+            prevDateTimeStart = time.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+            prevStartX = float(row[1])
+            prevStartY = float(row[2])
+            prevStartZ = float(row[3])
+
+            i=i+1
+        # if no crossHair experiments are taken after this target select experiment, return the data of the last experiment
+        return prevStartX-start3DX, prevStartY-start3DY, prevStartZ-start3DZ
 
 # 2D coordinates for the start button
 # in pixel

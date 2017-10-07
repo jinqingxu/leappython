@@ -6,40 +6,45 @@ import csv
 import os
 import matplotlib.pyplot as plt
 import  matplotlib
-from GlobalVariables import *
+
 from mpl_toolkits.mplot3d import Axes3D
 
 # import helper functions from other script
-from GlobalVariables import startThreeCor
-from GlobalVariables import  offset3DX
-from GlobalVariables import  offset3DY
-from GlobalVariables import offset3DZ
 
-from GlobalVariables import offsetSplitX
-from GlobalVariables import  offsetSplitY
-from GlobalVariables import offsetSplitZ
-from GlobalVariables import  offsetSplitTimestamp
-from GlobalVariables import offsetSplitDirection
-from GlobalVariables import  offsetSplitAmplitude
-from GlobalVariables import offsetAndroidBlock
-from GlobalVariables import offsetAndroidTrial
-from GlobalVariables import  offsetAndroidTargetX
-from GlobalVariables import  offsetAndroidTargetY
-from GlobalVariables import offsetAndroidFirstLiftUpX
-from GlobalVariables import  offsetAndroidFirstLiftUpY
-from GlobalVariables import PixelToM
-from GlobalVariables import startThreeCor
-
-from GlobalVariables import offsetSplitWidth
-from GlobalVariables import ThreeCorPoint
+from GlobalVariables import *
 
 from FileUtils import getSortedSplitFile
-
-from SpaceUtils import getTargetLocationFor3DWithDirection
-from SpaceUtils import  getTargetLocationFor3D
-from SpaceUtils import LocationInProjectedPlane
+from SpaceUtils import  *
 
 
+
+class TargetForPlot2D:
+    x=0
+    y=0
+    size=0
+
+    def __init__(self,x,y,size):
+        self.x=x
+        self.y=y
+        self.size=size
+
+    def __eq__(self,other):
+        return self.x==other.x and self.y==other.y and self.size==other.size
+
+class TargetForPlot3D:
+    x = 0
+    y = 0
+    z = 0
+    size = 0
+
+    def __init__(self, x, y, z, size):
+        self.x = x
+        self.y = y
+        self.z = z
+        self.size = size
+
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y and self.z==other.z and self.size == other.size
 
 # used as keys in finger_maps
 class Combination:
@@ -59,7 +64,7 @@ class Combination:
     def __hash__(self):
         return hash(str(self.direction) + str(self.width)+str(self.amplitude))
 
-    # used for draw plots of path
+# used for draw plots of path
 class FingerPath:
 
     # the start point of the path
@@ -75,8 +80,6 @@ class FingerPath:
     InterPathY=[]
     InterPathZ=[]
 
-
-
     def __init__(self,StartPathX,StartPathY,StartPathZ,EndPathX,EndPathY,EndPathZ,InterPathX,InterPathY,InterPathZ):
         self.StartPathX=StartPathX
         self.StartPathY=StartPathY
@@ -87,9 +90,6 @@ class FingerPath:
         self.InterPathX=InterPathX
         self.InterPathY=InterPathY
         self.InterPathZ=InterPathZ
-
-
-
 
 class DrawPlots:
 
@@ -108,20 +108,15 @@ class DrawPlots:
     targetY = 0
     targetZ = 0
 
+    targetWidth=0
 
-
+    offset3DX=0
+    offset3DY=0
+    offset3DZ=0
 
     path="" # the path for the raw file
 
     path2=""
-    def __init__(self,pid,path):
-
-        self.pid=pid
-        self.frameArray = []
-        self.numberFrame = 0
-        self.path=path
-        self.path2=self.path+'split/'
-
 
     def loadLeapData(self):
 
@@ -135,9 +130,9 @@ class DrawPlots:
 
         self.numberFrame = len(self.frameArray)
 
-        direction = float(self.frameArray[0][offsetSplitDirection])
-        width = float(self.frameArray[0][offsetSplitWidth])
-        amplitude=float(self.frameArray[0][offsetSplitAmplitude])
+        direction = float(self.frameArray[0][colNumSplitDirection])
+        width = float(self.frameArray[0][colNumSplitWidth])
+        amplitude=float(self.frameArray[0][colNumSplitAmplitude])
         self.combination=Combination(direction,width,amplitude)
 
         targetThreeCor = getTargetLocationFor3D(self.pid, self.block,self.trial,self.path)  # with accurate start coordinate in 3D,calculate the target 3D
@@ -146,12 +141,137 @@ class DrawPlots:
         self.targetY = targetThreeCor.y
         self.targetZ = targetThreeCor.z
 
+        self.targetWidth=float(self.frameArray[0][colNumSplitWidth])
+
+        self.offset3DX,self.offset3DY,self.offset3DZ=getOffetXYZ(self.pid)
+
+    def drawAllTargetFirstLiftUpPlot2D(self,path):
+
+        fileForAllParticipants=path+'All_First_Lift_Up_2D.csv'
+        firstLiftUpXForOlds=[]
+        firstLiftUpYForOlds=[]
+        firstLiftUpXForYoungs=[]
+        firstLiftUpYForYoungs=[]
+        firstRelaLiftUpXForOlds=[]
+        firstRelaLiftUpYForOlds=[]
+        firstRelaLiftUpXForYoungs=[]
+        firstRelaLiftUpYForYoungs=[]
+        colNumFirstLiftUpX=1
+        colNumFirstLiftUpY=2
+        colNumRelaFirstLiftUpX=3
+        colNumRelaFirstLiftUpY=4
+        # load all the liftUp and relative liftUp data
+        with open(fileForAllParticipants) as f:
+            f_csv = csv.reader(f)
+            next(f_csv)
+            for row in f_csv:
+                if float(row[0])<200:
+                    firstLiftUpXForOlds.append(float(row[colNumFirstLiftUpX]))
+                    firstLiftUpYForOlds.append(float(row[colNumFirstLiftUpY]))
+                    firstRelaLiftUpXForOlds.append(float(row[colNumRelaFirstLiftUpX]))
+                    firstRelaLiftUpYForOlds.append(float(row[colNumRelaFirstLiftUpY]))
+
+                else:
+                    firstLiftUpXForYoungs.append(float(row[colNumFirstLiftUpX]))
+                    firstLiftUpYForYoungs.append(float(row[colNumFirstLiftUpY]))
+                    firstRelaLiftUpXForYoungs.append(float(row[colNumRelaFirstLiftUpX]))
+                    firstRelaLiftUpYForYoungs.append(float(row[colNumRelaFirstLiftUpY]))
+        # load all the target data
+        fileForAllTargets=path+'All_Target_2D.csv'
+
+        with open(fileForAllTargets) as f:
+
+            f_csv=csv.reader(f)
+            next(f_csv)
+            targetForPlot_list=[]
+            for row in f_csv:
+                targetForPlot_list.append(TargetForPlot2D(float(row[0]),float(row[1]),float(row[2])))
+        plotTitle='Distribution of first lift up for all old adults'
+        self.helpDrawTargetFirstLiftUpPlot2D(plotTitle,pathHeaderForAllOldAdults,targetForPlot_list,firstLiftUpXForOlds,firstLiftUpYForOlds)
+        plotTitle='Distribution of first lift up for all young adults'
+        self.helpDrawTargetFirstLiftUpPlot2D(plotTitle,pathHeaderForAllYoungAdults, targetForPlot_list, firstLiftUpXForYoungs,firstLiftUpYForYoungs)
+        plotTitle='Distribution of relative first lift up for all old adults'
+        self.helpDrawRelativeTargetFirstLiftUpPlot2D(plotTitle,pathHeaderForAllOldAdults,firstRelaLiftUpXForOlds,firstRelaLiftUpYForOlds)
+        plotTitle = 'Distribution of relative first lift up for all young adults'
+        self.helpDrawRelativeTargetFirstLiftUpPlot2D(plotTitle,pathHeaderForAllYoungAdults, firstRelaLiftUpXForYoungs,firstRelaLiftUpYForYoungs)
+
+    def drawAllTargetFirstLiftUpPlot3D(self,path):
+
+        fileForAllParticipants = path + 'All_First_Lift_Up_3D.csv'
+        firstLiftUpXForOlds = []
+        firstLiftUpYForOlds = []
+        firstLiftUpZForOlds=[]
+        firstLiftUpXForYoungs = []
+        firstLiftUpYForYoungs = []
+        firstLiftUpZForYoungs=[]
 
 
+        # load all the liftUp and relative liftUp data
+        with open(fileForAllParticipants) as f:
+            f_csv = csv.reader(f)
+            next(f_csv)
+            for row in f_csv:
+                if float(row[0]) < 200:
+                    firstLiftUpXForOlds.append(float(row[1]))
+                    firstLiftUpYForOlds.append(float(row[2]))
+                    firstLiftUpZForOlds.append(float(row[3]))
+
+                else:
+                    firstLiftUpXForYoungs.append(float(row[1]))
+                    firstLiftUpYForYoungs.append(float(row[2]))
+                    firstLiftUpZForYoungs.append(float(row[3]))
+
+        # load all the target data
+        fileForAllTargets = path + 'All_Target_3D.csv'
+
+        with open(fileForAllTargets) as f:
+
+            f_csv = csv.reader(f)
+            next(f_csv)
+            targetForPlot3D_list = []
+            for row in f_csv:
+                targetForPlot3D_list.append(TargetForPlot3D(float(row[0]), float(row[1]), float(row[2]),float(row[3])))
+        plotTitle='Distribution of 3D first lift up of all old adults'
+        self.helpDrawTargetFirstLiftUpPlot3D(plotTitle,pathHeaderForAllOldAdults, targetForPlot3D_list, firstLiftUpXForOlds,firstLiftUpYForOlds,firstLiftUpZForOlds)
+        plotTitle='Distribution of 3D first lift up of all young adults'
+        self.helpDrawTargetFirstLiftUpPlot3D(plotTitle,pathHeaderForAllYoungAdults, targetForPlot3D_list, firstLiftUpXForYoungs,firstLiftUpYForYoungs,firstLiftUpZForYoungs)
 
 
+    def helpDrawTargetFirstLiftUpPlot2D(self,plotTitle,pathForPlot,targetForPlot_list,liftUpX_list,liftUpY_list):
 
+        # draw the picture
+        # we need to make the scale of x and y equal
+        plt.figure(figsize=(5, 5), dpi=100)
+        plt.title(plotTitle)
+        matplotlib.rcParams.update({'font.size': 10})
 
+        for t in targetForPlot_list:
+            plt.scatter(t.x, t.y, c='c', alpha=1, marker='o', s=t.size, edgecolors='black')
+        plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o', s=30, edgecolors='black')
+        plt.xlabel('First Lift Up X(mm)')
+        plt.ylabel('First Lift Up Y(mm)')
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(pathForPlot + plotTitle + '.png')
+
+    def helpDrawTargetFirstLiftUpPlot3D(self, plotTitle,pathForPlot, targetForPlot3D_list, firstLiftUpX_list, firstLiftUpY_list,firstLiftUpZ_list):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+        # ax=self.create3DPlots()
+        # draw the tablet plane
+        X, Y, Z = self.drawTabletPlane()
+        ax.scatter(X, Y, Z, c='c', alpha=0.1, marker='o', s=1)
+        for t in targetForPlot3D_list:
+            ax.scatter(t.x, t.y, t.z, c='r', label='target', alpha=1, marker='o', s=t.size, edgecolors='black')
+        ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='c', label='First Lift Up', alpha=1,
+                   marker='o', s=30, edgecolors='black')
+        ax.set_xlabel('x(mm)')
+        ax.set_ylabel('y(mm)')
+        ax.set_zlabel('z(mm)')
+        matplotlib.rcParams.update({'font.size': 10})
+        plt.title(plotTitle)
+        plt.legend()
+        plt.savefig(pathForPlot + plotTitle + '.png')
 
     # go through all the trials in one experiment
     # draw targets and each first lift up points
@@ -163,28 +283,23 @@ class DrawPlots:
 
         with open(file) as f:
 
-            targetX_list = []
-            targetY_list = []
+            targetForPlot_list=[]
+
             liftUpX_list = []
             liftUpY_list = []
+            rela_liftUpX_list=[] # relative to the target as the center
+            rela_liftUpY_list=[]
+
             f_csv = csv.reader(f)
             for i in range(0, 10):  # skip the beginning
                 next(f_csv)
-             # draw the picture
-            plotTitle = 'Distribution of First Lift Up in 2D in one trial'
-            # we need to make the scale of x and y equal
-            plt.figure(figsize=(5, 5), dpi=100)
-            plt.title(plotTitle)
 
             width=0
 
             for row in f_csv:
 
-                targetX_list=[]
-                targetY_list=[]
-
                 if width == 0:
-                    width = float(row[offsetAndroidWidth])
+                    width = float(row[colNumAndroidWidth])
                     #print width
                     sizeOfTarget = 0
                     if abs(width - 4.88) < 0.5:
@@ -194,50 +309,63 @@ class DrawPlots:
                     if abs(width - 9.22) < 0.5:
                         sizeOfTarget = 500
                     width=0
-                targetX_list.append(float(row[offsetAndroidTargetX]) * PixelToM)  # change from Pixel to mm
-                targetY_list.append(float(row[offsetAndroidTargetY]) * PixelToM)
-                liftUpX_list.append(float(row[offsetAndroidFirstLiftUpX]) * PixelToM)
-                liftUpY_list.append(float(row[offsetAndroidFirstLiftUpY]) * PixelToM)
-                plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o', s=sizeOfTarget,
-                            edgecolors='black')
+
+                targetX=float(row[colNumAndroidTargetX]) * PixelToM
+                targetY=float(row[colNumAndroidTargetY]) * PixelToM
+                targetForPlot=TargetForPlot2D(targetX,targetY,sizeOfTarget)
+
+                if targetForPlot not in targetForPlot_list:
+                    targetForPlot_list.append(targetForPlot)
+
+                liftUpX=float(row[colNumAndroidFirstLiftUpX]) * PixelToM
+                liftUpY=float(row[colNumAndroidFirstLiftUpY]) * PixelToM
+                rela_liftUpX=startTwoCor.x*PixelToM+liftUpX-targetX
+                rela_liftUpY=startTwoCor.y*PixelToM+liftUpY-targetY
+                liftUpX_list.append(liftUpX)
+                liftUpY_list.append(liftUpY)
+                rela_liftUpX_list.append(rela_liftUpX)
+                rela_liftUpY_list.append(rela_liftUpY)
 
 
-            matplotlib.rcParams.update({'font.size': 10})
 
-            plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o', s=30,
-                        edgecolors='black')
+            plotTitle='Distribution of 2D first lift up in PID_'+str(self.pid)+'_Experiment'
+            self.helpDrawTargetFirstLiftUpPlot2D(plotTitle,pathForPlot,targetForPlot_list,liftUpX_list,liftUpY_list)
+            plotTitle='Relative Distribution of 2D first lift up in PID_'+str(self.pid)+'_Experiment'
+            self.helpDrawRelativeTargetFirstLiftUpPlot2D(plotTitle,pathForPlot,rela_liftUpX_list,rela_liftUpY_list)
 
-            plt.xlabel('First Lift Up X(mm)')
-            plt.ylabel('First Left Up Y(mm)')
-            plt.legend()
-            plt.grid(True)
-            plt.savefig(pathForPlot + plotTitle + '.png')
-            #plt.show()
+            # append all the plot data in one file for further merged plots
+            fileForAllFirstLiftUp2D=pathHeaderForAllParticipiants+'All_First_Lift_Up_2D.csv'
+            if not os.path.exists(fileForAllFirstLiftUp2D):
+                with open(fileForAllFirstLiftUp2D, 'w') as f:
+                    w_csv = csv.writer(f)
+                    headers=['PID','Lift_Up_X(mm)','Lift_Up_Y(mm)','Relative_Lift_Up_X(mm)','Relative_Lift_Up_Y(mm)']
+                    w_csv.writerow(headers)
+            else:
+                with open(fileForAllFirstLiftUp2D, 'a') as f:
+                    w_csv = csv.writer(f)
+                    for i in range(len(rela_liftUpX_list)):
+                        row=[self.pid,liftUpX_list[i],liftUpY_list[i],rela_liftUpX_list[i],rela_liftUpY_list[i]]
+                        w_csv.writerow(row)
 
-    # find the First Lift Up Cors in leap motion
-    # find the closest timestamp
-    def getFirstLiftUpCors(self, FirstLiftUpTimestamp):
-        for i in range(len(self.frameArray)):
-            curTime = float(self.frameArray[i][offsetSplitTimestamp])
-            if curTime == FirstLiftUpTimestamp:
-                return i
-            if curTime > FirstLiftUpTimestamp:
-                prev = float(self.frameArray[i - 1][offsetSplitTimestamp])
-                if abs(prev - FirstLiftUpTimestamp) < abs(curTime - FirstLiftUpTimestamp):  # find the closest one
-                    return i - 1
-                else:
-                    return i
-        return len(self.frameArray) - 2  # if not found,the one before final LiftUp is the end of the submovement
+            # write the target data in a file for further merged plots
+
+            fileForAllTargets2D=pathHeaderForAllParticipiants+'All_Target_2D.csv'
+
+            with open(fileForAllTargets2D, 'w') as f:
+                w_csv = csv.writer(f)
+                headers = ['targetX(mm)','targetY(mm)','targetSize(mm)']
+                w_csv.writerow(headers)
+                for t in targetForPlot_list:
+                    w_csv.writerow([t.x,t.y,t.size])
 
     # the distribution of lift up in the first attempt
     def drawTargetFirstLiftUpPlot3D(self,pathForPlot):
+
         fileandroid = self.path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
         firstLiftUpTime_list = []
-        offsetFirstLiftUp = 20
-        # store 3D cors for target
-        targetX_list = []
-        targetY_list = []
-        targetZ_list = []
+
+        targetForPlot3D_list=[]
+
         # store 3D cors for first lift up
         firstLiftUpX_list = []
         firstLiftUpY_list = []
@@ -249,7 +377,7 @@ class DrawPlots:
 
             for row in f_csv:
 
-                width = float(row[offsetAndroidWidth])
+                width = float(row[colNumAndroidWidth])
                 sizeOfTarget = 0
                 if abs(width - 4.88) < 0.5:
                     sizeOfTarget = 120
@@ -267,41 +395,73 @@ class DrawPlots:
             self.block = int(filenameSplit[3])
             self.trial = int(filenameSplit[5][0:-4])
             self.loadLeapData()
-            targetX_list.append(float(self.targetX))
-            targetY_list.append(float(self.targetY))
-            targetZ_list.append(float(self.targetZ))
+            sizeOfTarget = 0
+            if abs(self.targetWidth - 4.88) < 0.5:
+                sizeOfTarget = 60
+            if abs(self.targetWidth - 7.22) < 0.5:
+                sizeOfTarget = 160
+            if abs(self.targetWidth - 9.22) < 0.5:
+                sizeOfTarget = 300
+            targetForPlot3D_list.append(TargetForPlot3D(self.targetX,self.targetY,self.targetZ,sizeOfTarget))
             #print firstLiftUpTime_list[i]
             loc = self.getFirstLiftUpCors(firstLiftUpTime_list[i])
-            firstLiftUpX_list.append(float(self.frameArray[loc][offsetSplitX]))
-            firstLiftUpY_list.append(float(self.frameArray[loc][offsetSplitY]))
-            firstLiftUpZ_list.append(float(self.frameArray[loc][offsetSplitZ]))
+            firstLiftUpX_list.append(float(self.frameArray[loc][colNumSplitX]))
+            firstLiftUpY_list.append(float(self.frameArray[loc][colNumSplitY]))
+            firstLiftUpZ_list.append(float(self.frameArray[loc][colNumSplitZ]))
             #print 'targetX', 'targetY', 'targetZ', 'firstLiftUpX', 'firstLiftUpY', 'firstLiftUpZ'
-            #print self.targetX, self.targetY, self.targetZ, self.frameArray[loc][offsetSplitX], self.frameArray[loc][offsetSplitY], self.frameArray[loc][offsetSplitZ]
-        fig = plt.figure()
-        ax = fig.add_subplot(111, projection='3d')
-        #ax=self.create3DPlots()
-        # draw the tablet plane
-        X, Y, Z = self.drawTabletPlane()
-        ax.scatter(X, Y, Z, c='c', alpha=0.1, marker='o', s=1)
-        ax.scatter(targetX_list, targetY_list, targetZ_list, c='r', label='target', alpha=1, marker='o', s=90,
-                   edgecolors='black')
-        ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='c', label='First Lift Up', alpha=1,
-                   marker='o', s=30, edgecolors='black')
-        ax.set_xlabel('x(mm)')
-        ax.set_ylabel('y(mm)')
-        ax.set_zlabel('z(mm)')
-        matplotlib.rcParams.update({'font.size': 10})
-        plotTitle='Distribution of First Lift Up in 3D in one trial'
-        plt.title(plotTitle)
-        plt.legend()
-        plt.savefig(pathForPlot + plotTitle + '.png')
-        #plt.show()
+            #print self.targetX, self.targetY, self.targetZ, self.frameArray[loc][colNumSplitX], self.frameArray[loc][colNumSplitY], self.frameArray[loc][colNumSplitZ]
 
+        plotTitle='Distribution of 3D first lift up in PID_'+str(self.pid)+"_Experiment"
+        self.helpDrawTargetFirstLiftUpPlot3D(plotTitle,pathForPlot,targetForPlot3D_list,firstLiftUpX_list,firstLiftUpY_list,firstLiftUpZ_list)
+
+        fileForFirstLiftUp3D=pathHeaderForAllParticipiants+'All_First_Lift_Up_3D.csv'
+        if not os.path.exists(fileForFirstLiftUp3D):
+            with open(fileForFirstLiftUp3D, 'w') as f:
+                w_csv = csv.writer(f)
+                headers = ['pid', 'firstLiftUpX(mm)', 'firstLiftUpY(mm)', 'firstLiftUpZ(mm)']
+                w_csv.writerow(headers)
+                for i in range(len(firstLiftUpX_list)):
+                    w_csv.writerow([self.pid, firstLiftUpX_list[i], firstLiftUpY_list[i], firstLiftUpZ_list[i]])
+        else:
+            with open(fileForFirstLiftUp3D, 'a') as f:
+                w_csv = csv.writer(f)
+                for i in range(len(firstLiftUpX_list)):
+                    w_csv.writerow([self.pid, firstLiftUpX_list[i], firstLiftUpY_list[i], firstLiftUpZ_list[i]])
+
+        # write the target data in a file for further merged plots
+
+        fileForAllTargets2D = pathHeaderForAllParticipiants + 'All_Target_3D.csv'
+
+        with open(fileForAllTargets2D, 'w') as f:
+            w_csv = csv.writer(f)
+            headers = ['targetX(mm)', 'targetY(mm)','targetZ(mm)', 'targetSize(mm)']
+            w_csv.writerow(headers)
+            for t in targetForPlot3D_list:
+                w_csv.writerow([t.x, t.y,t.z, t.size])
+
+
+    # find the First Lift Up Cors in leap motion
+    # find the closest timestamp
+    def getFirstLiftUpCors(self, FirstLiftUpTimestamp):
+        for i in range(len(self.frameArray)):
+            curTime = float(self.frameArray[i][colNumSplitTimestamp])
+            if curTime == FirstLiftUpTimestamp:
+                return i
+            if curTime > FirstLiftUpTimestamp:
+                prev = float(self.frameArray[i - 1][colNumSplitTimestamp])
+                if abs(prev - FirstLiftUpTimestamp) < abs(curTime - FirstLiftUpTimestamp):  # find the closest one
+                    return i - 1
+                else:
+                    return i
+        return len(self.frameArray) - 2  # if not found,the one before final LiftUp is the end of the submovement
+
+    '''
+    # not used any more
     def drawRelativeTargetFirstLiftUpPlot3D(self,pathForPlot):
 
         # get the index of firstLiftUp in android files
         fileandroid = self.path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
-        offsetFirstLiftUp = 20
+        colNumFirstLiftUp = 20
 
         firstLiftUpTimeList=[] # store the timestamp for all the first lift up of frames in a trial
 
@@ -313,13 +473,10 @@ class DrawPlots:
                 next(f_csv)
 
             for row in f_csv:
-                firstLiftUpTimeList.append(float(row[offsetFirstLiftUp]))  # first lift up timestamp
+                firstLiftUpTimeList.append(float(row[colNumFirstLiftUp]))  # first lift up timestamp
 
 
         files = getSortedSplitFile(self.path2, self.pid)
-
-
-
         for file in files:
             keys = file.split('_')
             block = keys[3]
@@ -338,15 +495,12 @@ class DrawPlots:
             firstLiftUpY_list = []
             firstLiftUpZ_list = []
 
-
             file = self.path+'split/' + "PID_" + str(self.pid) + "_Block_" + str(block) + "_Trial_" + str(trial) + ".csv"
             self.readFile = file
             self.block = block
             self.trial = trial
             self.loadLeapData()
-            width = float(self.frameArray[0][offsetSplitWidth])
-
-
+            width = float(self.frameArray[0][colNumSplitWidth])
             sizeOfTarget = 0
             if abs(width - 4.88) < 0.5:
                 sizeOfTarget = 250
@@ -357,17 +511,14 @@ class DrawPlots:
 
             index = self.getFirstLiftUpCors(firstLiftUpTimeList[i])  # get the index of the first lift up frame
 
-            firstLiftUpX_list.append(float(self.frameArray[index][
-                                               offsetSplitX]) - self.targetX)  # frameArray[loc] is the first Lift Up frame.Get the first List Up X cors.Then get the relative X
-            firstLiftUpY_list.append(float(self.frameArray[index][offsetSplitY]) - self.targetY)
-            firstLiftUpZ_list.append(float(self.frameArray[index][offsetSplitZ]) - self.targetZ)
+            firstLiftUpX_list.append(float(self.frameArray[index][colNumSplitX]) - self.targetX)  # frameArray[loc] is the first Lift Up frame.Get the first List Up X cors.Then get the relative X
+            firstLiftUpY_list.append(float(self.frameArray[index][colNumSplitY]) - self.targetY)
+            firstLiftUpZ_list.append(float(self.frameArray[index][colNumSplitZ]) - self.targetZ)
 
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
-            ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='r', label='First Lift Up', alpha=1,
-                       marker='o', s=30, edgecolors='black')
-            ax.scatter(targetX_list, targetY_list, targetZ_list, c='c', label='target', alpha=1, marker='o', s=sizeOfTarget,
-                       edgecolors='black')
+            ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='r', label='First Lift Up', alpha=1,marker='o', s=30, edgecolors='black')
+            ax.scatter(targetX_list, targetY_list, targetZ_list, c='c', label='target', alpha=1, marker='o', s=sizeOfTarget, edgecolors='black')
 
             margin = 40  # the margin of the plot
             ax.set_xlabel('x(mm)')
@@ -382,66 +533,23 @@ class DrawPlots:
             plt.legend()
             plt.savefig(pathForPlot + 'relative_3d' +'/'+ plotTitle + '.png')
             #plt.show()
-
-
-    def drawRelativeTargetFirstLiftUpPlot2D(self,pathForPlot):
-        file = self.path + "PId_" + str(self.pid) + "_TwoDFittsData_External.csv"
-
-        offsetTargetX = 12
-        offsetTargetY = 13
-        offsetLiftUpX = 16
-        offsetLiftUpY = 17
-
-        with open(file) as f:
-            f_csv = csv.reader(f)
-            for i in range(0, 10):  # skip the beginning
-                next(f_csv)
-
-            for row in f_csv:
-
-                width = float(row[offsetAndroidWidth])
-
-                sizeOfTarget = 0
-                if abs(width - 4.88) < 0.5:
-                    sizeOfTarget = 250
-                if abs(width - 7.22) < 0.5:
-                    sizeOfTarget = 600
-                if abs(width - 9.22) < 0.5:
-                    sizeOfTarget = 1000
-
-                targetX_list = []
-                targetY_list = []
-                liftUpX_list = []
-                liftUpY_list = []
-                targetX = float(row[offsetTargetX]) * PixelToM  # change from pixel to mm
-                targetY = float(row[offsetTargetY]) * PixelToM
-                targetX_list.append(0)
-                targetY_list.append(0)
-                liftUpX = float(row[offsetLiftUpX]) * PixelToM
-                liftUpY = float(row[offsetLiftUpY]) * PixelToM
-                relaLiftUpX = liftUpX - targetX
-                relaLiftUpY = liftUpY - targetY
-                liftUpX_list.append(relaLiftUpX)
-                liftUpY_list.append(relaLiftUpY)
-                matplotlib.rcParams.update({'font.size': 10})
-                plt.figure(figsize=(5, 5), dpi=100)
-                # draw the picture
-                plotTitle = 'Distribution Of Relative First attempt in 2D with block_' + str(
-                    row[offsetAndroidBlock]) + ' trial_' + str(row[offsetAndroidTrial])
-                plt.title(plotTitle)
-                plt.scatter(targetX_list, targetY_list, c='c', alpha=1, marker='o',  s=sizeOfTarget,
-                            )
-                plt.scatter(liftUpX_list, liftUpY_list, c='r', alpha=1, marker='o',  s=30,
-                            )
-                margin = 40  # the margin of the plot
-                plt.xlim(-1 * (margin), margin)  # set the target point to be the center
-                plt.ylim(-1 * (margin), margin)
-                plt.xlabel('First Lift Up X(mm)')
-                plt.ylabel('First Lift Up Y(mm)')
-                plt.legend()
-                plt.grid(True)
-                plt.savefig(pathForPlot + 'relative_2d' +'/'+ plotTitle + '.png')
-                #plt.show()
+     '''
+    def helpDrawRelativeTargetFirstLiftUpPlot2D(self,plotTitle, pathForPlot,rela_LiftUpX_list,rela_LiftUpY_list):
+        # we need to make the scale of x and y equal
+        plt.figure(figsize=(5, 5), dpi=100)
+        plt.xlim(85, 95)
+        plt.ylim(56, 66)
+        plt.title(plotTitle)
+        targetX_list=[startTwoCor.x*PixelToM] # view target as the center
+        targetY_list=[startTwoCor.y*PixelToM]
+        plt.scatter(targetX_list, targetY_list, c='r', alpha=1, marker='o', s=20,edgecolors='black')
+        plt.scatter(rela_LiftUpX_list, rela_LiftUpY_list, c='c', alpha=1, marker='o', s=30, edgecolors='black')
+        plt.xlabel('First Lift Up X(mm)')
+        plt.ylabel('First Lift Up Y(mm)')
+        plt.legend()
+        plt.grid(True)
+        plt.savefig(pathForPlot + plotTitle + '.png')
+        #plt.show()
 
 
     # a helper function for drawing the tablet plane in a 3D plot
@@ -534,16 +642,16 @@ class DrawPlots:
             # the start of the path is the first frame
             # construct a three-cor class with x,y and z
             # offset3DX,offset3DY,offset3DZ mean the offset between the position measured by leap motion and the real location measured by ruler
-            startPathThreeCor = ThreeCorPoint(float(self.frameArray[0][offsetSplitX]) + offset3DX,
-                                              float(self.frameArray[0][offsetSplitY]) + offset3DY,
-                                              float(self.frameArray[0][offsetSplitZ]) + offset3DZ)
+            startPathThreeCor = ThreeCorPoint(float(self.frameArray[0][colNumSplitX]) + self.offset3DX,
+                                              float(self.frameArray[0][colNumSplitY]) + self.offset3DY,
+                                              float(self.frameArray[0][colNumSplitZ]) + self.offset3DZ)
 
             self.projectedStartPathThreeCor = LocationInProjectedPlane(
                 startPathThreeCor)  # project it in a system that tablet is vertical to the ground
 
-            endPathThreeCor = ThreeCorPoint(float(self.frameArray[self.numberFrame - 1][offsetSplitX]) + offset3DX,
-                                            float(self.frameArray[self.numberFrame - 1][offsetSplitY]) + offset3DY,
-                                            float(self.frameArray[self.numberFrame - 1][offsetSplitZ]) + offset3DZ)
+            endPathThreeCor = ThreeCorPoint(float(self.frameArray[self.numberFrame - 1][colNumSplitX]) + self.offset3DX,
+                                            float(self.frameArray[self.numberFrame - 1][colNumSplitY]) + self.offset3DY,
+                                            float(self.frameArray[self.numberFrame - 1][colNumSplitZ]) + self.offset3DZ)
 
             self.projectedEndPathThreeCor = LocationInProjectedPlane(endPathThreeCor)  # project it in a system that tablet is vertical to the ground
 
@@ -559,9 +667,9 @@ class DrawPlots:
 
             for i in range(1, self.numberFrame - 1):
                 # construct a 3D point class for the path point
-                pathThreeCor = ThreeCorPoint(float(self.frameArray[i][offsetSplitX]) + offset3DX,
-                                             float(self.frameArray[i][offsetSplitY]) + offset3DY,
-                                             float(self.frameArray[i][offsetSplitZ]) + offset3DZ)
+                pathThreeCor = ThreeCorPoint(float(self.frameArray[i][colNumSplitX]) + self.offset3DX,
+                                             float(self.frameArray[i][colNumSplitY]) + self.offset3DY,
+                                             float(self.frameArray[i][colNumSplitZ]) + self.offset3DZ)
                 # project it in the system that tablet is vertical to the ground
                 projectedPathThreeCor = LocationInProjectedPlane(pathThreeCor)
                 InterPathX.append(projectedPathThreeCor.x)
@@ -753,10 +861,6 @@ class DrawPlots:
 
                     fig.set_size_inches(6, 6)
                     plt.savefig(pathForPlot+ str(dimension) + 'd_' + 'mode_' + str(mode)+'/'+plotTitle+'.png')
-
-
-    # draw the distribution of pause
-
 
     # this function is used for helping make the scale of x,y and z the same
     def set_axes_equal(self, ax):

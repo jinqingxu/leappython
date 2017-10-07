@@ -6,24 +6,10 @@ import csv
 
 from SpaceUtils import calculate_3D_Dis_Of_Two_Points
 
-from GlobalVariables import offsetAndroidBlock
-from GlobalVariables import offsetAndroidTrial
-from GlobalVariables import  offsetAndroidAmplitude
-from GlobalVariables import  offsetAndroidWidth
-from GlobalVariables import offsetAndroidDirection
 
-from GlobalVariables  import offsetSplitX
-from GlobalVariables import  offsetSplitY
-from GlobalVariables import offsetSplitZ
+from GlobalVariables import *
 
-from GlobalVariables import  offsetDisBlock
-from GlobalVariables import  offsetDisTrial
-from GlobalVariables import offsetDisAmplitude
-from GlobalVariables import offsetDisWidth
-from GlobalVariables import offsetDisDirection
-from GlobalVariables import offsetDisDistance
-from GlobalVariables import offsetDisAbsDifference
-from GlobalVariables import offsetDisDifference
+
 
 
 from FileUtils import getSortedSplitFile
@@ -106,12 +92,12 @@ def get_min_max_mean_deviation_from_list(l):
     return min_l, max_l, sum_l / (len(l) + 0.0),max_l-min_l
 
 # write PID_XXX_Dis_Difference_Android_Leap.csv
-def write_dis_difference(pid,path):
+def write_dis_difference(pid,pathForResult,pathForData):
 
-    file2 = path + 'PID_' + str(pid) + '_TwoDFittsData_External.csv'  # android data
+    file2 = pathForData + 'PID_' + str(pid) + '_TwoDFittsData_External.csv'  # android data
     # headers for the new written file
     new_headers=['Block','Trial','Amplitude(mm)','Width(mm)','Direction','Start TipX(mm)','End TipX(mm)','Distance(mm)','Difference(mm)','AbsDifference(mm)','AbsDiffX(mm)','AbsDiff_Dis_X(mm)']
-    file3 = path + 'PID_' + str(pid) + '_DIS_Difference_Android_Leap.csv' # the new file
+    file3 = pathForResult + 'PID_' + str(pid) + '_DIS_Difference_Android_Leap.csv' # the new file
     difference_dis_list=[] # record the difference between the calculated distance and amplitude
     absolute_difference_dis_list=[]  # record the absolute difference between the calculated distance and amplitude
     absolute_difference_X_list=[] # record the absolute difference of startX and endX
@@ -123,20 +109,20 @@ def write_dis_difference(pid,path):
         #get android data
         with open(file2) as f:
             f_csv = csv.reader(f)
-            for i in range(0, 9):  # skip the beginning
+            for i in range(0, 10):  # skip the beginning
                 next(f_csv)
-            headers = next(f_csv)  # get headers of csv
+
             # android data:Block,Trial,Amplitude,Width,Direction
             datas=[] #  two-dimensional array,one record means data of one trail
             for row in f_csv:
                 difdata=[]
-                difdata.append(row[offsetAndroidBlock])  # block
-                difdata.append(row[offsetAndroidTrial])  # trial
-                difdata.append(row[offsetAndroidAmplitude])  # amplitude in mm
-                difdata.append(row[offsetAndroidWidth])  # width in mm
-                difdata.append(row[offsetAndroidDirection])  # direction
+                difdata.append(row[colNumAndroidBlock])  # block
+                difdata.append(row[colNumAndroidTrial])  # trial
+                difdata.append(row[colNumAndroidAmplitude])  # amplitude in mm
+                difdata.append(row[colNumAndroidWidth])  # width in mm
+                difdata.append(row[colNumAndroidDirection])  # direction
                 datas.append(difdata)
-            path2=path+'split/'
+            path2=pathForData+'split/'
             files=getSortedSplitFile(path2,pid)
             for i in range(len(datas)):
                 f = open(path2 + files[i], "r")
@@ -149,13 +135,13 @@ def write_dis_difference(pid,path):
                     # so we can not go through the f_csv
                     for row in f_csv:
                         if k == 1:
-                            firstx = float(row[offsetSplitX])
-                            firsty = float(row[offsetSplitY])
-                            firstz = float(row[offsetSplitZ])
+                            firstx = float(row[colNumSplitX])
+                            firsty = float(row[colNumSplitY])
+                            firstz = float(row[colNumSplitZ])
                         if k == length - 1:
-                            endx = float(row[offsetSplitX])
-                            endy = float(row[offsetSplitY])
-                            endz = float(row[offsetSplitZ])
+                            endx = float(row[colNumSplitX])
+                            endy = float(row[colNumSplitY])
+                            endz = float(row[colNumSplitZ])
                         k = k + 1
                     # "firstx",firstx,"endx",endx
                     dis = calculate_3D_Dis_Of_Two_Points(firstx, firsty, firstz, endx, endy, endz)
@@ -208,11 +194,11 @@ def write_dis_difference(pid,path):
 
 
 # find the min,max,average abs_difference of all combinations of amplitude,width and direction
-def statistic_combination(pid,path):
+def statistic_combination(pid,pathForResult,pathForData):
 
     dis_list = [] # the statistic data list
 
-    file=path+'PID_'+str(pid)+'_DIS_Difference_Android_Leap.csv' # append the result at the bottom of the statistic file
+    file=pathForResult+'PID_'+str(pid)+'_DIS_Difference_Android_Leap.csv' # append the result at the bottom of the statistic file
 
     with open(file) as f:
         length=len(f.readlines())-4 # remove the header,the min,max,average in the bottom
@@ -224,7 +210,7 @@ def statistic_combination(pid,path):
         for row in f_csv:
             if j==length: # do not include the min,max,average value in the dis_list
                 break
-            tmp_dis=Dis_leap_android(row[offsetDisBlock],row[offsetDisTrial],row[offsetDisAmplitude],row[offsetDisWidth],row[offsetDisDirection],row[offsetDisDistance],row[offsetDisDifference],row[offsetDisAbsDifference])
+            tmp_dis=Dis_leap_android(row[colNumDisBlock],row[colNumDisTrial],row[colNumDisAmplitude],row[colNumDisWidth],row[colNumDisDirection],row[colNumDisDistance],row[colNumDisDifference],row[colNumDisAbsDifference])
             dis_list.append(tmp_dis)
             j=j+1
 

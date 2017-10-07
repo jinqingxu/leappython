@@ -2,10 +2,8 @@ import csv
 import math
 import os
 from CalculateOfCircle import get_min_max_mean_deviation_from_list
-from GlobalVariables import offsetLeapX
-from GlobalVariables import offsetLeapY
-from GlobalVariables import offsetLeapZ
-from GlobalVariables import path
+
+from GlobalVariables import *
 # 3D point
 class ThreeCorPoint:
     x=0
@@ -42,7 +40,7 @@ class Distance:
 # they are dis12,dis13,dis14,dis15,dis23,dis24,dis25,dis34,dis35,dis45
 rulers = [40, 40, 40, 40, 56.6, 80, 56.56, 56.56, 80, 56.56]
 
-def print_min_mean_max_from_split_files(pid,num):
+def print_min_mean_max_from_split_files(path,pid,num):
     lxs=[] # two-dimension array,one record means an array of x from a trial
     lys=[] # two-dimension array,one record means an array of y from a trial
     lzs=[] # two-dimension array,one record means an array of z from a trial
@@ -57,9 +55,9 @@ def print_min_mean_max_from_split_files(pid,num):
             tmp_ly=[]
             tmp_lz=[]
             for row in f_csv:
-                tmp_lx.append(row[offsetLeapX])
-                tmp_ly.append(row[offsetLeapY])
-                tmp_lz.append(row[offsetLeapZ])
+                tmp_lx.append(row[colNumLeapX])
+                tmp_ly.append(row[colNumLeapY])
+                tmp_lz.append(row[colNumLeapZ])
         lxs.append(tmp_lx)
         lys.append(tmp_ly)
         lzs.append(tmp_lz)
@@ -104,16 +102,16 @@ def get_mean_from_split_files(pid,num): # num means how many data we need to pro
             sum_z=0.0
             k=0
             for row in f_csv:
-                sum_x+=float(row[offsetLeapX])
-                sum_y+=float(row[offsetLeapY])
-                sum_z+=float(row[offsetLeapZ])
+                sum_x+=float(row[colNumLeapX])
+                sum_y+=float(row[colNumLeapY])
+                sum_z+=float(row[colNumLeapZ])
                 k=k+1
             current=ThreeCorPoint(sum_x/(k+0.0),sum_y/(k+0.0),sum_z/(k+0.0))
             position3D.append(current)
     return position3D
 
 # write file and print error of distances
-def write_and_print_error(distancesFor3D):
+def write_and_print_error(path,distancesFor3D):
     file1 = path+'RedCross_DIS_error.csv'
     header=[ "StartIndex", "EndIndex", "RealDis(mm)", "CalDis(mm)","Error(mm)"]
     print 'StartIndex','EndIndex','RealDis(mm)','CalDis(mm)','Error(mm)'

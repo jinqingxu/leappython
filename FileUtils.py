@@ -33,3 +33,18 @@ def getSortedSplitFile(path,pid):
             result.append(file)
     return result
 
+def getAllPids(path):
+
+    pid_list=[]
+    for dir in os.listdir(path):
+        child = os.path.join(path, dir)
+        if os.path.isdir(child):
+            keys = child.split('/')
+            if keys[len(keys) - 1][0:4] == 'PID_':  # go through all the folder that contain datas from experiment
+                keys2 = keys[len(keys) - 1].split('_')  # split PID_pid to get the pid
+                pid = keys2[len(keys2) - 1]
+                if pid != '8888':  # 8888 is for crossHair experiment
+                    pid_list.append(pid)
+
+    return pid_list
+

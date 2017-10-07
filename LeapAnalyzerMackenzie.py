@@ -5,17 +5,12 @@
 import csv
 import math
 from SpaceUtils import getDistanceBetweenPointAndPlane
-from GlobalVariables import offsetSplitX
-from GlobalVariables import  offsetSplitY
-from GlobalVariables import offsetSplitZ
+from GlobalVariables import *
 
-from GlobalVariables import  startThreeCor
+
+
 from SpaceUtils import getTargetLocationFor3D
-# the normal vector of the tablet
-# used to calculate MO
-from GlobalVariables import normalVectorX
-from GlobalVariables import normalVectorY
-from  GlobalVariables import normalVectorZ
+
 
 class LeapAnalyzerMackenzie:
     pid=0
@@ -76,6 +71,7 @@ class LeapAnalyzerMackenzie:
         return self.numberFrame
 
     def calculateMovementDirectionChange(self):
+
         prevFrame = self.frameArray[0] # let the first frame be the initial prevFrame
         currentFrame = self.frameArray[1] # let the second frame be the initial currentFrame
         i = 2 # started from the third frame
@@ -87,12 +83,12 @@ class LeapAnalyzerMackenzie:
         currentDirectionY = ""
         currentDirectionZ = ""
         while i < len(self.frameArray):
-            prevX = float(prevFrame[offsetSplitX])
-            prevY = float(prevFrame[offsetSplitY])
-            prevZ = float(prevFrame[offsetSplitZ])
-            currentX = float(currentFrame[offsetSplitX])
-            currentY = float(currentFrame[offsetSplitY])
-            currentZ = float(currentFrame[offsetSplitZ])
+            prevX = float(prevFrame[colNumSplitX])
+            prevY = float(prevFrame[colNumSplitY])
+            prevZ = float(prevFrame[colNumSplitZ])
+            currentX = float(currentFrame[colNumSplitX])
+            currentY = float(currentFrame[colNumSplitY])
+            currentZ = float(currentFrame[colNumSplitZ])
             # update the self.movementDirectionChangX and return the current direction of X
             # if the same direction self.movementDirectionChangX++
             # else self.movementDirectionChangX--
@@ -143,9 +139,9 @@ class LeapAnalyzerMackenzie:
         sumMovementErrorDifference=0
         for i in range(0,len(self.frameArray)):
             currentFrame=self.frameArray[i]
-            currentX=float(currentFrame[offsetSplitX])
-            currentY=float(currentFrame[offsetSplitY])
-            currentZ=float(currentFrame[offsetSplitZ])
+            currentX=float(currentFrame[colNumSplitX])
+            currentY=float(currentFrame[colNumSplitY])
+            currentZ=float(currentFrame[colNumSplitZ])
             # the movement offset represent the average movement error
             differenceMovementErrorSqr=math.pow(self.calculateRealMovementError(self.startX,self.startY,self.startZ,self.targetX,self.targetY,self.targetZ,currentX,currentY,currentZ)-movementOffset,2)
             sumMovementErrorDifference=sumMovementErrorDifference+differenceMovementErrorSqr
@@ -167,9 +163,9 @@ class LeapAnalyzerMackenzie:
         sumMovementError = 0
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[offsetSplitX])
-            currentY = float(currentFrame[offsetSplitY])
-            currentZ = float(currentFrame[offsetSplitZ])
+            currentX = float(currentFrame[colNumSplitX])
+            currentY = float(currentFrame[colNumSplitY])
+            currentZ = float(currentFrame[colNumSplitZ])
             sumMovementError = sumMovementError + abs(self.calculateRealMovementError(self.startX, self.startY, self.startZ, self.targetX, self.targetY,
                                                                               self.targetZ, currentX, currentY, currentZ))
         # self.movementError=sumMovementError / (len(self.frameArray)-2.0)
@@ -207,9 +203,9 @@ class LeapAnalyzerMackenzie:
         sumMovementError = 0
         for i in range(0, len(self.frameArray)):
             currentFrame = self.frameArray[i]
-            currentX = float(currentFrame[offsetSplitX])
-            currentY = float(currentFrame[offsetSplitY])
-            currentZ = float(currentFrame[offsetSplitZ])
+            currentX = float(currentFrame[colNumSplitX])
+            currentY = float(currentFrame[colNumSplitY])
+            currentZ = float(currentFrame[colNumSplitZ])
             sumMovementError = sumMovementError + self.calculateRealMovementError(self.startX, self.startY, self.startZ,self.targetX, self.targetY,self.targetZ, currentX, currentY,currentZ)
 
 
@@ -235,7 +231,7 @@ class LeapAnalyzerMackenzie:
         startFrame=self.frameArray[0]
 
         # judge the initial direction
-        if self.judgeAboveOrBelowPlane(float(startFrame[offsetSplitX]),float(startFrame[offsetSplitY]),float(startFrame[offsetSplitZ]))==True:
+        if self.judgeAboveOrBelowPlane(float(startFrame[colNumSplitX]),float(startFrame[colNumSplitY]),float(startFrame[colNumSplitZ]))==True:
             preAbove=True
         else:
             preAbove=False
@@ -244,7 +240,7 @@ class LeapAnalyzerMackenzie:
         for  i in range(1,len(self.frameArray)):
             curFrame=self.frameArray[i]
             # judge in the current frame,
-            curAbove=self.judgeAboveOrBelowPlane(float(curFrame[offsetSplitX]),float(curFrame[offsetSplitY]),float(curFrame[offsetSplitZ]))
+            curAbove=self.judgeAboveOrBelowPlane(float(curFrame[colNumSplitX]),float(curFrame[colNumSplitY]),float(curFrame[colNumSplitZ]))
             if curAbove!=preAbove:
                 self.taskAxisCrossing=self.taskAxisCrossing+1 # task axis crossing happens
                 preAbove=curAbove
