@@ -10,6 +10,7 @@ from FileUtils import *
 def processOneExperiment(pid):
 
     dimensionList = [2, 3]
+
     modeList = ['start_and_end', 'path']
 
     if float(pid)<200:
@@ -19,9 +20,9 @@ def processOneExperiment(pid):
         pathForData = pathHeaderForData+'Young Adults/' + 'PID_' + str(pid) + '/'
 
     if float(pid)<200:
-        pathForResult = pathHeaderForResult +'Old Adults/'+ 'PID_' + str(pid) + '/'
+        pathForResult = pathHeaderForIndividual +'Old Adults/'+ 'PID_' + str(pid) + '/'
     else:
-        pathForResult = pathHeaderForResult +'Young Adults/'+ 'PID_' + str(pid) + '/'
+        pathForResult = pathHeaderForIndividual +'Young Adults/'+ 'PID_' + str(pid) + '/'
 
     if not os.path.exists(pathForResult):
         os.mkdir(pathForResult)
@@ -39,19 +40,20 @@ def processOneExperiment(pid):
 
 
 
+
     pathForFirstLiftUpPlots=pathForResult+'firstLiftUpPlots/'
     if not os.path.exists(pathForFirstLiftUpPlots):
         os.mkdir(pathForFirstLiftUpPlots)
         #os.mkdir(pathForFirstLiftUpPlots + 'relative_3d' + '/')
         #os.mkdir(pathForFirstLiftUpPlots + 'relative_2d' + '/')
 
-    #drawPlots.drawRelativeTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
-    drawPlots.drawTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
-    drawPlots.drawTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
-    #drawPlots.drawRelativeTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
+
+    #drawPlots.drawTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
+    #drawPlots.drawTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
 
 
 
+    '''
     pathForFinalLiftUpPlots = pathForResult +'finalLiftUpPlots/'
     if not os.path.exists(pathForFinalLiftUpPlots):
 
@@ -60,10 +62,10 @@ def processOneExperiment(pid):
         for d in dimensionList:
             for m in modeList:
                 os.mkdir(pathForFinalLiftUpPlots + str(d) + 'd_' + 'mode_' + str(m) + '/')
+    '''
 
 
-
-    drawPlots.drawStartAndEnd(pathForFinalLiftUpPlots)
+    drawPlots.drawPathForIndividuals(pid)
 
 def loadMeasurementData(pathHeaderForResult):
 
@@ -97,13 +99,16 @@ def getAverageValueForAllColumns(datas):
 
     result=[]
     length=len(datas[0])
+
     for i in range(29,length):
+
 
         value_list=[]
         for j in range(0,len(datas)):
-            print 'i',i,'j',j,datas[j][1],datas[j][2],datas[j][3]
-            print 'length',len(datas[j])
+
             value_list.append(datas[j][i])
+
+
 
         min_v,max_v,average_v,deviation_v=get_min_max_mean_deviation_from_list(value_list)
         result.append(average_v)
@@ -119,7 +124,7 @@ def mergeMeasurementFiles():
 
     header,datasForAllOlds,datasForAllYoungs=loadMeasurementData(pathHeaderForResult)
     fileForAllOlds = pathHeaderForAllOldAdults + 'Measurements_For_All_Old_Adults.csv'
-    ''''
+
     average_results_old=getAverageValueForAllColumns(datasForAllOlds)
     average_results_young=getAverageValueForAllColumns(datasForAllYoungs)
     fileForAverageOlds = pathHeaderForAllOldAdults + 'Average_Old_Adults_Measurements.csv'
@@ -145,7 +150,7 @@ def mergeMeasurementFiles():
         w_csv.writerow(average_results_old)
         w_csv.writerow(average_results_young)
 
-    '''
+
 
     with open(fileForAllOlds, 'w') as f:
         w_csv = csv.writer(f)
@@ -187,17 +192,18 @@ def startProgram():
     pid_list2=getAllPids(pathHeaderForData+'Young Adults/')
     pid_list.extend(pid_list2)
 
-    '''
+
     for pid in pid_list:
 
         processOneExperiment(pid)
-    '''
 
 
 
-    mergeMeasurementFiles()
+
+    #mergeMeasurementFiles()
     drawPlots=DrawPlots()
-    drawPlots.drawAllTargetFirstLiftUpPlot2D(pathHeaderForAllParticipiants)
+    #drawPlots.drawAllTargetFirstLiftUpPlot2D(pathHeaderForAllParticipiants)
+    drawPlots.drawAllTargetFirstLiftUpPlot3D(pathHeaderForAllParticipiants)
 
 
 

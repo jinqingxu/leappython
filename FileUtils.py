@@ -20,8 +20,9 @@ def file_cmp(x,y):
             return 0
         if trial1>trial2:
             return 1
-
-# in the path directory, find all the file begin with PID_pid
+'''
+# not used any more
+# in the path directory, find all the split file
 # return them in a sorted list
 def getSortedSplitFile(path,pid):
     files = os.listdir(path)
@@ -32,6 +33,18 @@ def getSortedSplitFile(path,pid):
         if str(pid) in keys:  # if the file begins with PID_xxx
             result.append(file)
     return result
+'''
+
+# in the path directory, find all the split file
+# return them in a sorted list
+def getSortedSplitFile(path):
+    files = os.listdir(path)
+    files = sorted(files, file_cmp)
+    result=[]
+    for file in files:
+        result.append(file)
+    return result
+
 
 def getAllPids(path):
 

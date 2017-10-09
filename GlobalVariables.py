@@ -3,6 +3,17 @@ import math
 import csv
 import time
 
+#workpath
+pathHeader='/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/'
+pathHeaderForData = pathHeader+'Experiment Data/'
+pathHeaderForIndividual=pathHeader+'All Individual Experiment Result/'
+pathHeaderForAllOldAdults=pathHeader+'All Old Adults Experiment Result/'
+pathHeaderForAllYoungAdults=pathHeader+'All Young Adults Experiment Result/'
+pathHeaderForAllParticipiants=pathHeader+'All Participants Experiment Result/'
+pathHeaderForAccuracy=pathHeader+'Leap Accuracy/'
+pathHeaderForCrossHair=pathHeaderForAccuracy+'CrossHair Data/'
+pathHeaderForPrecision=pathHeaderForAccuracy+'Precision Data/'
+
 # the index of data in android file
 colNumAndroidStartTime = 17
 colNumAndroidFinalLiftUp = 24
@@ -20,24 +31,11 @@ colNumAndroidFirstTouchDownX=13
 colNumAndroidFirstTouchDownY=14
 colNumAndroidFirstLiftUpTimeStamp=20
 
-
 # the index of data in leap file
 colNumLeapX=3
 colNumLeapY=4
 colNumLeapZ=5
 colNumLeapTimeStamp=2
-
-
-#workpath
-pathHeader='/Users/irene/Documents/McGillUni/ACT_Research_Lab/Experiments/Motion Tracking Study/'
-pathHeaderForData = pathHeader+'Experiment Data/'
-pathHeaderForResult=pathHeader+'All Individual Experiment Result/'
-pathHeaderForAllOldAdults=pathHeader+'All Old Adults Experiment Result/'
-pathHeaderForAllYoungAdults=pathHeader+'All Young Adults Experiment Result/'
-pathHeaderForAllParticipiants=pathHeader+'All Participants Experiment Result/'
-pathHeaderForCrossHair=pathHeader+'Leap Accuracy'+'CrossHair Data/'
-
-
 
 # index of the data from split files
 colNumSplitX = 9
@@ -92,7 +90,22 @@ start3DX=0
 start3DY=50
 start3DZ=-85
 
+# 2D coordinates for the start button
+# in pixel
+start2DX=1024
+start2DY=695
 
+# start point in 2D
+startThreeCor=ThreeCorPoint(start3DX,start3DY,start3DZ)
+startTwoCor=TwoCorPoint(start2DX,start2DY)
+
+# the angle of the tablet
+tabletAngle=45
+
+# the normal vector of the tablet
+normalVectorX=0
+normalVectorY=1
+normalVectorZ=1
 
 # input a pid
 # output the offsetX,offsetY,offsetZ of the nearest experiment before PID_XXX
@@ -129,10 +142,11 @@ def getOffetXYZ(pid):
 
         dateTimeTargetSelect=time.strptime(dateTimeStr, "%Y-%m-%d %H:%M:%S")
 
+
     # find the nearest timestamp
 
     #startPointFile=pathHeaderForData+'Records_Of_StartButton_Offset.csv'
-    startPointFile = pathHeaderForCrossHair + 'Records_Of_StartButton_Offset.csv'
+    startPointFile = pathHeaderForCrossHair + 'Average_x_y_z_of_crossHair_experiment.csv'
 
     with open(startPointFile) as f:
 
@@ -140,41 +154,27 @@ def getOffetXYZ(pid):
         next(f_csv) # skip the header
         i=0
         for row in f_csv:
-            if i==0:
-                prevDateTimeStart = time.strptime(row[0], "%Y-%m-%d %H:%M:%S")
-                prevStartX = float(row[1])
-                prevStartY = float(row[2])
-                prevStartZ = float(row[3])
+            if len(row[1]) < 19:  # sometimes the datetime will be like 2017-09-13 12:12 it should be 12:12:00 to satisfy the date format
+                row[1] += ':00'
 
-            dateTimeStartPoint=time.strptime(row[0], "%Y-%m-%d %H:%M:%S")
+            if i==0:
+                prevDateTimeStart = time.strptime(row[1], "%Y-%m-%d %H:%M:%S")
+                prevStartX = float(row[2])
+                prevStartY = float(row[3])
+                prevStartZ = float(row[4])
+
+            dateTimeStartPoint=time.strptime(row[1], "%Y-%m-%d %H:%M:%S")
             if dateTimeStartPoint > dateTimeTargetSelect: # choose the prevDateTime which is earlier than the current dateTime
                 return prevStartX-start3DX,prevStartY-start3DY,prevStartZ-start3DZ
 
-            prevDateTimeStart = time.strptime(row[0], "%Y-%m-%d %H:%M:%S")
-            prevStartX = float(row[1])
-            prevStartY = float(row[2])
-            prevStartZ = float(row[3])
+            prevDateTimeStart = time.strptime(row[1], "%Y-%m-%d %H:%M:%S")
+            prevStartX = float(row[2])
+            prevStartY = float(row[3])
+            prevStartZ = float(row[4])
 
             i=i+1
         # if no crossHair experiments are taken after this target select experiment, return the data of the last experiment
         return prevStartX-start3DX, prevStartY-start3DY, prevStartZ-start3DZ
 
-# 2D coordinates for the start button
-# in pixel
-start2DX=1024
-start2DY=695
-
-# start point in 2D
-startThreeCor=ThreeCorPoint(start3DX,start3DY,start3DZ)
-startTwoCor=TwoCorPoint(start2DX,start2DY)
-
-# the angle of the tablet
-tabletAngle=45
-
-
-# the normal vector of the tablet
-normalVectorX=0
-normalVectorY=1
-normalVectorZ=1
 
 

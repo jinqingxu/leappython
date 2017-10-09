@@ -122,12 +122,12 @@ def write_dis_difference(pid,pathForResult,pathForData):
                 difdata.append(row[colNumAndroidWidth])  # width in mm
                 difdata.append(row[colNumAndroidDirection])  # direction
                 datas.append(difdata)
-            path2=pathForData+'split/'
-            files=getSortedSplitFile(path2,pid)
+            pathForSplit=pathForData+'split/'
+            files=getSortedSplitFile(pathForSplit)
             for i in range(len(datas)):
-                f = open(path2 + files[i], "r")
+                f = open(pathForSplit+ files[i], "r")
                 length = len(f.readlines())  # get the length of the csv file
-                with open(path2 + files[i]) as f:
+                with open(pathForSplit + files[i]) as f:
                     f_csv = csv.reader(f)
                     next(f_csv)  # skip headers of csv
                     k = 1  # begin with the second line

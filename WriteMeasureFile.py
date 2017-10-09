@@ -45,6 +45,7 @@ def writeErrorForEveryTrial(pid,datas,pathFordata):
     leapTimeStamp_list=loadLeapTimeStampData(pathFordata,pid)
 
     with open(androidfile) as f:
+
         f_csv = csv.reader(f)
         for i in range(0, 9):  # skip the beginning
             next(f_csv)
@@ -191,7 +192,7 @@ def writeFiles(pid,pathForResult,pathForData):
     datas,headers=writeErrorForEveryTrial(pid,datas,pathForData) # append error datas ,those data only need data from android
 
     # the measurement from mackenzie,hwang and our work need the split data from leap motion
-    files = getSortedSplitFile(pathForData+'split/', pid)  # the files are sorted as the sequence of datas,block is of the highest priority,then trial
+    files = getSortedSplitFile(pathForData+'split/')  # the files are sorted as the sequence of datas,block is of the highest priority,then trial
     wrongIndex=[]
     datas,headers,wrongIndex=writeMackenzieMeasurements(pid,files,datas,headers,pathForData,wrongIndex)  # append measures from Mackenzie
     datas,headers,wrongIndex=writeHwangMeasurements(pid,files,datas,headers,pathForData,wrongIndex)   # append measures from Hwang

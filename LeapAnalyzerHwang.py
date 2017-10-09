@@ -311,7 +311,7 @@ class LeapAnalyzerHwang:
         for i in range(index,self.numberFrame):
 
             if sumDuration >= 100: # speed >0 up to 100 ms
-                return i-1
+                return i
 
             curFrame=self.frameArray[i]
             curTimeStamp=float(curFrame[colNumSplitTimestamp])
@@ -327,10 +327,9 @@ class LeapAnalyzerHwang:
             if curSpeed>self.pauseMarginSpeed:
                 sumDuration+=duration
 
-        return -1
+        return -1 # not found
 
-        # return the acceleration speed of the current index
-
+    # return the acceleration speed of the current index
     def calculateAccelerationSpeed(self, index):
 
         prevFrame = self.frameArray[index - 1]
@@ -368,30 +367,27 @@ class LeapAnalyzerHwang:
 
             curFrame = self.frameArray[j]
             curSpeed = float(curFrame[colNumSplitSpeed])
-
             if curSpeed>self.tmpPeekSpeed:
                 self.tmpPeekSpeed=curSpeed
-
             curAcc = self.calculateAccelerationSpeed(j)
 
-            # first situation: pause
+            # first situation: pause( the speed is almost zero)
             if curSpeed < self.pauseMarginSpeed:
                 return j
 
             # second situation
             if index>1 :
-                # if index<=1,there will be no grandFrame,so the second situation is meaningless
+                # if index<=1,there will be no prevAcc,so the second situation is meaningless
                 # acceleration speed change from negtive to positive and the current speed < 75% of peek speed
                 if prevAcc<0 and curAcc>0 and curSpeed < 0.75*self.tmpPeekSpeed:
                     return j
 
             # the third situation,reach a relative max negtive acc
-            # sudden brake
-            # relative max means larger than the previous maximum and the next two frame
+
 
             if negtiveTime>0:
-                # if the curAcc reaches maximum, it should > prevAcc and > nextAcc
-                if abs(curAcc)>maxAcc and abs(curAcc)>self.brakeMarginAcc:
+                # if the curAcc reaches maximum, it should > prevAcc and also > nextAcc
+                if abs(curAcc)>maxAcc and abs(curAcc)>self.brakeMarcginAcc:
 
                     if j<self.numberFrame-2: # the last two does not have next two frame
 
