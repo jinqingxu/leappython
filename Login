@@ -122,7 +122,7 @@ def getAverageValueForAllColumns(datas):
 def mergeMeasurementFiles():
 
 
-    header,datasForAllOlds,datasForAllYoungs=loadMeasurementData(pathHeaderForResult)
+    header,datasForAllOlds,datasForAllYoungs=loadMeasurementData(pathHeaderForIndividual)
     fileForAllOlds = pathHeaderForAllOldAdults + 'Measurements_For_All_Old_Adults.csv'
 
     average_results_old=getAverageValueForAllColumns(datasForAllOlds)
@@ -192,18 +192,19 @@ def startProgram():
     pid_list2=getAllPids(pathHeaderForData+'Young Adults/')
     pid_list.extend(pid_list2)
 
-
+    '''
     for pid in pid_list:
 
         processOneExperiment(pid)
-
+    '''
 
 
 
     #mergeMeasurementFiles()
     drawPlots=DrawPlots()
     #drawPlots.drawAllTargetFirstLiftUpPlot2D(pathHeaderForAllParticipiants)
-    drawPlots.drawAllTargetFirstLiftUpPlot3D(pathHeaderForAllParticipiants)
+    #drawPlots.drawAllTargetFirstLiftUpPlot3D(pathHeaderForAllParticipiants)
+    drawPlots.drawAllPath()
 
 
 
@@ -213,7 +214,7 @@ def startProgram():
 
 
 startProgram()
-#processOneExperiment(190)
+#processOneExperiment(204)
 
 
 

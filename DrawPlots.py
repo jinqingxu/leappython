@@ -13,7 +13,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 from GlobalVariables import *
 
-from FileUtils import getSortedSplitFile
+from FileUtils import *
 from SpaceUtils import  *
 
 
@@ -129,6 +129,7 @@ class DrawPlots:
                 self.frameArray.append(row)
 
         self.numberFrame = len(self.frameArray)
+
 
         direction = float(self.frameArray[0][colNumSplitDirection])
         width = float(self.frameArray[0][colNumSplitWidth])
@@ -606,26 +607,30 @@ class DrawPlots:
 
 
 
+
+
     # this function is used to store the data of fingers in a map
-    def setUpForFingerPath_map(self,pid):
+    # the key is the direction
+    # the value is a list of value in the class of FingerPath
+    def setUpForFingerPath_map(self,pid,fingerPath_map,dimension):
 
         if float(pid)<200:
             pathForSplit=pathHeaderForData+'Old Adults/'+'PID_'+str(pid)+'/'+'split/'
+            pathForData=pathHeaderForData+'Old Adults/'+'PID_'+str(pid)+'/'
         else:
             pathForSplit = pathHeaderForData + 'Young Adults/' + 'PID_' + str(pid) + '/' + 'split/'
+            pathForData = pathHeaderForData + 'Young Adults/'+'PID_'+str(pid)+'/'
 
         files = getSortedSplitFile(pathForSplit)
-
-        # the key is the direction
-        # the value is a list of value in the class of FingerPath
-        fingerPath_map = {}
 
         for file in files:
 
             self.readFile = pathForSplit + file
             keys = file.split('_')
+            self.pid=keys[1]
             self.block = keys[3]
             self.trial = int(keys[5][0:-4])
+            self.path=pathForData
             self.loadLeapData() # set the  combination(width,amplitude,direction) for the drawPlots class
             # if the current direction does not exist in the map
             # create new position list for the current direction
@@ -656,6 +661,7 @@ class DrawPlots:
                                               float(self.frameArray[0][colNumSplitY]) + self.offset3DY,
                                               float(self.frameArray[0][colNumSplitZ]) + self.offset3DZ)
 
+
             self.projectedStartPathThreeCor = LocationInProjectedPlane(startPathThreeCor)  # project it in a system that tablet is vertical to the ground
 
             endPathThreeCor = ThreeCorPoint(float(self.frameArray[self.numberFrame - 1][colNumSplitX]) + self.offset3DX,
@@ -664,14 +670,28 @@ class DrawPlots:
 
             self.projectedEndPathThreeCor = LocationInProjectedPlane(endPathThreeCor)  # project it in a system that tablet is vertical to the ground
 
-            # store the location of the start of the path
-            StartPathX.append(self.projectedStartPathThreeCor.x)
-            StartPathY.append(self.projectedStartPathThreeCor.y)
-            StartPathZ.append(self.projectedStartPathThreeCor.z)
-            # store the location of the end of the path
-            EndPathX.append(self.projectedEndPathThreeCor.x)
-            EndPathY.append(self.projectedEndPathThreeCor.y)
-            EndPathZ.append(self.projectedEndPathThreeCor.z)
+            if dimension==2:
+
+                # store the location of the start of the path
+                StartPathX.append(self.projectedStartPathThreeCor.x)
+                StartPathY.append(self.projectedStartPathThreeCor.y)
+                StartPathZ.append(self.projectedStartPathThreeCor.z)
+                # store the location of the end of the path
+                EndPathX.append(self.projectedEndPathThreeCor.x)
+                EndPathY.append(self.projectedEndPathThreeCor.y)
+                EndPathZ.append(self.projectedEndPathThreeCor.z)
+
+            else:
+
+                # store the location of the start of the path
+                StartPathX.append(startPathThreeCor.x)
+                StartPathY.append(startPathThreeCor.y)
+                StartPathZ.append(startPathThreeCor.z)
+                # store the location of the end of the path
+                EndPathX.append(endPathThreeCor.x)
+                EndPathY.append(endPathThreeCor.y)
+                EndPathZ.append(endPathThreeCor.z)
+
             # store the path of the finger excluding the start and end
 
             for i in range(1, self.numberFrame - 1):
@@ -681,9 +701,16 @@ class DrawPlots:
                                              float(self.frameArray[i][colNumSplitZ]) + self.offset3DZ)
                 # project it in the system that tablet is vertical to the ground
                 projectedPathThreeCor = LocationInProjectedPlane(pathThreeCor)
-                InterPathX.append(projectedPathThreeCor.x)
-                InterPathY.append(projectedPathThreeCor.y)
-                InterPathZ.append(projectedPathThreeCor.z)
+
+                if dimension==2:
+                    InterPathX.append(projectedPathThreeCor.x)
+                    InterPathY.append(projectedPathThreeCor.y)
+                    InterPathZ.append(projectedPathThreeCor.z)
+                else:
+                    InterPathX.append(pathThreeCor.x)
+                    InterPathY.append(pathThreeCor.y)
+                    InterPathZ.append(pathThreeCor.z)
+
             fingerPath = FingerPath(StartPathX, StartPathY, StartPathZ, EndPathX, EndPathY, EndPathZ, InterPathX,
                                     InterPathY, InterPathZ)
 
@@ -769,6 +796,7 @@ class DrawPlots:
 
         return startPathX,startPathY,startPathZ,endPathX,endPathY,endPathZ,interPathX,interPathY,interPathZ
 
+    # for all combinations, draw all the old/young participants
 
     # draw the path of the finger
     def drawPathForIndividuals(self, pid):
@@ -800,11 +828,9 @@ class DrawPlots:
                 if dimension == 3:
 
                     ax = fig.add_subplot(111, projection='3d')
-                    ax.view_init(elev=85, azim=90)
+                    ax.view_init(elev=85, azim=270)
                     ax.set_aspect('equal')  # to ensure x,y and z have then same scale
-                    ax.set_xlim3d(minX, maxX)
-                    ax.set_ylim3d(minY, maxY)
-                    ax.set_zlim3d(minZ, maxZ)
+
 
 
                 else:  # 2D
@@ -813,8 +839,8 @@ class DrawPlots:
                     plt.xlim(minX, maxX)
                     plt.ylim(minY, maxY)
 
-
-                fingerPath_map=self.setUpForFingerPath_map(pid)
+                fingerPath_map={}
+                fingerPath_map=self.setUpForFingerPath_map(pid,fingerPath_map,dimension)
                 if dimension == 3:
 
                     j=0
@@ -853,6 +879,9 @@ class DrawPlots:
                     ax.set_ylabel('Y(mm)')
                     ax.set_xlabel('X(mm)')
                     self.set_axes_equal(ax)
+                    ax.set_xlim3d(minX, maxX)
+                    ax.set_ylim3d(minY, maxY)
+                    ax.set_zlim3d(minZ, maxZ)
 
                 else:
                     plt.xlabel('X(mm)')
@@ -877,173 +906,207 @@ class DrawPlots:
                 pathForPlot=pathForPlot+str(dimension)+'_d/'
                 if not os.path.exists(pathForPlot):
                     os.mkdir(pathForPlot)
+                '''
+                # decide the rotate angle
+                if dimension == 3:
+                    for ii in xrange(0, 360, 1):
+                        ax.view_init(elev=90, azim=ii)  # elev is rotated by X, and azim is rotated by Z
+                        plt.savefig(pathHeader + 'movies2/' + "movie%d.png" % ii)
+                '''
+
                 plt.savefig(pathForPlot + plotTitle + '.png')
 
+
     # draw the path of the finger
-    def drawStartAndEnd(self,pathForPlot):
+    def helpDrawDifferentCombinationPath(self,fingerPath_map,pathForPlot,dimension):
 
-        fingerPath_map=self.setUpForFingerPath_map()
+        #modeList = ['path','start_and_end']  # 1 represent start and end,2 represent path
+        modeList = ['path']  # 1 represent start and end,2 represent path
+        for mode in modeList:
 
+            for key in fingerPath_map.keys():
+
+                # get the list for drawing real start,real target and real target
+                RealStartX_list, RealStartY_list, RealStartZ_list, RealTargetX_list, RealTargetY_list, RealTargetZ_list = self.setUpRealStartAndTargetList(
+                    key)
+
+
+
+                # the size for drawing target cricle
+                sizeOfTargetCircle = 0
+
+                # calculate the size of the target
+                if abs(key.width - 4.88) < 0.5:
+                    sizeOfTargetCircle = 120
+                if abs(key.width - 7.22) < 0.5:
+                    sizeOfTargetCircle = 310
+                if abs(key.width - 9.22) < 0.5:
+                    sizeOfTargetCircle = 500
+                colors = cm.rainbow(np.linspace(0, 1, 140))  # color list for different trial in one plot
+
+                fig = plt.figure()
+                # the range of x
+                minX = -60
+                maxX = 60
+                # the range of y
+                minY = 20
+                maxY = 140
+                # the range of Z
+                minZ = -100
+                maxZ = 20
+
+                if dimension == 3:
+
+                    ax = fig.add_subplot(111, projection='3d')
+                    ax.view_init(elev=85, azim=270)
+                    ax.set_aspect('equal')  # to ensure x,y and z have then same scale
+                    ax.set_xlim3d(minX, maxX)
+                    ax.set_ylim3d(minY, maxY)
+                    ax.set_zlim3d(minZ, maxZ)
+                    print ax.get_xlim3d(),ax.get_ylim3d(),ax.get_zlim3d()
+
+
+                else:  # 2D
+                    # we need to make the scale of x and y equal
+                    plt.figure(figsize=(5, 5), dpi=100)
+                    plt.xlim(minX, maxX)
+                    plt.ylim(minY, maxY)
+
+                # draw the real start and target
+                if dimension == 3:
+                    '''
+                    # no longer draw target and start as 'o' since size does not matter in 3D plots
+                    # draw the center of the start circle
+                    ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='b', label='Real start',
+                               alpha=1, marker='o', s=1)
+                    # draw the start button at real size
+                    ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start',
+                               alpha=1, marker='o', s=self.sizeOfStartCircle)
+                    # in case the center is covered by the circle, we draw it again
+                    # draw the center of the start circle
+                    ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='b', label='Real start',
+                               alpha=1, marker='o', s=1)
+                    # draw the center of the target circle
+                    ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='b', label='First Lift Up',
+                               alpha=1, marker='o', s=1)
+                    # draw the target button at real size
+                    ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='y', label='First Lift Up',
+                               alpha=1, marker='o', s=sizeOfTargetCircle)
+                    '''
+                    ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start', alpha=1,
+                               marker='+', s=50, edgecolors='r')
+                    # in case the center is covered by the circle, we draw it again
+                    # draw the center of the target circle
+                    ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='b', label='First Lift Up',
+                               alpha=1, marker='+', s=100, edgecolors='c')
+
+                else:
+
+                    # draw the start button at real size
+                    plt.scatter(RealStartX_list, RealStartY_list, c='r', label='Real start', alpha=1, marker='o',
+                                s=self.sizeOfStartCircle)
+                    # draw the center of the start circle
+                    plt.scatter(RealStartX_list, RealStartY_list, c='b', label='Real start', alpha=1, marker='o',
+                                s=1)
+                    # draw the target at real size
+                    plt.scatter(RealTargetX_list, RealTargetY_list, c='y', label='First Lift Up', alpha=1,
+                                marker='o', s=sizeOfTargetCircle)
+                    # draw the target center
+                    plt.scatter(RealTargetX_list, RealTargetY_list, c='b', label='First Lift Up', alpha=1,
+                                marker='o', s=1)
+
+                # draw the path or start and end
+                k = 0
+                for p in fingerPath_map[key]:  # all the trials with the same combination of width,direction and amplitude
+
+                    # if k == maxNumOfPath:
+                    # break
+
+                    if dimension == 3:
+
+                        ax.scatter(p.StartPathX, p.StartPathY, p.StartPathZ, c=colors[k], label='Start', alpha=1,
+                                   marker='+', s=10, edgecolors='black')
+                        ax.scatter(p.EndPathX, p.EndPathY, p.EndPathZ, c=colors[k], label='First Lift Up', alpha=1,
+                                   marker='o', s=10, edgecolors='black')
+
+                        if mode == 'path':
+                            ax.scatter(p.InterPathX, p.InterPathY, p.InterPathZ, c=colors[k], label='Start',
+                                       alpha=1, marker='o', s=10)
+                    else:
+
+                        plt.scatter(p.StartPathX, p.StartPathY, c=colors[k], alpha=1, marker='+', s=10)
+                        plt.scatter(p.EndPathX, p.EndPathY, c=colors[k], alpha=1, marker='o', s=10)
+
+                        if mode == 'path':
+                            plt.scatter(p.InterPathX, p.InterPathY, c=colors[k], alpha=1, marker='o', s=10)
+
+                    k = k + 1
+
+                if dimension == 3:
+
+                    ax.set_zlabel('Z(mm)')
+                    ax.set_ylabel('Y(mm)')
+                    ax.set_xlabel('X(mm)')
+                    self.set_axes_equal(ax)
+                    ax.set_xlim3d(minX, maxX)
+                    ax.set_ylim3d(minY, maxY)
+                    ax.set_zlim3d(minZ, maxZ)
+
+                else:
+                    plt.xlabel('X(mm)')
+                    plt.ylabel('Y(mm)')
+
+                matplotlib.rcParams.update({'font.size': 5})
+                plotTitle = str(dimension) + 'd_' + 'direction_' + str(round(key.direction, 0)) + '_width_' + str(
+                    round(key.width, 2)) + '_amplitude_' + str(round(key.amplitude, 2))
+                plt.title(plotTitle)
+
+                if dimension == 2:
+                    plt.grid()
+
+                fig.set_size_inches(6, 6)
+                '''
+                # decide the rotate angle 
+                if dimension==3:
+                    for ii in xrange(0, 360, 1):
+                        ax.view_init(elev=90, azim=ii) # elev is rotated by X, and azim is rotated by Z
+                        plt.savefig(pathHeader+'movies2/'+"movie%d.png" % ii)
+                    break
+                '''
+                finalPathForPlot = pathForPlot + str(dimension) + 'd_' + 'mode_' + str(mode) + '/'
+                if not os.path.exists(finalPathForPlot):
+                    os.mkdir(finalPathForPlot)
+                plt.savefig(finalPathForPlot + plotTitle + '.png')
+
+    def drawAllPath(self):
         dimensionList = [2, 3]  # 2d/3d
-
-        modeList = ['start_and_end', 'path']  # 1 represent start and end,2 represent path
 
         for dimension in dimensionList:
 
-            for mode in modeList:
+            oldPids = getAllPids(pathHeaderForIndividual + 'Old Adults/')
+            youngPids = getAllPids(pathHeaderForIndividual + 'Young Adults/')
+            fingerPath_map = {}
+            for p in oldPids:
+                fingerPath_map = self.setUpForFingerPath_map(p, fingerPath_map,dimension)
 
-                for key in fingerPath_map.keys():
+            pathForOldPlot = pathHeaderForAllOldAdults + 'PathPlots/'
 
-                    # get the list for drawing real start,real target and real target
-                    RealStartX_list, RealStartY_list, RealStartZ_list, RealTargetX_list, RealTargetY_list, RealTargetZ_list=self.setUpRealStartAndTargetList(key)
+            if not os.path.exists(pathForOldPlot):
+                os.mkdir(pathForOldPlot)
 
-                    fig = plt.figure()
+            self.helpDrawDifferentCombinationPath(fingerPath_map, pathForOldPlot,dimension)
 
-                    # the size for drawing target cricle
-                    sizeOfTargetCircle = 0
+            fingerPath_map = {}
 
-                    # calculate the size of the target
-                    if abs(key.width - 4.88) < 0.5:
-                        sizeOfTargetCircle = 120
-                    if abs(key.width - 7.22) < 0.5:
-                        sizeOfTargetCircle = 310
-                    if abs(key.width - 9.22) < 0.5:
-                        sizeOfTargetCircle = 500
+            for p in youngPids:
+                fingerPath_map = self.setUpForFingerPath_map(p, fingerPath_map,dimension)
 
-                    '''
-                    # how many paths of trials will be shown in the plot
-                    if mode == 'start_and_end':
-                        maxNumOfPath = 30
-                    else:
-                        maxNumOfPath = 4  # too much path will make the whole plot a mass
-                    '''
+            pathForYoungPlot = pathHeaderForAllYoungAdults + 'PathPlots/'
 
-                    colors = cm.rainbow(np.linspace(0, 1, 10))  # color list for different trial in one plot
-                    # the range of x
-                    minX = -60
-                    maxX = 60
-                    # the range of y
-                    minY = 20
-                    maxY = 140
-                    # the range of Z
-                    minZ=-100
-                    maxZ=20
+            if not os.path.exists(pathForYoungPlot):
+                os.mkdir(pathForYoungPlot)
 
-                    if dimension == 3:
-
-                        ax = fig.add_subplot(111, projection='3d')
-                        ax.view_init(elev=38, azim=90)
-                        ax.set_aspect('equal')  # to ensure x,y and z have then same scale
-                        ax.set_xlim3d(minX,maxX)
-                        ax.set_ylim3d(minY,maxY)
-                        ax.set_zlim3d(minZ,maxZ)
-
-
-                    else:  # 2D
-                        # we need to make the scale of x and y equal
-                        plt.figure(figsize=(5, 5), dpi=100)
-                        plt.xlim(minX, maxX)
-                        plt.ylim(minY, maxY)
-
-                    # draw the real start and target
-                    if dimension == 3:
-                        '''
-                        # no longer draw target and start as 'o' since size does not matter in 3D plots
-                        # draw the center of the start circle
-                        ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='b', label='Real start',
-                                   alpha=1, marker='o', s=1)
-                        # draw the start button at real size
-                        ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start',
-                                   alpha=1, marker='o', s=self.sizeOfStartCircle)
-                        # in case the center is covered by the circle, we draw it again
-                        # draw the center of the start circle
-                        ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='b', label='Real start',
-                                   alpha=1, marker='o', s=1)
-                        # draw the center of the target circle
-                        ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='b', label='First Lift Up',
-                                   alpha=1, marker='o', s=1)
-                        # draw the target button at real size
-                        ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='y', label='First Lift Up',
-                                   alpha=1, marker='o', s=sizeOfTargetCircle)
-                        '''
-                        ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start',alpha=1, marker='+', s=50,edgecolors='r')
-                        # in case the center is covered by the circle, we draw it again
-                        # draw the center of the target circle
-                        ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='b', label='First Lift Up',alpha=1, marker='+', s=100,edgecolors='c')
-
-                    else:
-
-                        # draw the start button at real size
-                        plt.scatter(RealStartX_list, RealStartY_list, c='r', label='Real start', alpha=1, marker='o',
-                                    s=self.sizeOfStartCircle)
-                        # draw the center of the start circle
-                        plt.scatter(RealStartX_list, RealStartY_list, c='b', label='Real start', alpha=1, marker='o',
-                                    s=1)
-                        # draw the target at real size
-                        plt.scatter(RealTargetX_list, RealTargetY_list, c='y', label='First Lift Up', alpha=1,
-                                    marker='o', s=sizeOfTargetCircle)
-                        # draw the target center
-                        plt.scatter(RealTargetX_list, RealTargetY_list, c='b', label='First Lift Up', alpha=1,
-                            marker='o', s=1)
-
-
-                    # draw the path or start and end
-                    k = 0
-                    for p in fingerPath_map[key]: # all the trials with the same combination of width,direction and amplitude
-
-                        #if k == maxNumOfPath:
-                            #break
-
-                        if dimension == 3:
-
-                            ax.scatter(p.StartPathX, p.StartPathY, p.StartPathZ, c=colors[k], label='Start', alpha=1,
-                                       marker='+', s=10, edgecolors='black')
-                            ax.scatter(p.EndPathX, p.EndPathY, p.EndPathZ, c=colors[k], label='First Lift Up', alpha=1,
-                                       marker='o', s=10, edgecolors='black')
-
-                            if mode == 'path':
-                                ax.scatter(p.InterPathX, p.InterPathY, p.InterPathZ, c=colors[k], label='Start',
-                                           alpha=1, marker='o', s=10)
-                        else:
-
-                            plt.scatter(p.StartPathX, p.StartPathY, c=colors[k], alpha=1, marker='+', s=10)
-                            plt.scatter(p.EndPathX, p.EndPathY, c=colors[k], alpha=1, marker='o', s=10)
-
-                            if mode == 'path':
-                                plt.scatter(p.InterPathX, p.InterPathY, c=colors[k], alpha=1, marker='o', s=10)
-
-                        k = k + 1
-
-                    if dimension == 3:
-
-                        ax.set_zlabel('Z(mm)')
-                        ax.set_ylabel('Y(mm)')
-                        ax.set_xlabel('X(mm)')
-                        self.set_axes_equal(ax)
-
-
-
-                    else:
-                        plt.xlabel('X(mm)')
-                        plt.ylabel('Y(mm)')
-
-                    matplotlib.rcParams.update({'font.size': 10})
-                    plotTitle=str(dimension)+'d_'+'direction_' + str(round(key.direction, 0)) + '_width_' + str(round(key.width, 2)) + '_amplitude_' + str(round(key.amplitude, 2))
-                    plt.title(plotTitle)
-
-                    if dimension == 2:
-                        plt.grid()
-
-                    fig.set_size_inches(6, 6)
-                    '''
-                    # decide the rotate angle 
-                    if dimension==3:
-                        for ii in xrange(0, 360, 1):
-                            ax.view_init(elev=ii, azim=90) # elev is rotated by X, and azim is rotated by Z
-                            plt.savefig(pathHeader+'movies/'+"movie%d.png" % ii)
-                        break
-                    '''
-                    plt.savefig(pathForPlot+ str(dimension) + 'd_' + 'mode_' + str(mode)+'/'+plotTitle+'.png')
+            self.helpDrawDifferentCombinationPath(fingerPath_map, pathForYoungPlot,dimension)
 
     # this function is used for helping make the scale of x,y and z the same
     def set_axes_equal(self, ax):

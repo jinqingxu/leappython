@@ -52,13 +52,15 @@ def processPrecisionData(pid):
     if not os.path.exists(writefile):
         with open(writefile, 'w') as f:
             w_csv = csv.writer(f)
-            w_csv.writerow(['pid', 'averageX(mm)', 'averageY(mm)', 'averageZ(mm)'])
-            w_csv.writerow([pid,averageX, averageY, averageZ])
+            w_csv.writerow(['pid', 'averageX(mm)', 'averageY(mm)', 'averageZ(mm)','AbsDiffX(mm)','AbsDiffY(mm)','AbsDiffZ(mm)'])
+            w_csv.writerow([pid,averageX, averageY, averageZ,abs(averageX-start3DX),abs(averageY-start3DY),abs(averageZ-start3DZ)])
     else:
         with open(writefile, 'a') as f:
             w_csv = csv.writer(f)
-            w_csv.writerow([pid,averageX, averageY, averageZ])
+            w_csv.writerow([pid,averageX, averageY, averageZ,abs(averageX-start3DX),abs(averageY-start3DY),abs(averageZ-start3DZ)])
 
 
-pid=raw_input("please enter pid: ")
-processPrecisionData(pid)
+#pid=raw_input("please enter pid: ")
+pids=getAllPids(pathHeaderForPrecision)
+for p in pids:
+    processPrecisionData(p)

@@ -111,7 +111,7 @@ def writeMackenzieMeasurements(pid,files,datas,headers,path,wrongIndex):
             leap.calculateMovementVariability(
                 leap.movementOffset)  # movement variability means the deviation from the average location
             leap.calculateMovementError()  # movement error means the deviation from task plane based on the absolute distance
-            leap.calculateTaskAxisCrossing()  # task axis crossing means passing through the task plane. we count how many times does it happend
+            leap.calculateTaskPlaneCrossing()  # task axis crossing means passing through the task plane. we count how many times does it happend
             # since firstTRE and TRE belongs to the measures of Mackenzie,we append them as the begining of mackenzie data
             datas[i].append(firstTRE[i])
             datas[i].append(TRE[i])
@@ -134,11 +134,11 @@ def writeMackenzieMeasurements(pid,files,datas,headers,path,wrongIndex):
 def writeHwangMeasurements(pid,files,datas,headers,path,wrongIndex):
 
     # headers for measures from Hwang
-    hwangHeaders=['NumberOfPause','MeanPauseDuration(ms)','Verification Time(ms)','NumberOfSubmovement','PeekSpeed(mm/s)','NumberOfDecisionMaking','MeanDecisionMakingDuration(ms)']
+    hwangHeaders=['NumberOfDecisionMaking','MeanDecisionMakingDuration(ms)','Verification Time(ms)','NumberOfPause','MeanPauseDuration(ms)',
+                  'PeekSpeed(mm/s)','NumberOfSubmovement']
     headers.extend(hwangHeaders)
 
     for i in range(len(files)):
-
         try:
             # get the current block and trial for the file
             keys = files[i].split('_')
@@ -149,11 +149,11 @@ def writeHwangMeasurements(pid,files,datas,headers,path,wrongIndex):
             leap = LeapAnalyzerHwang(path + 'split/' + files[i], pid, block, trial, path)
             leap.loadLeapData()
             leap.getSubmovements()  # get the submovement_list,all measures from Hwang are based on this data
-            leap.calculatePauseTime()  # get how many pauses happens per trial and the mean pause duration
+            leap.calculatePause()  # get how many pauses happens per trial and the mean pause duration
             leap.pid = pid
 
             # put data from measures of Hwang into an array
-            hwangData = [leap.getVerificatonTime(), leap.pauseTime, leap.meanPauseDuration, leap.trialPeekSpeed,
+            hwangData = [leap.getVerificatonTime(), leap.pauseFrequency, leap.meanPauseDuration, leap.trialPeekSpeed,
                          leap.getTotalNumOfSubMovement()]
 
             # initial a Leap Analyzer for original measurments proposed in our work

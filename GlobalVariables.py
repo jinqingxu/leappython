@@ -110,39 +110,13 @@ normalVectorZ=1
 # input a pid
 # output the offsetX,offsetY,offsetZ of the nearest experiment before PID_XXX
 def getOffetXYZ(pid):
-
-    if float(pid)<200:
-        readfile=pathHeaderForData+'Old Adults/'+'PID_'+str(pid)+'/'+"PID_"+str(pid)+"_Data_from_LEAPtest_results_Frame.csv"
+    if float(pid) < 200:
+        readfile = pathHeaderForData + 'Old Adults/' + 'PID_' + str(pid) + '/' + "PID_" + str(
+            pid) + "_Data_from_LEAPtest_results_Frame.csv"
     else:
-        readfile = pathHeaderForData + 'Young Adults/' + 'PID_' + str(pid) + '/' + "PID_" + str(pid) + "_Data_from_LEAPtest_results_Frame.csv"
-
-
-    # get the dateTime of the target select experiment
-    with open(readfile) as f:
-
-        f_csv = csv.reader(f)
-
-        i=0
-
-        dateTimeStr=""
-
-        for row in f_csv:
-
-            if i==1: # date
-                dateList=row[0].split(':')
-                dateList2=dateList[1].strip().split('/') # demo value: 2017 09 30  use strip to remove space
-                dateTimeStr=dateList2[0]+'-'+dateList2[1]+'-'+dateList2[2]
-            if i==2: # time
-                timeStr=row[0][5:len(row)-2]
-                dateTimeStr+=' '
-                dateTimeStr+=timeStr.strip()
-            i=i+1
-            if i>=3:
-                break
-
-        dateTimeTargetSelect=time.strptime(dateTimeStr, "%Y-%m-%d %H:%M:%S")
-
-
+        readfile = pathHeaderForData + 'Young Adults/' + 'PID_' + str(pid) + '/' + "PID_" + str(
+            pid) + "_Data_from_LEAPtest_results_Frame.csv"
+    dateTimeTargetSelect,dateTimeTargetSelectStr=getDateTimeForLeapData(readfile)
     # find the nearest timestamp
 
     #startPointFile=pathHeaderForData+'Records_Of_StartButton_Offset.csv'
@@ -177,4 +151,35 @@ def getOffetXYZ(pid):
         return prevStartX-start3DX, prevStartY-start3DY, prevStartZ-start3DZ
 
 
+
+def getDateTimeForLeapData(readfile):
+
+
+
+    # get the dateTime of the target select experiment
+    with open(readfile) as f:
+
+        f_csv = csv.reader(f)
+
+        i=0
+
+        dateTimeStr=""
+
+        for row in f_csv:
+
+            if i==1: # date
+                dateList=row[0].split(':')
+                dateList2=dateList[1].strip().split('/') # demo value: 2017 09 30  use strip to remove space
+                dateTimeStr=dateList2[0]+'-'+dateList2[1]+'-'+dateList2[2]
+            if i==2: # time
+                timeStr=row[0][5:len(row)-2]
+                dateTimeStr+=' '
+                dateTimeStr+=timeStr.strip()
+            i=i+1
+            if i>=3:
+                break
+
+        dateTime=time.strptime(dateTimeStr, "%Y-%m-%d %H:%M:%S")
+
+        return dateTime,dateTimeStr
 

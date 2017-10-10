@@ -74,7 +74,7 @@ class LeapAnalyzerHwang:
 
     # variables for the pasue
     meanPauseDuration=0 # the average pause duration in one trial
-    pauseTime=0  # how many times pauses happen
+    pauseFrequency=0  # how many times pauses happen
     pauseDuration=[] # the duration of pause
     pauseLocation=[] # the distribution of pause location
     pauseMarginSpeed=0.01 # due to the measure mistake of leap motion,the pauseMargin should not be 0
@@ -193,12 +193,9 @@ class LeapAnalyzerHwang:
     #calculate the pause time and each pause duration
     # no return value
     # change the value of self.pauseTime,self.pauseDuration
-    def calculatePauseTime(self):
-
+    def calculatePause(self):
         i=0
-
         while i <self.numberFrame:
-
             curFrame=self.frameArray[i] # the current frame
             curSpeed=float(curFrame[colNumSplitSpeed]) # the speed of the current frame
             startTime=float(curFrame[colNumSplitTimestamp]) # the start time of the pause
@@ -206,25 +203,21 @@ class LeapAnalyzerHwang:
             # find the start frame of pause
             if self.judgePause(curSpeed) == True: #  pause meansthe speed is within the pauseMargin
 
-                self.pauseTime=self.pauseTime+1 # pauseTime means how many times do pauses happen
+                self.pauseFrequency=self.pauseFrequency+1 # pauseTime means how many times do pauses happen
                 curX=float(curFrame[colNumSplitX]) # currate X location
                 curY=float(curFrame[colNumSplitY])
                 curZ=float(curFrame[colNumSplitZ])
                 self.calculatePauseLocation(curX,curY,curZ) # the location means the distance between the current location and the target
-
                 if i==self.numberFrame-1: # if the current frame is the end one
 
                     self.pauseDuration.append(0) # pause time is zero
-
                 else:
 
                     for j in range(i + 1, self.numberFrame): # find the end frame of the pause
 
                         nextFrame = self.frameArray[j]
                         nextSpeed=float(nextFrame[colNumSplitSpeed]) # nextSpeed means the speed of next frame
-
                         if self.judgePause(nextSpeed) == False: # if the nextSpeed is not within the pause Margin,that means the end of the pause
-
                             endTime = float(nextFrame[colNumSplitTimestamp]) # the end time of a pause
                             duration = endTime - startTime  # the duration of a pause
                             self.pauseDuration.append(duration) # save the duration in a duration list for a trial
@@ -267,17 +260,14 @@ class LeapAnalyzerHwang:
             index = self.getSubmovementStart(index)  # the start index of the submovement
             startIndex = index
             startTime = float(self.frameArray[startIndex][colNumSplitTimestamp])
-
             startX = float(self.frameArray[startIndex][colNumSplitX])
             startY = float(self.frameArray[startIndex][colNumSplitY])
             startZ = float(self.frameArray[startIndex][colNumSplitZ])
-
             if startIndex == -1:  # there is no submovements int the future
                 break
 
             index = self.getSubmovementEnd(startIndex + 1)  # the end Index must be after the startIndex, so start at startIndex+1
             endIndex = index
-
             endX = float(self.frameArray[endIndex][colNumSplitX])
             endY = float(self.frameArray[endIndex][colNumSplitY])
             endZ = float(self.frameArray[endIndex][colNumSplitZ])
@@ -291,10 +281,9 @@ class LeapAnalyzerHwang:
 
             self.submovement_list.append(
                 SubMovement(startTime, endTime, startX, startY, startZ, endX, endY, endZ, self.tmpPeekSpeed,
-                            endTime - startTime))
+                            endTime - startTime)) # the last parameter is time duration of submovement
 
             self.tmpPeekSpeed = 0  # only a temporary variability,initized as 0 for the next submovement
-
             index = index + 1  # the start of next submovement begins after the end
 
 
@@ -353,17 +342,16 @@ class LeapAnalyzerHwang:
     # firstly,pause
     # secondly,acceleration speed changes from negtive to positive and the current speed < 75% of peek speed
     # thirdly,the negtive acceleration speed reached its relative max value
-
     def getSubmovementEnd(self,index):
 
         prevAcc = 0
         maxAcc = 0 # the max of absolute acc
-        negtiveTime=0 # record how many times continuous negtive acc occurs
+        negtiveDuration=0 # record how many times continuous negtive acc occurs
 
         if index > 1:  # if index<=1,there will be no frameArray[index-2],so there will be no prevAcc. Thus,the second situation is meaningless
             prevAcc = self.calculateAccelerationSpeed(index - 1) # the initial value for prevAcc
 
-        for j in range(index,self.numberFrame):
+        for j in range(index,self.numberFrame): # go through the remaining frames
 
             curFrame = self.frameArray[j]
             curSpeed = float(curFrame[colNumSplitSpeed])
@@ -383,30 +371,29 @@ class LeapAnalyzerHwang:
                     return j
 
             # the third situation,reach a relative max negtive acc
-
-
-            if negtiveTime>0:
+            # sudden brake
+            # relative max means larger than the previous maximum and the next two frame
+            if negtiveDuration>0:
                 # if the curAcc reaches maximum, it should > prevAcc and also > nextAcc
-                if abs(curAcc)>maxAcc and abs(curAcc)>self.brakeMarcginAcc:
-
-                    if j<self.numberFrame-2: # the last two does not have next two frame
-
+                if abs(curAcc)>maxAcc and abs(curAcc)>self.brakeMarginAcc:
+                    if j<self.numberFrame-1: # the last two does not have next two frame
                         nextAcc=self.calculateAccelerationSpeed(j+1)
-                        nextNextAcc=self.calculateAccelerationSpeed(j+2)
+                        if nextAcc>0: # the current acc is the max negative acceleration speed because the next acc becomes positive
+                            return j
 
-                        if abs(curAcc)>abs(nextAcc) and abs(curAcc)>abs(nextNextAcc):
+                        if abs(curAcc)>abs(nextAcc): # the current acc is the max negative acceleration speed
                             return j
                     else:
                         return j
 
             if abs(curAcc) > maxAcc:
-                maxAcc = abs(curAcc)
+                maxAcc = abs(curAcc) # update the max acc
 
             if curAcc >= 0:
-                negtiveTime = 0
-
+                negtiveDuration = 0
+                maxAcc=0
             else:
-                negtiveTime = negtiveTime + 1
+                negtiveDuration = negtiveDuration + 1
 
             prevAcc=curAcc
 
