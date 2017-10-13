@@ -58,8 +58,7 @@ def getAllPids(path):
             if keys[len(keys) - 1][0:4] == 'PID_':  # go through all the folder that contain datas from experiment
                 keys2 = keys[len(keys) - 1].split('_')  # split PID_pid to get the pid
                 pid = keys2[len(keys2) - 1]
-                if pid != '8888':  # 8888 is for crossHair experiment
-                    pid_list.append(pid)
+                pid_list.append(pid)
 
     return pid_list
 

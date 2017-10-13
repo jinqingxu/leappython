@@ -192,18 +192,15 @@ def startProgram():
     pid_list2=getAllPids(pathHeaderForData+'Young Adults/')
     pid_list.extend(pid_list2)
 
-    '''
+
     for pid in pid_list:
 
         processOneExperiment(pid)
-    '''
 
-
-
-    #mergeMeasurementFiles()
+    mergeMeasurementFiles()
     drawPlots=DrawPlots()
-    #drawPlots.drawAllTargetFirstLiftUpPlot2D(pathHeaderForAllParticipiants)
-    #drawPlots.drawAllTargetFirstLiftUpPlot3D(pathHeaderForAllParticipiants)
+    drawPlots.drawAllTargetFirstLiftUpPlot2D(pathHeaderForAllParticipiants)
+    drawPlots.drawAllTargetFirstLiftUpPlot3D(pathHeaderForAllParticipiants)
     drawPlots.drawAllPath()
 
 
@@ -214,6 +211,7 @@ def startProgram():
 
 
 startProgram()
+
 #processOneExperiment(204)
 
 

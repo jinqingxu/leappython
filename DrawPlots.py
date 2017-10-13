@@ -6,17 +6,11 @@ import csv
 import os
 import matplotlib.pyplot as plt
 import  matplotlib
-
 from mpl_toolkits.mplot3d import Axes3D
-
 # import helper functions from other script
-
 from GlobalVariables import *
-
 from FileUtils import *
 from SpaceUtils import  *
-
-
 
 class TargetForPlot2D:
     x=0
@@ -35,8 +29,7 @@ class TargetForPlot3D:
     x = 0
     y = 0
     z = 0
-    size = 0
-
+    size = 0 # size of the target
     def __init__(self, x, y, z, size):
         self.x = x
         self.y = y
@@ -130,7 +123,7 @@ class DrawPlots:
 
         self.numberFrame = len(self.frameArray)
 
-
+        # get direction,width and amplitude for a trial
         direction = float(self.frameArray[0][colNumSplitDirection])
         width = float(self.frameArray[0][colNumSplitWidth])
         amplitude=float(self.frameArray[0][colNumSplitAmplitude])
@@ -144,8 +137,10 @@ class DrawPlots:
 
         self.targetWidth=float(self.frameArray[0][colNumSplitWidth])
 
+        # this is the offset of the start point between data from leap motion and data from ruler
         self.offset3DX,self.offset3DY,self.offset3DZ=getOffetXYZ(self.pid)
 
+    # draw the first lift up plot of data from leap motion for all old adults and young adults, seperately
     def drawAllTargetFirstLiftUpPlot2D(self,path):
 
         fileForAllParticipants=path+'All_First_Lift_Up_2D.csv'
@@ -157,16 +152,19 @@ class DrawPlots:
         firstRelaLiftUpYForOlds=[]
         firstRelaLiftUpXForYoungs=[]
         firstRelaLiftUpYForYoungs=[]
+
         colNumFirstLiftUpX=1
         colNumFirstLiftUpY=2
         colNumRelaFirstLiftUpX=3
         colNumRelaFirstLiftUpY=4
+
         # load all the liftUp and relative liftUp data
         with open(fileForAllParticipants) as f:
             f_csv = csv.reader(f)
             next(f_csv)
             for row in f_csv:
-                if float(row[0])<200:
+                if float(row[0])<200: # old adults
+
                     firstLiftUpXForOlds.append(float(row[colNumFirstLiftUpX]))
                     firstLiftUpYForOlds.append(float(row[colNumFirstLiftUpY]))
                     firstRelaLiftUpXForOlds.append(float(row[colNumRelaFirstLiftUpX]))
@@ -177,6 +175,7 @@ class DrawPlots:
                     firstLiftUpYForYoungs.append(float(row[colNumFirstLiftUpY]))
                     firstRelaLiftUpXForYoungs.append(float(row[colNumRelaFirstLiftUpX]))
                     firstRelaLiftUpYForYoungs.append(float(row[colNumRelaFirstLiftUpY]))
+
         # load all the target data
         fileForAllTargets=path+'All_Target_2D.csv'
 
@@ -186,16 +185,22 @@ class DrawPlots:
             next(f_csv)
             targetForPlot_list=[]
             for row in f_csv:
-                targetForPlot_list.append(TargetForPlot2D(float(row[0]),float(row[1]),float(row[2])))
+                targetForPlot_list.append(TargetForPlot2D(float(row[0]),float(row[1]),float(row[2]))) # x,y,size
+
+        # use helper functions to draw plots
         plotTitle='Distribution of first lift up for all old adults'
         self.helpDrawTargetFirstLiftUpPlot2D(plotTitle,pathHeaderForAllOldAdults,targetForPlot_list,firstLiftUpXForOlds,firstLiftUpYForOlds)
+
         plotTitle='Distribution of first lift up for all young adults'
         self.helpDrawTargetFirstLiftUpPlot2D(plotTitle,pathHeaderForAllYoungAdults, targetForPlot_list, firstLiftUpXForYoungs,firstLiftUpYForYoungs)
+
         plotTitle='Distribution of relative first lift up for all old adults'
         self.helpDrawRelativeTargetFirstLiftUpPlot2D(plotTitle,pathHeaderForAllOldAdults,firstRelaLiftUpXForOlds,firstRelaLiftUpYForOlds)
+
         plotTitle = 'Distribution of relative first lift up for all young adults'
         self.helpDrawRelativeTargetFirstLiftUpPlot2D(plotTitle,pathHeaderForAllYoungAdults, firstRelaLiftUpXForYoungs,firstRelaLiftUpYForYoungs)
 
+    # draw all the first lift up plots of data from leap motion
     def drawAllTargetFirstLiftUpPlot3D(self,path):
 
         fileForAllParticipants = path + 'All_First_Lift_Up_3D.csv'
@@ -232,8 +237,10 @@ class DrawPlots:
             targetForPlot3D_list = []
             for row in f_csv:
                 targetForPlot3D_list.append(TargetForPlot3D(float(row[0]), float(row[1]), float(row[2]),float(row[3])))
+
         plotTitle='Distribution of 3D first lift up of all old adults'
         self.helpDrawTargetFirstLiftUpPlot3D(plotTitle,pathHeaderForAllOldAdults, targetForPlot3D_list, firstLiftUpXForOlds,firstLiftUpYForOlds,firstLiftUpZForOlds)
+
         plotTitle='Distribution of 3D first lift up of all young adults'
         self.helpDrawTargetFirstLiftUpPlot3D(plotTitle,pathHeaderForAllYoungAdults, targetForPlot3D_list, firstLiftUpXForYoungs,firstLiftUpYForYoungs,firstLiftUpZForYoungs)
 
@@ -256,17 +263,23 @@ class DrawPlots:
         plt.savefig(pathForPlot + plotTitle + '.png')
 
     def helpDrawTargetFirstLiftUpPlot3D(self, plotTitle,pathForPlot, targetForPlot3D_list, firstLiftUpX_list, firstLiftUpY_list,firstLiftUpZ_list):
+
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
         # ax=self.create3DPlots()
         # draw the tablet plane
         X, Y, Z = self.drawTabletPlane()
         ax.scatter(X, Y, Z, c='c', alpha=0.1, marker='o', s=1)
+
+        # draw all the targets
         for t in targetForPlot3D_list:
             #ax.scatter(t.x, t.y, t.z, c='r', label='target', alpha=1, marker='o', s=t.size, edgecolors='black')
+            # if you want to draw a crosshair, set marker = '+'
+            # if you want to draw a target, set marker = 'o'
             ax.scatter(t.x, t.y, t.z, c='r', label='target', alpha=1, marker='+', s=100,edgecolors='r')
-        ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='c', label='First Lift Up', alpha=1,
-                   marker='o', s=5, edgecolors='black')
+
+        # draw all the lift up points
+        ax.scatter(firstLiftUpX_list, firstLiftUpY_list, firstLiftUpZ_list, c='c', label='First Lift Up', alpha=1,marker='o', s=5, edgecolors='black')
         ax.set_xlabel('x(mm)')
         ax.set_ylabel('y(mm)')
         ax.set_zlabel('z(mm)')
@@ -302,7 +315,9 @@ class DrawPlots:
 
                 if width == 0:
                     width = float(row[colNumAndroidWidth])
-                    #print width
+
+                    # this is for drawing the size of target
+                    # it is only estimated and not accurate
                     sizeOfTarget = 0
                     if abs(width - 4.88) < 0.5:
                         sizeOfTarget = 180
@@ -315,14 +330,15 @@ class DrawPlots:
                 targetX=float(row[colNumAndroidTargetX]) * PixelToM
                 targetY=float(row[colNumAndroidTargetY]) * PixelToM
                 targetForPlot=TargetForPlot2D(targetX,targetY,sizeOfTarget)
-
                 if targetForPlot not in targetForPlot_list:
                     targetForPlot_list.append(targetForPlot)
 
-                liftUpX=float(row[colNumAndroidFirstLiftUpX]) * PixelToM
+                liftUpX=float(row[colNumAndroidFirstLiftUpX]) * PixelToM # change pixel to mm
                 liftUpY=float(row[colNumAndroidFirstLiftUpY]) * PixelToM
-                rela_liftUpX=startTwoCor.x*PixelToM+liftUpX-targetX
-                rela_liftUpY=startTwoCor.y*PixelToM+liftUpY-targetY
+                #rela_liftUpX=startTwoCor.x*PixelToM+liftUpX-targetX
+                #rela_liftUpY=startTwoCor.y*PixelToM+liftUpY-targetY
+                rela_liftUpX=liftUpX-targetX
+                rela_liftUpY=liftUpY-targetY
                 liftUpX_list.append(liftUpX)
                 liftUpY_list.append(liftUpY)
                 rela_liftUpX_list.append(rela_liftUpX)
@@ -543,8 +559,8 @@ class DrawPlots:
         plt.xlim(85, 95)
         plt.ylim(56, 66)
         plt.title(plotTitle)
-        targetX_list=[startTwoCor.x*PixelToM] # view target as the center
-        targetY_list=[startTwoCor.y*PixelToM]
+        targetX_list=[0] # view target as the center
+        targetY_list=[0]
         plt.scatter(targetX_list, targetY_list, c='r', alpha=1, marker='o', s=20,edgecolors='black')
         plt.scatter(rela_LiftUpX_list, rela_LiftUpY_list, c='c', alpha=1, marker='o', s=30, edgecolors='black')
         plt.xlabel('First Lift Up X(mm)')
@@ -604,9 +620,6 @@ class DrawPlots:
                 changeY += step
             changeX += step
         return X, Y, Z
-
-
-
 
 
     # this function is used to store the data of fingers in a map
@@ -847,11 +860,16 @@ class DrawPlots:
                     for k in fingerPath_map:
 
                         RealStartX_list,RealStartY_list,RealStartZ_list,RealTargetX_list, RealTargetY_list, RealTargetZ_list=self.setUpRealStartAndTargetList(k)
+                        # if you want the start or target to be a circle, use marker='o'
+                        # if you want it to be crosshair, use marker='+'
+                        # the s=50 means the size of the target, it's not accurate and only based on assumption.
                         ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', alpha=1, marker='+', s=50, edgecolors='r')
                         ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='y', alpha=1, marker='+', s=100, edgecolors='y')
 
                         for p in fingerPath_map[k]:
-
+                            # if you want the start or target to be a circle, use marker='o'
+                            # if you want it to be crosshair, use marker='+'
+                            # the s=50 means the size of the target, it's not accurate and only based on assumption.
                             ax.scatter(p.StartPathX,p.StartPathY,p.StartPathZ, c=colors[j], alpha=1, marker='+', s=10, edgecolors='black')
                             ax.scatter(p.EndPathX, p.EndPathY, p.EndPathZ, c=colors[j], alpha=1, marker='o', s=10,edgecolors='black')
                             if mode=='path':
@@ -862,11 +880,16 @@ class DrawPlots:
                     for k in fingerPath_map:
 
                         RealStartX_list, RealStartY_list, RealStartZ_list, RealTargetX_list, RealTargetY_list, RealTargetZ_list = self.setUpRealStartAndTargetList(k)
+                        # if you want the start or target to be a circle, use marker='o'
+                        # if you want it to be crosshair, use marker='+'
+                        # the s=50 means the size of the target, it's not accurate and only based on assumption.
                         plt.scatter(RealStartX_list, RealStartY_list, c='r', alpha=1, marker='o', s=50)
                         plt.scatter(RealTargetX_list,RealTargetY_list, c='c', alpha=1, marker='o', s=100)
-                        if k.direction==90:
-                            t=0
+
                         for p in fingerPath_map[k]:
+                            # if you want the start or target to be a circle, use marker='o'
+                            # if you want it to be crosshair, use marker='+'
+                            # the s=50 means the size of the target, it's not accurate and only based on assumption.
                             plt.scatter(p.StartPathX, p.StartPathY, c=colors[j], alpha=1, marker='+', s=10, edgecolors='black')
                             plt.scatter(p.EndPathX, p.EndPathY, c=colors[j], alpha=1, marker='o', s=10,edgecolors='black')
                             if mode == 'path':
@@ -927,10 +950,7 @@ class DrawPlots:
             for key in fingerPath_map.keys():
 
                 # get the list for drawing real start,real target and real target
-                RealStartX_list, RealStartY_list, RealStartZ_list, RealTargetX_list, RealTargetY_list, RealTargetZ_list = self.setUpRealStartAndTargetList(
-                    key)
-
-
+                RealStartX_list, RealStartY_list, RealStartZ_list, RealTargetX_list, RealTargetY_list, RealTargetZ_list = self.setUpRealStartAndTargetList(key)
 
                 # the size for drawing target cricle
                 sizeOfTargetCircle = 0
@@ -945,6 +965,7 @@ class DrawPlots:
                 colors = cm.rainbow(np.linspace(0, 1, 140))  # color list for different trial in one plot
 
                 fig = plt.figure()
+
                 # the range of x
                 minX = -60
                 maxX = 60
@@ -993,27 +1014,28 @@ class DrawPlots:
                     ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='y', label='First Lift Up',
                                alpha=1, marker='o', s=sizeOfTargetCircle)
                     '''
-                    ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start', alpha=1,
-                               marker='+', s=50, edgecolors='r')
+
+                    # if you want the start or target to be a circle, use marker='o'
+                    # if you want it to be crosshair, use marker='+'
+                    # the s=50 means the size of the target, it's not accurate and only based on assumption.
+                    ax.scatter(RealStartX_list, RealStartY_list, RealStartZ_list, c='r', label='Real start', alpha=1,marker='+', s=50, edgecolors='r')
                     # in case the center is covered by the circle, we draw it again
                     # draw the center of the target circle
-                    ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='b', label='First Lift Up',
-                               alpha=1, marker='+', s=100, edgecolors='c')
+                    ax.scatter(RealTargetX_list, RealTargetY_list, RealTargetZ_list, c='b', label='First Lift Up',alpha=1, marker='+', s=100, edgecolors='c')
 
                 else:
 
+                    # if you want the start or target to be a circle, use marker='o'
+                    # if you want it to be crosshair, use marker='+'
+                    # the s=50 means the size of the target, it's not accurate and only based on assumption.
                     # draw the start button at real size
-                    plt.scatter(RealStartX_list, RealStartY_list, c='r', label='Real start', alpha=1, marker='o',
-                                s=self.sizeOfStartCircle)
+                    plt.scatter(RealStartX_list, RealStartY_list, c='r', label='Real start', alpha=1, marker='o',s=self.sizeOfStartCircle)
                     # draw the center of the start circle
-                    plt.scatter(RealStartX_list, RealStartY_list, c='b', label='Real start', alpha=1, marker='o',
-                                s=1)
+                    plt.scatter(RealStartX_list, RealStartY_list, c='b', label='Real start', alpha=1, marker='o',s=1)
                     # draw the target at real size
-                    plt.scatter(RealTargetX_list, RealTargetY_list, c='y', label='First Lift Up', alpha=1,
-                                marker='o', s=sizeOfTargetCircle)
+                    plt.scatter(RealTargetX_list, RealTargetY_list, c='y', label='First Lift Up', alpha=1,marker='o', s=sizeOfTargetCircle)
                     # draw the target center
-                    plt.scatter(RealTargetX_list, RealTargetY_list, c='b', label='First Lift Up', alpha=1,
-                                marker='o', s=1)
+                    plt.scatter(RealTargetX_list, RealTargetY_list, c='b', label='First Lift Up', alpha=1,marker='o', s=1)
 
                 # draw the path or start and end
                 k = 0
@@ -1024,14 +1046,15 @@ class DrawPlots:
 
                     if dimension == 3:
 
-                        ax.scatter(p.StartPathX, p.StartPathY, p.StartPathZ, c=colors[k], label='Start', alpha=1,
-                                   marker='+', s=10, edgecolors='black')
-                        ax.scatter(p.EndPathX, p.EndPathY, p.EndPathZ, c=colors[k], label='First Lift Up', alpha=1,
-                                   marker='o', s=10, edgecolors='black')
+                        # if you want the start or target to be a circle, use marker='o'
+                        # if you want it to be crosshair, use marker='+'
+                        # the s=50 means the size of the target, it's not accurate and only based on assumption.
+
+                        ax.scatter(p.StartPathX, p.StartPathY, p.StartPathZ, c=colors[k], label='Start', alpha=1,marker='+', s=10, edgecolors='black')
+                        ax.scatter(p.EndPathX, p.EndPathY, p.EndPathZ, c=colors[k], label='First Lift Up', alpha=1,marker='o', s=10, edgecolors='black')
 
                         if mode == 'path':
-                            ax.scatter(p.InterPathX, p.InterPathY, p.InterPathZ, c=colors[k], label='Start',
-                                       alpha=1, marker='o', s=10)
+                            ax.scatter(p.InterPathX, p.InterPathY, p.InterPathZ, c=colors[k], label='Start',alpha=1, marker='o', s=10)
                     else:
 
                         plt.scatter(p.StartPathX, p.StartPathY, c=colors[k], alpha=1, marker='+', s=10)
@@ -1077,6 +1100,7 @@ class DrawPlots:
                 if not os.path.exists(finalPathForPlot):
                     os.mkdir(finalPathForPlot)
                 plt.savefig(finalPathForPlot + plotTitle + '.png')
+
 
     def drawAllPath(self):
         dimensionList = [2, 3]  # 2d/3d

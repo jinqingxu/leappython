@@ -70,18 +70,14 @@ class LeapAnalyzerOriginal:
         margin=15 # the max distance of p and A
         # let the line vertical to the plane and  passing through curX,curY,curZ  be l
         # this function calculate the intersaction point of l and the plane
-        # firstly,tan(tabletAngle)=1.6003
-        # then one of the direction vector of the tablet plane is (0,1.6,-1)
-        # the other direction vector is (1,0,0)
-        # since the normal vector of the plane (a,b,c) should be vertical to the two direction vector
-        # (a,b,c)*(1,0,0)=0 and (a,b,c)*(0,1.6,-1)=0
-        # so the normal vector of the tablet plane is (0,1,1.6)
+        # the definition of this function is in the SpaceUtil.py
         intersactionX,intersactionY,intersactionZ=getIntersactionPointOfPointAndPlane(curX,curY,curZ,targetX,targetY,targetZ,normalVectorX,normalVectorY,normalVectorZ)
         # find the distance between p and A
         dis=calculate_3D_Dis_Of_Two_Points(curX,curY,curZ,intersactionX,intersactionY,intersactionZ)
         if dis > margin:
             return False
         else: # dis should be smaller or equal to margin
+            # calculate the distance between target and intersaction point c
             dis2=calculate_3D_Dis_Of_Two_Points(targetX,targetY,targetZ,intersactionX,intersactionY,intersactionZ)
             margin2=(1+1/4)*width # the max distance of A and target center
             if dis2 > margin2:
@@ -92,52 +88,39 @@ class LeapAnalyzerOriginal:
 
 
 
-    # spiral means the finger is very close to the ipad
-    # and is within the 5/4 redius circle
+    # decision meaking means the finger is very close to the tablet and near the target
     def calculateDecisionMakingDuration(self):
-
         endFrame = self.frameArray[self.numberFrame - 1]  # end Frame is the last frame
         width=float(endFrame[colNumSplitWidth]) # the width of the target
-
         i=1 # skip the start frame
-
         while i < self.numberFrame-1: # skip the end frame
-
             curFrame=self.frameArray[i]
             curX=float(curFrame[colNumSplitX])
             curY=float(curFrame[colNumSplitY])
             curZ=float(curFrame[colNumSplitZ])
-
             if self.judgeNearTarget(curX,curY,curZ,self.targetX,self.targetY,self.targetZ,width)==True: # decisionMaking started
-
                 self.decisionMakingTime=self.decisionMakingTime+1
                 startTime=float(curFrame[colNumSplitTimestamp]) # the start time of the spiral
-
-                if i==self.numberFrame-2: # if the current one is the one before the end one,the loop  will not be executed since the end Frame should be frame[numberOfFrame-1]
+                # if the current one is the one before the end one,the loop  will not be executed since the end Frame should be frame[numberOfFrame-1]
+                if i==self.numberFrame-2:
                     nextFrame = self.frameArray[self.numberFrame-1]
                     endTime = float(nextFrame[colNumSplitTimestamp])
                     duration = endTime - startTime
                     self.decisionMakingDuration.append(duration)
-
                 else:
-
                     for j in range(i + 1, self.numberFrame - 1):
-
                         nextFrame = self.frameArray[j]
                         nextX = float(nextFrame[colNumSplitX])
                         nextY = float(nextFrame[colNumSplitY])
                         nextZ = float(nextFrame[colNumSplitZ])
-
-                        if self.judgeNearTarget(nextX, nextY, nextZ, self.targetX, self.targetY,
-                                                self.targetZ,width) == False or j == self.numberFrame - 2:  # stop decisionMaking or arriving at the last frame
+                        # stop decisionMaking or arriving at the last frame
+                        if self.judgeNearTarget(nextX, nextY, nextZ, self.targetX, self.targetY,self.targetZ,width) == False or j == self.numberFrame - 2:
                             endTime = float(nextFrame[colNumSplitTimestamp])
                             duration = endTime - startTime
                             self.decisionMakingDuration.append(duration)
                             i=j # find the next spiral
                             break
-
             i=i+1
-
         mind, maxd, averaged, deviationd = get_min_max_mean_deviation_from_list(self.decisionMakingDuration) # get the statistics of the decisionMaking list
         self.meanDecideMakingDuration=averaged
 

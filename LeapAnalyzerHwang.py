@@ -145,6 +145,9 @@ class LeapAnalyzerHwang:
     def calculateNumberOfFrame(self): # the length of self.frameArray
         return self.numberFrame
 
+    '''
+    # this function is not used any more
+    # this function is help to decide whether the submovement is slipOff or before final selection
     # let the finger point be p ,the laptop plane be A, the line passing though p and vertical to A be l
     # let the intersaction of l and A be c
     # spiral should meet two conditions
@@ -165,6 +168,7 @@ class LeapAnalyzerHwang:
                 return False
             else:
                 return True
+    '''
 
     # the current speed is near zero
     def judgePause(self,speed):

@@ -12,14 +12,14 @@ def processCrossHairData(pid):
     file1 = pathHeaderForCrossHair + 'PID_' + str(pid) + '/' + 'PID_' + str(pid) + '_CrossHair_Experiment_Timestamp.csv'
     timestamp_list = []
 
-    # read leap data
+    # read the timestamp : touch down
     with open(file1) as f:
 
         f_csv = csv.reader(f)
         next(f_csv)  # skip the header
         for row in f_csv:
             timestamp_list.append(float(row[0]))
-            timestamp_list.append(float(row[1]))
+
 
     file2 = pathHeaderForCrossHair + 'PID_' + str(pid) + '/' + 'PID_' + str(pid) + '_Data_from_LEAPtest_results_Frame.csv'
 
@@ -36,7 +36,7 @@ def processCrossHairData(pid):
 
         for row in f_csv:
 
-            if float(row[2]) >= timestamp_list[0]:
+            if float(row[2]) >= timestamp_list[0]: # timestamp_list[0] means the touch down timstamp and row[2] is the timestamp of a frame
 
                 x_list.append(float(row[colNumLeapX]))
                 y_list.append(float(row[colNumLeapY]))
@@ -48,16 +48,15 @@ def processCrossHairData(pid):
     minZ, maxZ, averageZ, deviationZ = get_min_max_mean_deviation_from_list(z_list)
 
     writefile = pathHeaderForCrossHair + 'Average_X_Y_Z_Of_CrossHair_Experiment.csv'
-    dateTimeLeap,dateTimeLeapStr=getDateTimeForLeapData(file2)
+    dateTimeLeap,dateTimeLeapStr=getDateTimeForLeapData(file2) # get the dateTime of the leap motion data
+    # a new result file
     if not os.path.exists(writefile):
         with open(writefile, 'w') as f:
             w_csv = csv.writer(f)
             w_csv.writerow(['pid', 'dateTime','averageX(mm)', 'averageY(mm)', 'averageZ(mm)','AbsDiffX(mm)','AbsDiffY(mm)','AbsDiffZ(mm)'])
             w_csv.writerow([float(pid),dateTimeLeapStr,averageX, averageY, averageZ,abs(averageX-start3DX),abs(averageY-start3DY),abs(averageZ-start3DZ)])
     else:
-
-
-
+        # append
         with open(writefile, 'a') as f:
 
             w_csv = csv.writer(f)
@@ -66,26 +65,15 @@ def processCrossHairData(pid):
 
 
 #pid=raw_input("please enter pid: ")
+
 def process():
-    '''
-
-    maxPid = 0
-    if  os.path.exists(writefile):
-
-        with open(writefile, 'r') as f:
-            f_csv = csv.reader(f)
-            next(f_csv)  # get headers of csv
-
-            for row in f_csv:
-                if not row[0] == '':
-                    if (float(row[0]) > maxPid):
-                        maxPid = float(row[0])
-    '''
     pids = getAllPids(pathHeaderForCrossHair)
     writefile = pathHeaderForCrossHair + 'Average_X_Y_Z_Of_CrossHair_Experiment.csv'
+    # remove the existing result file
     if os.path.exists(writefile):
         os.remove(writefile)
+    # go through all the pid
     for p in pids:
-        if  float(p)>=8897:
-            processCrossHairData(p)
+        processCrossHairData(p)
+
 process()

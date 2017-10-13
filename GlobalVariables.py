@@ -14,7 +14,7 @@ pathHeaderForAccuracy=pathHeader+'Leap Accuracy/'
 pathHeaderForCrossHair=pathHeaderForAccuracy+'CrossHair Data/'
 pathHeaderForPrecision=pathHeaderForAccuracy+'Precision Data/'
 
-# the index of data in android file
+# the column number of data in android file
 colNumAndroidStartTime = 17
 colNumAndroidFinalLiftUp = 24
 colNumAndroidBlock=2
