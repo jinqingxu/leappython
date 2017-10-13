@@ -154,17 +154,12 @@ def getOffetXYZ(pid):
 
 def getDateTimeForLeapData(readfile):
 
-
-
     # get the dateTime of the target select experiment
     with open(readfile) as f:
 
         f_csv = csv.reader(f)
-
         i=0
-
         dateTimeStr=""
-
         for row in f_csv:
 
             if i==1: # date

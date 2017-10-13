@@ -5,9 +5,10 @@ import math
 import os
 # android data
 from GlobalVariables import *
-
+from FileUtils import  *
 
 import shutil
+
 
 class LeapTimeStamp:
 
@@ -27,20 +28,20 @@ class LeapTimeStamp:
 
 
 #a global array to store data from leap motion
-leapdata=[]
+#leapdata=[]
 
 #a global array to store data from android
-androiddata=[]
+#androiddata=[]
 
 #find the leap record with best timestamp_match of start
-def best_match_start(stime,index):
+def best_match_start(stime,index,leapdata):
     for i in range(index,len(leapdata)):
         if leapdata[i][colNumLeapTimeStamp]>=stime: #the matched_timestamp is after or equal to the stime
             return i #return the matched index of leap data
     return -1 # not found
 
 # find the leap record with best timestamp_match of first_lift_up
-def best_match_end(etime,index):
+def best_match_end(etime,index,leapdata):
     for i in range(index, len(leapdata)):
         if leapdata[i][colNumLeapTimeStamp] > etime: #the matched_timestamp is before etime,so find the first record that is after etime and return its previous one
             return i-1  #return the matched index
@@ -48,7 +49,7 @@ def best_match_end(etime,index):
             return i  #the exact matched of leap data
     return -1 # not found
 
-def best_match_firstLiftUp(ftime,index):
+def best_match_firstLiftUp(ftime,index,leapdata):
     for i in range(index, len(leapdata)):
         if leapdata[i][colNumLeapTimeStamp] > ftime:  # the matched_timestamp is before etime,so find the first record that is after etime and return its previous one
             return i - 1  # return the matched index
@@ -57,7 +58,8 @@ def best_match_firstLiftUp(ftime,index):
     return -1  # not found
 
 #write the split data into files
-def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction,path):
+def split_and_write(begin,end,pid,block,trial,headers,amplitude,width,direction,path,leapdata):
+
     file=path+'split/'+'PID_'+str(pid)+'_Block_'+block+'_Trial_'+trial+'.csv' #one trial matches one file
     with open(file, 'w') as f:
         f_csv = csv.writer(f)
@@ -94,7 +96,10 @@ def writeLeapTimeStamp(path,pid,leapTimeStamp_list):
 
 # split the data from leap motion with the timstamp from android file
 def process_split(pid,path):
-
+    leapdata=[]
+    androiddata=[]
+    wrongTrialFile=path+'wrongTrial_PID'+str(pid)+'_file.csv'
+    wrong_list=[]
     leapTimeStamp_list=[]
     #shutil.rmtree(path+'split/')
     if not os.path.exists(path+'split/'):
@@ -102,7 +107,8 @@ def process_split(pid,path):
     file1=path+'PID_'+str(pid)+'_Data_from_LEAPtest_results_Frame.csv' #leap data
     file2=path+'PID_'+str(pid)+'_TwoDFittsData_External.csv' #android data
     headers=[] # for headers of the csv file
-
+    if pid=='204':
+        t=0
     #read leap data
     with open(file1) as f:
         f_csv = csv.reader(f)
@@ -131,37 +137,45 @@ def process_split(pid,path):
             width=row[colNumAndroidWidth]
             direction=row[colNumAndroidDirection]
             # to find the best matched start index
-            index=best_match_start(stime,index)
+            index=best_match_start(stime,index,leapdata)
             if index==-1:
                 return
             begin=index # the begin index of the split data
             if ftime==etime:
                 # to find the best matched end index
                 # the next scan should begin at the last_matched_index add 1
-                index = best_match_end(etime, index + 1)
+                index = best_match_end(etime, index + 1,leapdata)
                 if index == -1:
                     return
                 end = index  # the end index of the split data
                 firstLiftUpIndex=end
             else:
-                index = best_match_firstLiftUp(ftime, index)
+                index = best_match_firstLiftUp(ftime, index,leapdata)
                 firstLiftUpIndex = index
                 # to find the best matched end index
                 # the next scan should begin at the last_matched_index add 1
-                index = best_match_end(etime, index + 1)
+                index = best_match_end(etime, index + 1,leapdata)
                 if index == -1:
                     return
                 end = index  # the end index of the split data
 
+            if end-begin<5:
+                wrong=[pid,block,trial]
+                wrong_list.append(wrong) # wrong split file
 
             # use the start and end loc to split the data
-            split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction,path)
+            split_and_write(begin,end,pid,block,trial,headers2,amplitude,width,direction,path,leapdata)
 
             # store the leap timeStamp
             leapTimeStamp=LeapTimeStamp(block,trial,leapdata[begin][colNumLeapTimeStamp],leapdata[firstLiftUpIndex][colNumLeapTimeStamp],leapdata[end][colNumLeapTimeStamp])
             leapTimeStamp_list.append(leapTimeStamp)
 
     writeLeapTimeStamp(path,pid,leapTimeStamp_list)
+
+    writeWrongFile(wrong_list)
+
+
+
 
 
 '''

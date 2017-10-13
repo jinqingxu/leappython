@@ -52,17 +52,17 @@ def processPrecisionData(pid):
     minX, maxX, averageX, deviationX = get_min_max_mean_deviation_from_list(x_list)
     minY, maxY, averageY, deviationY = get_min_max_mean_deviation_from_list(y_list)
     minZ, maxZ, averageZ, deviationZ = get_min_max_mean_deviation_from_list(z_list)
-
+    writeDateFile=getDateTimeForLeapData(file2)
     writefile = pathHeaderForPrecision + 'Average_x_y_z_of_precision_experiment.csv'
     if not os.path.exists(writefile):
         with open(writefile, 'w') as f:
             w_csv = csv.writer(f)
-            w_csv.writerow(['pid', 'averageX(mm)', 'averageY(mm)', 'averageZ(mm)','AbsDiffX(mm)','AbsDiffY(mm)','AbsDiffZ(mm)'])
-            w_csv.writerow([pid,averageX, averageY, averageZ,abs(averageX-start3DX),abs(averageY-start3DY),abs(averageZ-start3DZ)])
+            w_csv.writerow(['pid','datetime' 'averageX(mm)', 'averageY(mm)', 'averageZ(mm)','AbsDiffX(mm)','AbsDiffY(mm)','AbsDiffZ(mm)'])
+            w_csv.writerow([pid,writeDateFile,averageX, averageY, averageZ,abs(averageX-start3DX),abs(averageY-start3DY),abs(averageZ-start3DZ)])
     else:
         with open(writefile, 'a') as f:
             w_csv = csv.writer(f)
-            w_csv.writerow([pid,averageX, averageY, averageZ,abs(averageX-start3DX),abs(averageY-start3DY),abs(averageZ-start3DZ)])
+            w_csv.writerow([pid,writeDateFile,averageX, averageY, averageZ,abs(averageX-start3DX),abs(averageY-start3DY),abs(averageZ-start3DZ)])
 
 def process():
     # pid=raw_input("please enter pid: ")

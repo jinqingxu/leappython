@@ -3,7 +3,7 @@
 
 from LeapAnalyzerMackenzie import *
 from ErrorUtils import *
-
+from FileUtils import *
 
 from GlobalVariables import *
 from Split import LeapTimeStamp
@@ -87,7 +87,7 @@ def writeErrorForEveryTrial(pid,datas,pathFordata):
 
 
 # append measures of mackenzie into datas and headers
-def writeMackenzieMeasurements(pid,files,datas,headers,path,wrongIndex):
+def writeMackenzieMeasurements(pid,files,datas,headers,path,wrongIndex,wrong_list):
 
     # headers for measures from mackenzie
     macHeaders = ['FirstRe-Entry', 'AverageNumOfRe-Entry', 'MovementDirectionChangeX', 'MovementDirectionChangeY',
@@ -125,13 +125,14 @@ def writeMackenzieMeasurements(pid,files,datas,headers,path,wrongIndex):
         except Exception as e:
             print "wrong pid,block,trial",leap.pid,leap.block,leap.trial
             wrongIndex.append(i)
+            wrong_list.append([leap.pid,leap.block,leap.trial])
             continue
 
 
-    return datas,headers,wrongIndex
+    return datas,headers,wrongIndex,wrong_list
 
 # append measures of Hwang and our work into datas and headers
-def writeHwangMeasurements(pid,files,datas,headers,path,wrongIndex):
+def writeHwangMeasurements(pid,files,datas,headers,path,wrongIndex,wrong_list):
 
     # headers for measures from Hwang
     hwangHeaders=['NumberOfDecisionMaking','MeanDecisionMakingDuration(ms)','Verification Time(ms)','NumberOfPause','MeanPauseDuration(ms)',
@@ -175,10 +176,11 @@ def writeHwangMeasurements(pid,files,datas,headers,path,wrongIndex):
             print "wrong pid,block,trial", leap.pid,leap.block, leap.trial
             # how to remove data[i]?
             wrongIndex.append(i)
+            wrong_list.append([leap.pid,leap.block, leap.trial])
             continue
 
 
-    return datas,headers,wrongIndex
+    return datas,headers,wrongIndex,wrong_list
 
 
 def writeFiles(pid,pathForResult,pathForData):
@@ -188,14 +190,14 @@ def writeFiles(pid,pathForResult,pathForData):
     datas = []
     # the headers consists of the original headers,the error headers,mackenzie headers,hwang headers
     headers = []
-
+    wrong_list=[]
     datas,headers=writeErrorForEveryTrial(pid,datas,pathForData) # append error datas ,those data only need data from android
 
     # the measurement from mackenzie,hwang and our work need the split data from leap motion
     files = getSortedSplitFile(pathForData+'split/')  # the files are sorted as the sequence of datas,block is of the highest priority,then trial
     wrongIndex=[]
-    datas,headers,wrongIndex=writeMackenzieMeasurements(pid,files,datas,headers,pathForData,wrongIndex)  # append measures from Mackenzie
-    datas,headers,wrongIndex=writeHwangMeasurements(pid,files,datas,headers,pathForData,wrongIndex)   # append measures from Hwang
+    datas,headers,wrongIndex,wrong_list=writeMackenzieMeasurements(pid,files,datas,headers,pathForData,wrongIndex,wrong_list)  # append measures from Mackenzie
+    datas,headers,wrongInde,wrong_list=writeHwangMeasurements(pid,files,datas,headers,pathForData,wrongIndex,wrong_list)   # append measures from Hwang
 
     # write the new TwoD_measurment file with all measurements
     # do not overwrite the old android data in case some problems occur. We need the raw data.
@@ -208,5 +210,8 @@ def writeFiles(pid,pathForResult,pathForData):
         for i in range(len(datas)):
             if i not in wrongIndex:
                 w_csv.writerow(datas[i])
+
+        writeWrongFile(wrong_list)
+
 
 

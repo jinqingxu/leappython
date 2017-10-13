@@ -114,7 +114,6 @@ class DrawPlots:
     def loadLeapData(self):
 
         self.frameArray = []
-
         with open(self.readFile) as f:
             f_csv = csv.reader(f)
             next(f_csv)  # skip the header
@@ -410,9 +409,16 @@ class DrawPlots:
         for i in range(len(firstLiftUpTime_list)):
             self.readFile = self.path2 + files[i]
             filenameSplit=files[i].split('_')
+            self.pid = filenameSplit[1]
             self.block = int(filenameSplit[3])
             self.trial = int(filenameSplit[5][0:-4])
-            self.loadLeapData()
+            try:
+                self.loadLeapData()
+            except:
+                wrong_list = []
+                wrong_list.append([self.pid, self.block, self.trial])
+                writeWrongFile(wrong_list)
+                continue
             sizeOfTarget = 0
             if abs(self.targetWidth - 4.88) < 0.5:
                 sizeOfTarget = 60
@@ -556,8 +562,8 @@ class DrawPlots:
     def helpDrawRelativeTargetFirstLiftUpPlot2D(self,plotTitle, pathForPlot,rela_LiftUpX_list,rela_LiftUpY_list):
         # we need to make the scale of x and y equal
         plt.figure(figsize=(5, 5), dpi=100)
-        plt.xlim(85, 95)
-        plt.ylim(56, 66)
+        plt.xlim(-5, 5)
+        plt.ylim(-5, 5)
         plt.title(plotTitle)
         targetX_list=[0] # view target as the center
         targetY_list=[0]
@@ -644,7 +650,15 @@ class DrawPlots:
             self.block = keys[3]
             self.trial = int(keys[5][0:-4])
             self.path=pathForData
-            self.loadLeapData() # set the  combination(width,amplitude,direction) for the drawPlots class
+
+            try:
+                self.loadLeapData() # set the  combination(width,amplitude,direction) for the drawPlots class
+            except:
+                wrong_list=[]
+                wrong_list.append([self.pid,self.block,self.trial])
+                writeWrongFile(wrong_list)
+                continue
+
             # if the current direction does not exist in the map
             # create new position list for the current direction
             if not fingerPath_map.has_key(self.combination):
@@ -984,7 +998,7 @@ class DrawPlots:
                     ax.set_xlim3d(minX, maxX)
                     ax.set_ylim3d(minY, maxY)
                     ax.set_zlim3d(minZ, maxZ)
-                    print ax.get_xlim3d(),ax.get_ylim3d(),ax.get_zlim3d()
+                    #print ax.get_xlim3d(),ax.get_ylim3d(),ax.get_zlim3d()
 
 
                 else:  # 2D
@@ -1103,6 +1117,7 @@ class DrawPlots:
 
 
     def drawAllPath(self):
+
         dimensionList = [2, 3]  # 2d/3d
 
         for dimension in dimensionList:

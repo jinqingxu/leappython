@@ -37,19 +37,16 @@ def processOneExperiment(pid):
     drawPlots.pid = pid
     drawPlots.path = pathForData
     drawPlots.path2 = drawPlots.path + 'split/'
-
-
-
-
     pathForFirstLiftUpPlots=pathForResult+'firstLiftUpPlots/'
+
     if not os.path.exists(pathForFirstLiftUpPlots):
         os.mkdir(pathForFirstLiftUpPlots)
         #os.mkdir(pathForFirstLiftUpPlots + 'relative_3d' + '/')
         #os.mkdir(pathForFirstLiftUpPlots + 'relative_2d' + '/')
 
 
-    #drawPlots.drawTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
-    #drawPlots.drawTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
+    drawPlots.drawTargetFirstLiftUpPlot2D(pathForFirstLiftUpPlots)
+    drawPlots.drawTargetFirstLiftUpPlot3D(pathForFirstLiftUpPlots)
 
 
 
@@ -197,6 +194,7 @@ def startProgram():
 
         processOneExperiment(pid)
 
+
     mergeMeasurementFiles()
     drawPlots=DrawPlots()
     drawPlots.drawAllTargetFirstLiftUpPlot2D(pathHeaderForAllParticipiants)
@@ -212,6 +210,7 @@ def startProgram():
 
 startProgram()
 
+# just process one pid
 #processOneExperiment(204)
 
 

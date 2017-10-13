@@ -2,7 +2,7 @@
 import os
 import csv
 import time
-
+from GlobalVariables import *
 # compare the filename by block then trial
 def file_cmp(x,y):
     key1=x.split('_')
@@ -48,6 +48,7 @@ def getSortedSplitFile(path):
     return result
 
 
+# get all pid in a folder
 def getAllPids(path):
 
     pid_list=[]
@@ -61,4 +62,28 @@ def getAllPids(path):
                 pid_list.append(pid)
 
     return pid_list
+
+def writeWrongFile(wrong_list):
+    if len(wrong_list)<1:
+        return
+    file=""
+    pid=wrong_list[0][0]
+    if float(pid)<200:
+        file=pathHeaderForData+'Old Adults/'+'PID_'+str(pid)+'/'+'wrongTrial_PID'+str(pid)+'_file.csv'
+    else:
+        file = pathHeaderForData + 'Young Adults/' + 'PID_' + str(pid) + '/' +'wrongTrial_PID_'+str(pid)+'_file.csv'
+
+    if os.path.exists(file):
+        with open(file, 'a') as f:
+            f_csv = csv.writer(f)
+
+            for row in wrong_list:
+                f_csv.writerow(row)
+    else:
+        with open(file, 'w') as f:
+            f_csv = csv.writer(f)
+            f_csv.writerow(['pid', 'block', 'trial'])
+            for row in wrong_list:
+                f_csv.writerow(row)
+    f.close()
 
